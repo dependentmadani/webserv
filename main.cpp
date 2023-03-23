@@ -1,31 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing.hpp                                        :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/19 15:26:22 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/23 16:03:27 by sriyani          ###   ########.fr       */
+/*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
+/*   Updated: 2023/03/23 15:53:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <fstream>
 
-#ifndef PARSING_HPP
-# define PARSING_HPP
-
-struct parsing
+int main(int ac, char **av)
 {
-    int ind_port;
-    int ind_host;
-    int error_pages;
-    int limit_body;
+    std::ifstream file;
     
-    
-    std::string server_name;
-    
-};
-
-
-#endif
+    if (ac == 2)
+    {
+        file.open(av[1]);
+        if (file)
+        {
+            std::cout << " File exist"<<std::endl;
+        }
+        else
+          std::cout << " File doesn't exist"<<std::endl;       
+    }
+    else
+        std::cout<<"Error from number of arguments "<<std::endl;
+           
+}
