@@ -26,7 +26,7 @@
 
 #define PORT 8080
 
-int server::initiat_server() {
+int Server::initiat_server() {
     int socketfd = socket(AF_INET, SOCK_STREAM, 0); //SOCK_STREAM is virtual circuit service, and AF_INET is IP
     if (socketfd < 0){
         perror("WEBSERV (failed): ");
@@ -47,4 +47,9 @@ int server::initiat_server() {
     }
     printf("socket successfully bound to address, and the value is {%d}\n", i);
     return 0;
+}
+
+void    Server::accept_connections()
+{
+    
 }

@@ -17,14 +17,20 @@
 # include <netinet/in.h>
 # include <sys/types.h>
 # include <errno.h>
+# include <vector>
 
-class server {
+class Server {
     public:
-        server();
-        ~server();
-        int initiat_server();
-    private:
+        Server();
+        ~Server();
+        int     initiat_server();
+        void    accept_connections();
 
+    private:
+        int                 _socket_fd;
+        struct sockaddr_in  _host_addr;
+        int                 _port;
+        std::vector<int>    _socket_client;
 };
 
 #endif
