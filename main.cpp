@@ -28,6 +28,6 @@ int main(int ac, char **av)
           std::cout << " File doesn't exist"<<std::endl;       
     }
     else
-        std::cout<<"Error from number of arguments "<<std::endl;
+        std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
            
 }
