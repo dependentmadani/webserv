@@ -18,10 +18,9 @@ CPP = c++
 CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 SRC = main.cpp\
-		parse/parsing.cpp\
-		# parse/request_parsing.cpp
+	server/Server.cpp
 
-HEADERS = parse/parsing.hpp
+HEADERS = server/Server.hpp
 			
 
 OBJ = $(SRC:.cpp=.o)

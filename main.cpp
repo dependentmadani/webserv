@@ -12,10 +12,12 @@
 
 #include <iostream>
 #include <fstream>
+#include "server/Server.hpp"
 
 int main(int ac, char **av)
 {
     std::ifstream file;
+    Server  server;
     
     if (ac == 2)
     {
@@ -29,5 +31,8 @@ int main(int ac, char **av)
     }
     else
         std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
-           
+    if (server.initiat_server() < 0)
+        return 1;
+    server.accept_connections();
+    return 0;
 }
