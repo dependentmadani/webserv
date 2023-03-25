@@ -17,6 +17,7 @@
 # include <netinet/in.h>
 # include <sys/types.h>
 # include <errno.h>
+# include <unistd.h>
 # include <vector>
 
 class Server {

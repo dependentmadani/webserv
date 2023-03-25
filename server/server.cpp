@@ -42,7 +42,7 @@ int Server::initiat_server() {
     _host_addr.sin_port = htons(_port);
     _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // Bind the socket to the address
+    std::cout << "Binding the socket" << std::endl;
     int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
     if (i < 0) {
         perror("webserv error (bind) ");
@@ -70,7 +70,16 @@ void    Server::accept_connections()
             exit(EXIT_FAILURE);
         }
         std::cout << "working properly" << std::endl;
+        char buffer[1024] = {0};
+        int valread = read( _socket_fd , buffer, 1024); 
+        if(valread < 0)
+        { 
+            printf("No bytes are there to read");
+        }
+        char hello[22] = "Hello from the server";//IMPORTANT! WE WILL GET TO IT
+        write(_socket_fd , hello , sizeof(hello));
     }
+    close(_socket_fd);
 }
 
 // struct sockaddr_in {

@@ -17,7 +17,7 @@
 int main(int ac, char **av)
 {
     std::ifstream file;
-    Server  server;
+    Server  server(80);
     
     if (ac == 2)
     {
@@ -27,12 +27,15 @@ int main(int ac, char **av)
             std::cout << " File exist"<<std::endl;
         }
         else
+        {
           std::cout << " File doesn't exist"<<std::endl;       
+            return (1);
+        }
     }
     else
         std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
     if (server.initiat_server() < 0)
-        return 1;
+        return (1);
     server.accept_connections();
-    return 0;
+    return (0);
 }
