@@ -16,9 +16,12 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <sys/types.h>
+# include <poll.h>
 # include <errno.h>
 # include <unistd.h>
 # include <vector>
+
+# define BUFFER_SIZE 8192
 
 class Server {
     public:
@@ -28,12 +31,15 @@ class Server {
         
         int     initiat_server();
         void    accept_connections();
+        int     recv_data(struct pollfd *poll);
 
     private:
         int                 _socket_fd;
         struct sockaddr_in  _host_addr;
         int                 _port;
         std::vector<int>    _socket_client;
+        char                _buffer[BUFFER_SIZE + 1];
+        bool                _connexion_status;
 };
 
 #endif

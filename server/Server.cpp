@@ -17,12 +17,14 @@ Server::Server() : _host_addr(), _socket_client()
 {
     _socket_fd = 0;
     _port = 8080;
+    _connexion_status = false;
 }
 
 Server::Server(int port) : _host_addr(), _socket_client()
 {
     _socket_fd = 0;
     _port = port;
+    _connexion_status = false;
 }
 
 Server::~Server()
@@ -62,27 +64,59 @@ void    Server::accept_connections()
 {
     int addr_length = sizeof(_host_addr);
     int socket_to_accept;
-    while (1)
+    while (socket_to_accept != -1)
     {
         socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
         if (socket_to_accept < 0)
         {
             perror("webserv error (accept)");
-            exit(EXIT_FAILURE);
+            socket_to_accept = -1;
         }
-        std::cout << "working properly" << std::endl;
-        char buffer[1024] = {0};
-        int valread = read( socket_to_accept , buffer, 1024);
-        std::cout << buffer << "\n" << std::endl;
-        if(valread < 0)
-        { 
-            printf("No bytes are there to read");
+        else
+        {
+            _socket_client.push_back(socket_to_accept);
         }
-        char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
-        write(socket_to_accept , hello , sizeof(hello));
-        close(socket_to_accept);
-        std::cout << "\n listening to new socket \n" << std::endl;
+        // std::cout << "working properly" << std::endl;
+        // char buffer[1024] = {0};
+        // int valread = read( socket_to_accept , buffer, 1024);
+        // std::cout << buffer << "\n" << std::endl;
+        // if(valread < 0)
+        // { 
+        //     printf("No bytes are there to read");
+        // }
+        // char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
+        // write(socket_to_accept , hello , sizeof(hello));
+        // close(socket_to_accept);
+        // std::cout << "\n listening to new socket \n" << std::endl;
     }
+}
+
+int    Server::recv_data(struct pollfd *poll)
+{
+    int data = recv(poll->fd, _buffer, BUFFER_SIZE, 0);
+	if (data < 0)
+	{
+		// if (errno != EWOULDBLOCK)
+		// {
+			_connexion_status = true;
+		// 	std::cout << "recv() failed" << std::endl;
+		// }
+		std::cout << "recv() failed" << std::endl;
+		return (data);
+	}
+	if (data == 0)
+	{
+		std::cout << "connection closed from remote side" << std::endl;
+		_connexion_status = true;
+		return(data);
+	}
+	_buffer[data] = '\0';
+
+	std::cout << "\n\n" << "===============   "  << data << " BYTES  RECEIVED   ===============\n";
+	std::cout << _buffer;
+	std::cout << "\n======================================================" << std::endl;
+
+	return (data);
 }
 
 // struct sockaddr_in {
