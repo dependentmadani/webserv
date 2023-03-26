@@ -6,7 +6,7 @@
 #    By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/19 15:27:10 by mbadaoui          #+#    #+#              #
-#    Updated: 2023/03/23 15:51:12 by sriyani          ###   ########.fr        #
+#    Updated: 2023/03/26 14:14:26 by sriyani          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME = webserv
 
 CPP = c++
 
-CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
+CPPFLAGS = -std=c++98 #-Wall -Werror -Wextra
 
 SRC = main.cpp\
 		parse/parsing.cpp\
