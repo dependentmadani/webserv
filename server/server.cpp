@@ -60,10 +60,11 @@ int Server::initiat_server() {
 
 void    Server::accept_connections()
 {
+    int addr_length = sizeof(_host_addr);
+    int socket_to_accept;
     while (1)
     {
-        int addr_length = sizeof(_host_addr);
-        int socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
+        socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
         if (socket_to_accept < 0)
         {
             perror("webserv error (accept)");
@@ -71,15 +72,17 @@ void    Server::accept_connections()
         }
         std::cout << "working properly" << std::endl;
         char buffer[1024] = {0};
-        int valread = read( _socket_fd , buffer, 1024); 
+        int valread = read( socket_to_accept , buffer, 1024);
+        std::cout << buffer << "\n" << std::endl;
         if(valread < 0)
         { 
             printf("No bytes are there to read");
         }
-        char hello[22] = "Hello from the server";//IMPORTANT! WE WILL GET TO IT
-        write(_socket_fd , hello , sizeof(hello));
+        char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
+        write(socket_to_accept , hello , sizeof(hello));
+        close(socket_to_accept);
+        std::cout << "\n listening to new socket \n" << std::endl;
     }
-    close(_socket_fd);
 }
 
 // struct sockaddr_in {
