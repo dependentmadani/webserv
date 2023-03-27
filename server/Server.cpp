@@ -63,7 +63,7 @@ int Server::initiat_server() {
 void    Server::accept_connections()
 {
     int addr_length = sizeof(_host_addr);
-    int socket_to_accept;
+    int socket_to_accept = 0;
     while (socket_to_accept != -1)
     {
         socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
@@ -96,12 +96,8 @@ int    Server::recv_data(struct pollfd *poll)
     int data = recv(poll->fd, _buffer, BUFFER_SIZE, 0);
 	if (data < 0)
 	{
-		// if (errno != EWOULDBLOCK)
-		// {
-			_connexion_status = true;
-		// 	std::cout << "recv() failed" << std::endl;
-		// }
-		std::cout << "recv() failed" << std::endl;
+		_connexion_status = true;
+		std::cout << "webserv error (recv)" << std::endl;
 		return (data);
 	}
 	if (data == 0)
@@ -117,6 +113,11 @@ int    Server::recv_data(struct pollfd *poll)
 	std::cout << "\n======================================================" << std::endl;
 
 	return (data);
+}
+
+int Server::getServerFd()
+{
+    return _socket_fd;
 }
 
 // struct sockaddr_in {

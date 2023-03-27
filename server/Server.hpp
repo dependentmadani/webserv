@@ -33,6 +33,8 @@ class Server {
         void    accept_connections();
         int     recv_data(struct pollfd *poll);
 
+        int     getServerFd();
+
     private:
         int                 _socket_fd;
         struct sockaddr_in  _host_addr;

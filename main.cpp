@@ -34,8 +34,13 @@ int main(int ac, char **av)
     }
     else
         std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
+    struct pollfd theOne;
+    memset(&theOne, 0, sizeof(theOne));
     if (server.initiat_server() < 0)
         return (1);
     server.accept_connections();
+    theOne.fd = server.getServerFd();
+    theOne.events = POLLIN;
+    server.recv_data(&theOne);
     return (0);
 }
