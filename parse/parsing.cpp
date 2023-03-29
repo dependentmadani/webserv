@@ -5,47 +5,67 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/19 15:31:25 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/26 15:58:06 by sriyani          ###   ########.fr       */
+/*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
+/*   Updated: 2023/03/29 17:29:50 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+
 #include "parsing.hpp"
+#include <string.h>
 
-parsing::parsing(void)
+bool isWhitespace(std::string str)
 {
-    std::cout<<"constructor"<<std::endl;
+    int len = 0;
+    for (int i = 0; i < str.length(); i++)
+    {
+          if ((str[i] == '\t' || str[i] == '\n' || str[i] == '\r' ||  str[i] == '\f' || str[i] == '\v' || str[i] == ' '))
+            len++;
+    }
+    if (str.length() == len)
+        return  true;
+    return false;
 }
 
-
-parsing::~parsing()
-{
-    std::cout<<"destructor"<<std::endl;
-}
-
-void parsing::copy_file(std::string ptr)
+void parsing::copy_file(parsing *pars, std::string ptr)
 {
     std::string line;
     std::ifstream file(ptr);
     
     int i = 0;
     while (getline(file, line))
-        this->vec.push_back(line);    
+        pars->vec.push_back(line);
+     
 }
-void parsing::check_key()
+void  parsing::check_key(s_parsing *pars)
 {
-    for(int i=0;i < this->vec.size() ;i++)
+    int j =0;
+    // pars->serv = new t_server;
+    for(int i=0;i < pars->vec.size() ;i++)
     {
-        if (!this->vec[i].compare("server {"))
+        if (!strncmp(pars->vec[i].c_str(), "server", 6) || pars->vec[i] == "\0" || isWhitespace(pars->vec[i]))
         {
-            std::cout << "=----------BARCCCCCCCCCA----------="<<std::endl;
-        }
-        else
-        {
-            std::cout << "ERROR"<<std::endl;
-            // exit(1);
+            if(!strncmp(pars->vec[i].c_str(), "server", 6) && !strncmp(pars->vec[i+1].c_str(), "{", 1))
+            {
+                for(int j = i+2; j < pars->vec.size() ;j++)
+                {
+                    if (!strncmp(pars->vec[j].c_str(),"}",1))
+                        break ;
+                    else
+                        pars->serv[j].server.push_back(pars->vec[j]);
+                }
+                j++;
+                // break;
+            }
         }
     }
+    std::cout<<"-------"<<pars->serv[0].server.size()<<"---------"<<std::endl;
+    for (size_t i = 0; i < pars->serv[0].server.size() ; i++)
+    {
+        std::cout<<"-------"<<pars->serv[0].server[i]<<"---------"<<std::endl;
+    }
+    
 }
 
 std::vector<std::string>  parsing::get_vec()

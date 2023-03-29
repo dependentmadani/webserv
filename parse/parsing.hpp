@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/19 15:26:22 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/26 15:25:25 by sriyani          ###   ########.fr       */
+/*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
+/*   Updated: 2023/03/29 17:29:02 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,22 +17,30 @@
 
 #ifndef PARSING_HPP
 # define PARSING_HPP
-class parsing
+typedef struct s_server
 {
-    private:
-    std::vector<std::string> vec;
+    std::vector<std::string> server;
     int ind_port;
     int ind_host;
     int error_pages;
     int limit_body;
     std::string server_name;
+} t_server;
+
+typedef struct s_parsing
+{
+    private:
+    // std::vector<std::string> server_name;
     public:
-        parsing();
-        ~parsing();
-    void    copy_file(std::string ptr);
-    void    check_key();
+    std::vector<std::string> vec;
+    t_server *serv;
+    void    copy_file(s_parsing *pars, std::string ptr);
+    void    check_key(s_parsing *pars);
     std::vector<std::string>  get_vec();
-};
+    
+} parsing;
+bool    isWhitespace(unsigned char c);
+
 
 
 #endif
