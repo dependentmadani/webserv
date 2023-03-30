@@ -10,4 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Request.hpp"
 
+void    Request::FirstLinerRequest()
+{
+    
+}
+
+void    Request::HeaderRequest()
+{
+
+}
+
+void    Request::BodyRequest()
+{
+
+}

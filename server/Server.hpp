@@ -33,7 +33,9 @@ class Server {
         void    accept_connections();
         int     recv_data(struct pollfd *poll);
 
-        int     getServerFd();
+        int                 getServerFd();
+        char               *getBuffer();
+        std::vector<int>    getSocket_client();
 
     private:
         int                 _socket_fd;

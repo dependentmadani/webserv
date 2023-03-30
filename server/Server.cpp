@@ -64,6 +64,9 @@ void    Server::accept_connections()
 {
     int addr_length = sizeof(_host_addr);
     int socket_to_accept = 0;
+    struct pollfd theOne;
+
+    memset(&theOne, 0, sizeof(theOne));
     while (socket_to_accept != -1)
     {
         socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
@@ -76,6 +79,10 @@ void    Server::accept_connections()
         {
             _socket_client.push_back(socket_to_accept);
         }
+
+        theOne.fd = (this->getSocket_client())[0];
+        theOne.events = POLLIN;
+        this->recv_data(&theOne);
         // std::cout << "working properly" << std::endl;
         // char buffer[1024] = {0};
         // int valread = read( socket_to_accept , buffer, 1024);
@@ -89,6 +96,7 @@ void    Server::accept_connections()
         // close(socket_to_accept);
         // std::cout << "\n listening to new socket \n" << std::endl;
     }
+        close(theOne.fd);
 }
 
 int    Server::recv_data(struct pollfd *poll)
@@ -107,7 +115,7 @@ int    Server::recv_data(struct pollfd *poll)
 		return(data);
 	}
 	_buffer[data] = '\0';
-
+    std::cout << "\n\n" << std::endl;
 	std::cout << "\n\n" << "===============   "  << data << " BYTES  RECEIVED   ===============\n";
 	std::cout << _buffer;
 	std::cout << "\n======================================================" << std::endl;
@@ -118,6 +126,16 @@ int    Server::recv_data(struct pollfd *poll)
 int Server::getServerFd()
 {
     return _socket_fd;
+}
+
+char* Server::getBuffer()
+{
+    return this->_buffer;
+}
+
+std::vector<int>    Server::getSocket_client()
+{
+    return this->_socket_client;
 }
 
 // struct sockaddr_in {
