@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/29 17:29:02 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/30 12:31:59 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,14 @@ typedef struct s_parsing
     // std::vector<std::string> server_name;
     public:
     std::vector<std::string> vec;
-    t_server *serv;
+    t_server **serv;
     void    copy_file(s_parsing *pars, std::string ptr);
     void    check_key(s_parsing *pars);
+    void check_server(s_parsing *pars);
     std::vector<std::string>  get_vec();
     
 } parsing;
+bool whitespace(unsigned char c);
 bool    isWhitespace(unsigned char c);
 
 

@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/29 17:29:50 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/30 13:16:43 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,14 @@ bool isWhitespace(std::string str)
         return  true;
     return false;
 }
-
+bool whitespace(unsigned char c) 
+{
+    if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v') {
+        return true;
+    } else {
+        return false;
+    }
+}
 void parsing::copy_file(parsing *pars, std::string ptr)
 {
     std::string line;
@@ -38,33 +45,41 @@ void parsing::copy_file(parsing *pars, std::string ptr)
         pars->vec.push_back(line);
      
 }
+// void check_server(parsing *pars)
+// {
+//     check_listen(pars);
+//     check_server_name(pars);
+//     check_error_pages(pars);
+//     check_client_max_size(pars);
+// }
+
 void  parsing::check_key(s_parsing *pars)
 {
-    int j =0;
-    // pars->serv = new t_server;
+    int k = 0;
+    
     for(int i=0;i < pars->vec.size() ;i++)
     {
-        if (!strncmp(pars->vec[i].c_str(), "server", 6) || pars->vec[i] == "\0" || isWhitespace(pars->vec[i]))
+        pars->vec[i].erase(std::remove_if(pars->vec[i].begin(), pars->vec[i].end(), whitespace), pars->vec[i].end());
+        if (!strncmp(pars->vec[i].c_str(), "server", 6) || pars->vec[i] == "\0")
         {
-            if(!strncmp(pars->vec[i].c_str(), "server", 6) && !strncmp(pars->vec[i+1].c_str(), "{", 1))
+            std::cout<< i << " ************ |"<< pars->vec[i]<<"|  ************"<<std::endl;
+            if(!strncmp(pars->vec[i].c_str(), "server", 6))
             {
+                pars->serv[k] = new t_server();
                 for(int j = i+2; j < pars->vec.size() ;j++)
                 {
                     if (!strncmp(pars->vec[j].c_str(),"}",1))
                         break ;
                     else
-                        pars->serv[j].server.push_back(pars->vec[j]);
+                        pars->serv[k]->server.push_back(pars->vec[j]);
                 }
-                j++;
-                // break;
+                k++;
             }
         }
+        // else
+        //     std::cout<< i << " Error "<<std::endl;
     }
-    std::cout<<"-------"<<pars->serv[0].server.size()<<"---------"<<std::endl;
-    for (size_t i = 0; i < pars->serv[0].server.size() ; i++)
-    {
-        std::cout<<"-------"<<pars->serv[0].server[i]<<"---------"<<std::endl;
-    }
+//    check_server(pars);
     
 }
 
