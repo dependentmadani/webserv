@@ -33,12 +33,13 @@ class Server {
         void    accept_connections();
         int     recv_data(struct pollfd *poll);
 
-        int                 getServerFd();
+        int                 getServerFd() const;
         char               *getBuffer();
-        std::vector<int>    getSocket_client();
+        std::vector<int>    getSocket_client() const;
 
     private:
         int                 _socket_fd;
+        int                 _socket_to_accept;
         struct sockaddr_in  _host_addr;
         int                 _port;
         std::vector<int>    _socket_client;

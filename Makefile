@@ -18,9 +18,14 @@ CPP = c++
 CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 SRC = main.cpp\
-	server/Server.cpp
+	server/Server.cpp \
+	Request/Request.cpp \
+	utils/ft_split.cpp \
+	utils/utils_functions.cpp \
 
-HEADERS = server/Server.hpp
+HEADERS = server/Server.hpp \
+	Request/Request.hpp \
+	utils/utils.hpp \
 			
 
 OBJ = $(SRC:.cpp=.o)

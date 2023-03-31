@@ -13,27 +13,35 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-#include "../Server/Server.hpp"
-#include <iostream>
+# include "../server/Server.hpp"
+# include "../utils/utils.hpp"
+# include <iostream>
+# include <map>
 
 class Request {
 
     private:
-        Server      _server;
-        int         _error_status;
-        std::string _method;
-        std::string _path;
-        std::string _protocol;
+        Server                              _server;
+        int                                 _error_status;
+        std::string                         _first_liner_header;
+        std::string                         _method;
+        std::string                         _path;
+        std::string                         _protocol;
+        std::map<std::string, std::string>  _header;
 
 
     public:
-        void    FirstLinerRequest();
-        void    HeaderRequest();
-        void    BodyRequest();
+        Request();
+        ~Request();
 
-        std::string getMethod();
-        std::string getPath();
-        std::string getProtocol();
+        int     ParseRequest(char* request_message);
+        int    FirstLinerRequest(char *request_message);
+        int    HeaderRequest();
+
+        std::string getMethod() const;
+        std::string getPath() const;
+        std::string getProtocol() const;
+        std::string getHeader() const;
 };
 
 #endif

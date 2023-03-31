@@ -16,6 +16,7 @@
 Server::Server() : _host_addr(), _socket_client()
 {
     _socket_fd = 0;
+    _socket_to_accept = 0;
     _port = 8080;
     _connexion_status = false;
 }
@@ -23,6 +24,7 @@ Server::Server() : _host_addr(), _socket_client()
 Server::Server(int port) : _host_addr(), _socket_client()
 {
     _socket_fd = 0;
+    _socket_to_accept = 0;
     _port = port;
     _connexion_status = false;
 }
@@ -63,40 +65,30 @@ int Server::initiat_server() {
 void    Server::accept_connections()
 {
     int addr_length = sizeof(_host_addr);
-    int socket_to_accept = 0;
-    struct pollfd theOne;
 
-    memset(&theOne, 0, sizeof(theOne));
-    while (socket_to_accept != -1)
+    _socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
+    if (_socket_to_accept < 0)
     {
-        socket_to_accept = accept(_socket_fd, (struct sockaddr*)&_host_addr, (socklen_t*)&addr_length);
-        if (socket_to_accept < 0)
-        {
-            perror("webserv error (accept)");
-            socket_to_accept = -1;
-        }
-        else
-        {
-            _socket_client.push_back(socket_to_accept);
-        }
-
-        theOne.fd = (this->getSocket_client())[0];
-        theOne.events = POLLIN;
-        this->recv_data(&theOne);
-        // std::cout << "working properly" << std::endl;
-        // char buffer[1024] = {0};
-        // int valread = read( socket_to_accept , buffer, 1024);
-        // std::cout << buffer << "\n" << std::endl;
-        // if(valread < 0)
-        // { 
-        //     printf("No bytes are there to read");
-        // }
-        // char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
-        // write(socket_to_accept , hello , sizeof(hello));
-        // close(socket_to_accept);
-        // std::cout << "\n listening to new socket \n" << std::endl;
+        perror("webserv error (accept)");
+        _socket_to_accept = -1;
     }
-        close(theOne.fd);
+    else
+    {
+        _socket_client.push_back(_socket_to_accept);
+    }
+    // std::cout << "working properly" << std::endl;
+    // char buffer[1024] = {0};
+    // int valread = read( socket_to_accept , buffer, 1024);
+    // std::cout << buffer << "\n" << std::endl;
+    // if(valread < 0)
+    // { 
+    //     printf("No bytes are there to read");
+    // }
+    // char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
+    // write(socket_to_accept , hello , sizeof(hello));
+    // close(socket_to_accept);
+    // std::cout << "\n listening to new socket \n" << std::endl;
+    // close(_socket_to_accept);
 }
 
 int    Server::recv_data(struct pollfd *poll)
@@ -123,7 +115,7 @@ int    Server::recv_data(struct pollfd *poll)
 	return (data);
 }
 
-int Server::getServerFd()
+int Server::getServerFd() const
 {
     return _socket_fd;
 }
@@ -133,7 +125,7 @@ char* Server::getBuffer()
     return this->_buffer;
 }
 
-std::vector<int>    Server::getSocket_client()
+std::vector<int>    Server::getSocket_client() const
 {
     return this->_socket_client;
 }
