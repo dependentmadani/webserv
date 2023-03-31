@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/30 17:31:52 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/31 17:34:02 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,17 @@ void parsing::copy_file(parsing *pars, std::string ptr)
         pars->vec.push_back(line);
      
 }
+
+bool isNumber(char * str)
+{
+    for (int i =0;str[i];i++) 
+    {
+        if (std::isdigit(str[i]) == 0)
+            return false;
+    }
+    return true;
+}
+
 bool isWhitespace(std::string str)
 {
     int len = 0;
@@ -48,25 +59,45 @@ bool isWhitespace(std::string str)
     return false;
 }
 
-void parsing::check_listen(t_server *pars, std::string str)
+void parsing::check_listen(t_server *serv, std::string str)
 {
-    std::string ptr;
-    // std::string s = "scott>=tiger>=mushroom";
-    std::string delimiter = " ";
-    
-    size_t pos = 0;
-    std::string token;
-    while ((pos = str.find(delimiter)) != std::string::npos) {
-        token = str.substr(0, pos);
-        str.erase(0, pos + delimiter.length());
-        std::cout <<"++++++++|"<<token <<"+++++++"<< std::endl;
+    char  *ptr;
+    char *ss = const_cast<char*>(str.c_str());
+    char *s1;
+    ptr = strtok(ss, " ");
+    if (!strcmp(str.c_str(), "listen"))
+    {
+         while (ptr!= NULL)
+        {
+            if (isNumber(s1))
+               serv->ind_port = atoi(s1);
+            else
+                serv->host = s1;
+            ptr = strtok(NULL,  " ");
+            s1 =  strtok(ptr,":");
+        }
     }
-    // std::cout <<str << std::endl;
-     
-    // std::cout <<"|||||" <<tokens[0] << "|||||||"<< std::endl;
-    
-    
 }
+void parsing::check_server_name(t_server *serv, std::string str, int pos)
+{
+    char  *ptr;
+    int  i = 0;
+    char *ss = const_cast<char*>(str.c_str());
+    ptr = ss+pos;
+    // std::cout <<" +++++++++" << ptr <<std::endl;
+    if (!strncmp(ptr, "server_name", 11))
+    {
+		// i = 11;
+         while (ptr[i])
+        {
+          	// std::cout <<" +++++++++" << ptr[i] <<std::endl;
+            ptr = strtok(NULL,  " ");
+			i++;
+        }
+    }
+    // std::cout <<" +++++++++" << serv->server_name <<std::endl;
+}
+
 void parsing::check_server(s_parsing *pars, int len)
 {
     for (int i = 0; i < len ; i++)
@@ -76,8 +107,16 @@ void parsing::check_server(s_parsing *pars, int len)
         size_t found;
         found = pars->serv[i]->server[j].find("listen");
         if (found != std::string::npos)
-            {check_listen(pars->serv[i], pars->serv[i]->server[j]);break ;}
-            
+        {
+            check_listen(pars->serv[i], pars->serv[i]->server[j]);
+            // break ;
+        }
+
+        found = pars->serv[i]->server[j].find("server_name");
+        if (found != std::string::npos)
+        {
+            check_server_name(pars->serv[i], pars->serv[i]->server[j], found);
+        }
         pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
         if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
             break ;
@@ -96,7 +135,7 @@ void parsing::check_server(s_parsing *pars, int len)
 void  parsing::check_key(s_parsing *pars)
 {
     int k = 0;
-    
+    pars->serv = new t_server*[pars->vec.size()];
     for(int i=0;i < pars->vec.size() ;i++)
     {
         pars->vec[i].erase(std::remove_if(pars->vec[i].begin(), pars->vec[i].end(), whitespace), pars->vec[i].end());

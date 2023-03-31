@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/30 15:43:40 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/31 16:09:23 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@
 typedef struct s_server
 {
     private:
-    int ind_port;
-    int ind_host;
     int error_pages;
     int limit_body;
-    std::string server_name;
     public:
+    int ind_port;
     std::vector<std::string> server;
+    std::string server_name;
+    std::string host;
 } t_server;
 
 typedef struct s_parsing
@@ -42,6 +42,7 @@ typedef struct s_parsing
     void    check_key(s_parsing *pars);
     void check_server(s_parsing *pars, int len);
     void check_listen(t_server *pars, std::string str);
+    void check_server_name(t_server *serv, std::string str, int pos);
     std::vector<std::string>  get_vec();
     
 } parsing;

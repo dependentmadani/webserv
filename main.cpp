@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/29 17:29:29 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/31 14:09:07 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int main(int ac, char **av)
 {
     std::ifstream file(av[1]);
     parsing vars;
-    parsing *pars = new parsing;
+    parsing *pars = new parsing();
     if (ac == 2)
     {
         if (file.is_open())
