@@ -35,8 +35,11 @@ class Request {
         ~Request();
 
         int     ParseRequest(char* request_message);
-        int    FirstLinerRequest(char *request_message);
-        int    HeaderRequest();
+        int     FirstLinerRequest(char *request_message);
+        int     HeaderRequest(char *request_message);
+        void    ft_http_code();
+
+        std::map<int, std::string> http_code;
 
         std::string getMethod() const;
         std::string getPath() const;

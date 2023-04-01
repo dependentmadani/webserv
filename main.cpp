@@ -45,6 +45,7 @@ int main(int ac, char **av)
     theOne.events = POLLIN;
     server.recv_data(&theOne);
     close(theOne.fd);
+    close(server.getServerFd());
     request.ParseRequest(server.getBuffer());
     return (0);
 }
