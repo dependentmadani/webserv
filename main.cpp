@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "server/Server.hpp"
+#include "Server/Server.hpp"
 #include "Request/Request.hpp"
 
 int main(int ac, char **av)
