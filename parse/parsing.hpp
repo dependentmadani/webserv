@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/31 16:09:23 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/02 17:12:48 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,13 @@ typedef struct s_server
 {
     private:
     int error_pages;
-    int limit_body;
     public:
     int ind_port;
+    int max_client;
     std::vector<std::string> server;
     std::string server_name;
     std::string host;
+    std::vector<std::string>  error;
 } t_server;
 
 typedef struct s_parsing
@@ -42,13 +43,19 @@ typedef struct s_parsing
     void    check_key(s_parsing *pars);
     void check_server(s_parsing *pars, int len);
     void check_listen(t_server *pars, std::string str);
-    void check_server_name(t_server *serv, std::string str, int pos);
+    void check_server_name(t_server *serv, std::string str);
+    void check_error_pages(t_server *serv, std::string str);
+    void check_max_client(t_server *serv, std::string str);
     std::vector<std::string>  get_vec();
+    std::string trim(const std::string& str);
     
 } parsing;
 bool whitespace(unsigned char c);
 bool    isWhitespace(unsigned char c);
 
-
+int ft_len(std::string s, char c);
+// char	*ft_substr(char *s, unsigned int start, size_t len);
+// int	ft_len(char  *s, char c);
+// char	**ft_split(char  *s, char c);
 
 #endif
