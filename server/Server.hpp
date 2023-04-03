@@ -20,6 +20,7 @@
 # include <errno.h>
 # include <unistd.h>
 # include <vector>
+# include "../parse/parsing.hpp"
 
 # define BUFFER_SIZE 8192
 
@@ -36,6 +37,7 @@ class Server {
         int                 getServerFd() const;
         char               *getBuffer();
         std::vector<int>    getSocket_client() const;
+        void                setParse(s_parsing* );
 
     private:
         int                 _socket_fd;
@@ -45,6 +47,7 @@ class Server {
         std::vector<int>    _socket_client;
         char                _buffer[BUFFER_SIZE + 1];
         bool                _connexion_status;
+        s_parsing           *_parse;
 };
 
 #endif

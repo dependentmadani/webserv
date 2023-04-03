@@ -26,9 +26,10 @@ int     Request::ParseRequest(char *request_message)
 
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
-    if (check_method())
-        return ft_http_status(_http_status);
-    this->is_request_well_formed();
+    if (check_method_protocol())
+        return ft_http_status(getHttpStatus());
+    this->is_request_well_formed(request_message);
+    this->get_matched_location_for_request_uri();
     return 0;
 }
 
@@ -47,52 +48,83 @@ int    Request::FirstLinerRequest(char *request_message)
     return 0;
 }
 
+// int    Request::HeaderRequest(char *request_message)
+// {
+//     // char **splited_header = ft_split(request_message, '\r');
+//     char *tmp = request_message;
+//     char *tmp_request = request_message;
+//     char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
+
+//     splited_header = strtok_r(NULL, "\r\n", &tmp);
+//     while (splited_header != NULL)
+//     {
+//         char **split_each_line = ft_split(splited_header, ':');
+//         _header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+//         splited_header = strtok_r(NULL, "\r\n", &tmp);
+//         if (splited_header && !strcmp(splited_header,""))
+//             std::cout << "kan hna" << std::endl;
+//     }
+//     // std::cout << "all good for now :) !" << std::endl;
+//     return 0;
+// }
+
 int    Request::HeaderRequest(char *request_message)
 {
-    // char **splited_header = ft_split(request_message, '\r');
-    char *splited_header = strtok(request_message, "\r\n");
+    char **splited_header = ft_split(request_message, '\n');
+    // char *tmp = request_message;
+    // char *tmp_request = request_message;
+    // char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
 
-    splited_header = strtok(NULL, "\r\n");
-    while (splited_header != NULL)
+    // splited_header = strtok_r(NULL, "\r\n", &tmp);
+    int i = 1;
+    while (splited_header[i] != NULL)
     {
-        char **split_each_line = ft_split(splited_header, ':');
-        _header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
-        splited_header = strtok(NULL, "\r\n");
+        if (std::string(splited_header[i]).find(":") != std::string::npos)
+        {
+            char **split_each_line = ft_split(splited_header[i], ':');
+            _header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+            i++;
+        }
+        else
+            break ;
     }
-    // std::cout << "all good for now :) !" << std::endl;
     return 0;
 }
 
-int Request::is_request_well_formed()
+int Request::is_request_well_formed(char *request_message)
 {
     if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("chunked")))
     {
         _http_status = 501;
-        std::cout << "not good for now 1!" << std::endl;
         return ft_http_status(getHttpStatus());
     }
     if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
     {
         _http_status = 400;
-        std::cout << "not good for now 2!" << std::endl;
         return ft_http_status(getHttpStatus());
     }
     if (url_characters_checker())
     {
         _http_status = 400;
-        std::cout << "not good for now 3!" << std::endl;
         return ft_http_status(getHttpStatus());
     }
     if (getPath().size() > 2048)
     {
         _http_status = 414;
-        std::cout << "not good for now 4!" << std::endl;
         return ft_http_status(getHttpStatus());
     }
-    // Need to check If request body is larger than client max body size set in config file.
-    //need to know how I will receive the parsed config file
+    if (is_body_size_good(request_message))
+    {
+        _http_status = 413;
+        return ft_http_status(getHttpStatus());
+    }
     std::cout << "all good for now :) !" << std::endl;
     return 0;
+}
+
+int Request::get_matched_location_for_request_uri()
+{
+
 }
 
 /*
@@ -106,7 +138,7 @@ All the methods:
                       | "TRACE"                  ; Section 9.8
                       | "CONNECT"                ; Section 9.9
 */
-int Request::check_method()
+int Request::check_method_protocol()
 {
     if (_method == "GET" || _method == "POST" || _method == "DELETE")
     {
@@ -116,6 +148,11 @@ int Request::check_method()
     if (_method == "OPTIONS" || _method == "HEAD" || _method == "PUT" || _method == "TRACE" || _method == "CONNECT")
     {
         _http_status = 501;
+        return -1;
+    }
+    if (_protocol != "HTTP/1.1")
+    {
+        _http_status = 403; //to check the http status code after...!!
         return -1;
     }
     _http_status = 501;
@@ -303,6 +340,16 @@ int Request::url_characters_checker()
     return 0;
 }
 
+int Request::is_body_size_good(char *request_message)
+{
+    char *tmp_request_body = strstr(request_message, "\r\n\r\n");
+    tmp_request_body[0] = '\0';
+    _body = std::string(tmp_request_body + 4);
+    if (_body.size() > (size_t)_parse->serv[0]->max_client)
+        return 1;
+    return 0;
+}
+
 std::string Request::getPath() const
 {
     return _path;
@@ -311,4 +358,14 @@ std::string Request::getPath() const
 int     Request::getHttpStatus() const
 {
     return _http_status;
+}
+
+std::string Request::getProtocol() const
+{
+    return _protocol;
+}
+
+void    Request::setParse(s_parsing* parsed)
+{
+    this->_parse = parsed;
 }

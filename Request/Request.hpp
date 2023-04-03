@@ -15,6 +15,7 @@
 
 # include "../Server/Server.hpp"
 # include "../utils/utils.hpp"
+# include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
 
@@ -27,7 +28,9 @@ class Request {
         std::string                         _method;
         std::string                         _path;
         std::string                         _protocol;
+        std::string                         _body;
         std::map<std::string, std::string>  _header;
+        s_parsing                          *_parse;
 
 
     public:
@@ -40,8 +43,10 @@ class Request {
         void    ft_http_code();
         void    ft_mime_type();
         int     ft_http_status(int value);
-        int     check_method();
-        int     is_request_well_formed();
+        int     check_method_protocol();
+        int     is_request_well_formed(char *request_message);
+        int     is_body_size_good(char *request_message);
+        int     get_matched_location_for_request_uri();
 
         //function to check in the header
         int     is_available(std::string, std::string);
@@ -56,6 +61,7 @@ class Request {
         std::string getProtocol() const;
         std::string getHeader() const;
         int         getHttpStatus() const;
+        void        setParse(s_parsing *);
 };
 
 #endif

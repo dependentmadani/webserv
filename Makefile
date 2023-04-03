@@ -22,11 +22,12 @@ SRC = main.cpp\
 	Request/Request.cpp \
 	utils/ft_split.cpp \
 	utils/utils_functions.cpp \
+	parse/parsing.cpp \
 
 HEADERS = Server/Server.hpp \
 	Request/Request.hpp \
 	utils/utils.hpp \
-			
+	parse/parsing.hpp \
 
 OBJ = $(SRC:.cpp=.o)
 
