@@ -17,9 +17,12 @@
 # include <netinet/in.h>
 # include <sys/types.h>
 # include <poll.h>
+# include <stdio.h>
+# include <cstring>
 # include <errno.h>
 # include <unistd.h>
 # include <vector>
+# include <errno.h>
 # include "../parse/parsing.hpp"
 
 # define BUFFER_SIZE 8192

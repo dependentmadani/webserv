@@ -93,12 +93,12 @@ int    Request::HeaderRequest(char *request_message)
 
 int Request::is_request_well_formed(char *request_message)
 {
-    if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("chunked")))
+    if (_method == "POST" && !is_available(std::string("TRANSFER-ENCODING"), std::string("chunked")))
     {
         _http_status = 501;
         return ft_http_status(getHttpStatus());
     }
-    if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
+    if (_method == "POST" && !is_available(std::string("TRANSFER-ENCODING"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
     {
         _http_status = 400;
         return ft_http_status(getHttpStatus());
@@ -124,7 +124,32 @@ int Request::is_request_well_formed(char *request_message)
 
 int Request::get_matched_location_for_request_uri()
 {
+    //check if path is valid, for security reason
+    int path_counter = 0;
+    size_t pos = 0;
+    std::string url = getPath();
 
+    url.erase(0, 1);
+    std::string tmp;
+    while ( ( pos = url.find("/") ) != std::string::npos)
+    {
+        tmp = url.substr(0, pos);
+        if (tmp == "..")
+            --path_counter;
+        else
+            ++path_counter;
+        // path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+        if (path_counter < 0)
+        {
+            _http_status = 400;
+            std::cout << "was here aa hanida" << std::endl;
+            return ft_http_status(getHttpStatus());
+        }
+        url.erase(0, pos + 1);
+    }
+    //need to check if its available
+
+    return 0;
 }
 
 /*

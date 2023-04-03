@@ -48,7 +48,7 @@ bool whitespace(unsigned char c)
 void parsing::copy_file(parsing *pars, std::string ptr)
 {
     std::string line;
-    std::ifstream file(ptr);
+    std::ifstream file(ptr.c_str());
     
     while (getline(file, line))
         pars->vec.push_back(line);

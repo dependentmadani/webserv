@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <cstring>  
+#include <algorithm>
 
 
 #ifndef PARSING_HPP
