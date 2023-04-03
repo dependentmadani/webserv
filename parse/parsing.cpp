@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/02 17:34:25 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:42:42 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,49 +122,38 @@ void parsing::check_server_name(t_server *serv, std::string str)
 
 void parsing::check_error_pages(t_server *serv, std::string str)
 {
-    char  **ptr;
     char *ss;
-    char * s2;
+    char *s2;
     str = trim(str);
     int lent =  0;
     int j = 10;
-    int k; 
+    int k;
     if (!strncmp(str.c_str(), "error_page",10))
     {
         lent = ft_len(str,' ');
-        lent = ft_len(str, 9)+lent;
-        // std::cout<<"-------|"<< lent<<"|>>>>>>>>>>>>"<<std::endl;
+        if (lent != 3)
+            lent = ft_len(str, 9)+ lent -1;
         ss = const_cast<char*>(str.c_str());
-        for (int i = 0; i < lent -1; i++)
+        s2 = new char[strlen(ss) -j + 1];
+        for (int i = 0; i < lent -1 ; i++)
         {
-            for ( ; ss[j] == ' ' || ss[j]  == 9 ; j++)
-            {
-            }
+            for ( ; ss[j] == ' ' || ss[j]  == 9 ; j++);
             k = 0;
             for (; ss[j] ; j++)
             {
-                if (ss[j] == ' ')
-                {
+                if (ss[j] == ' ' || ss[j] ==  9)
                     break;
-                }
-                
-                s2[k] = ss[j];
-                std::cout<<"-------|"<< s2[k] <<"|>>>>>>>>>>>>"<<std::endl;
-                    k++;
+                s2[k++] = ss[j];
             }
             s2[k] = '\0';
-            std::string po(s2);
-            std::cout<<po<<"|*******************|"<< s2<<std::endl;
-            serv->error.push_back(po);
-            
+            std::string ptr(s2);
+            if (isNumber(s2))
+                 serv->error_num.push_back(atoi(s2));
+            else
+                serv->error_page.push_back(ptr);
         }
-         for (int i =0; i < serv->error.size(); i++)
-        {
-           std::cout<<">>>>>>>>>>>>"<<serv->error[i]<<std::endl;
-        }
-        
+        delete [] s2;  
     }
-
 }
 
 void parsing::check_max_client(t_server *serv, std::string str)
@@ -177,12 +166,23 @@ void parsing::check_max_client(t_server *serv, std::string str)
             str = trim(str);
             ss = const_cast<char*>(str.c_str());
             if (isNumber(ss))
-                serv-> max_client = atoi(ss);
+                serv-> max_client = atol(ss);
              else
                 std::cout<<"Error max_client_body_size"<<std::endl;
-                
     }
 }
+
+void parsing::check_location(t_server *serv, std::string str)
+{
+    char *ss;
+    str = trim(str);
+    if (!strncmp(str.c_str(), "location", 8))
+    {
+        
+    }
+}
+
+
 
 void parsing::check_server(s_parsing *pars, int len)
 {
@@ -212,6 +212,12 @@ void parsing::check_server(s_parsing *pars, int len)
         {
             check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
         }
+        found = pars->serv[i]->server[j].find("location");
+        if (found != std::string::npos)
+        {
+            check_location(pars->serv[i], pars->serv[i]->server[j]);    
+        }
+        
         pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
         if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
             break ;
@@ -221,8 +227,6 @@ void parsing::check_server(s_parsing *pars, int len)
         // if (pars->serv[i]->server[j])
        }
     }
-
-    
     // check_server_name(pars);
     // check_error_pages(pars);
     // check_client_max_size(pars);

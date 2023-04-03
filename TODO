@@ -1,6 +1,7 @@
 START -> _BLANK.START  | "server".Server | EOF
 Server -> _BLANK.Server | "{".ServerToken
 ServerToken -> _BLANK.ServerToken | _END_BRACE.START | _ServerListToken._Token.ServerToken | "location"._Token.Location
+
 Location -> _BLANK.Location | "{".LocationToken
 LocationToken -> _BLANK.LocationToken | _END_BRACE.ServerToken | _LocationListToken._Token.LocationToken
 _ServerListToken -> "listen"|"server_name"|"max_client_body_size"|"error_page"
