@@ -52,6 +52,7 @@ class Request {
         int     is_available(std::string, std::string);
         //function to check url for a character not allowed
         int     url_characters_checker();
+        void    print_parse_vector();
 
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;

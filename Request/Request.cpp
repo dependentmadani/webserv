@@ -30,6 +30,7 @@ int     Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     this->is_request_well_formed(request_message);
     this->get_matched_location_for_request_uri();
+    print_parse_vector();
     return 0;
 }
 
@@ -134,15 +135,14 @@ int Request::get_matched_location_for_request_uri()
     while ( ( pos = url.find("/") ) != std::string::npos)
     {
         tmp = url.substr(0, pos);
-        if (tmp == "..")
-            --path_counter;
-        else
-            ++path_counter;
-        // path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+        // if (tmp == "..")
+        //     --path_counter;
+        // else
+        //     ++path_counter;
+        path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
         if (path_counter < 0)
         {
             _http_status = 400;
-            std::cout << "was here aa hanida" << std::endl;
             return ft_http_status(getHttpStatus());
         }
         url.erase(0, pos + 1);
@@ -393,4 +393,17 @@ std::string Request::getProtocol() const
 void    Request::setParse(s_parsing* parsed)
 {
     this->_parse = parsed;
+}
+
+void    Request::print_parse_vector()
+{
+    std::vector<std::string>::iterator vec_b = _parse->serv[0]->server.begin();
+    std::vector<std::string>::iterator vec_e = _parse->serv[0]->server.end();
+
+    for (; vec_b != vec_e; ++vec_b)
+    {
+        std::cout << "value: " << *vec_b << std::endl;
+    }
+    std::cout << _parse->serv[0]->server_name << std::endl;
+    std::cout << _parse->serv[0]->max_client << std::endl;
 }
