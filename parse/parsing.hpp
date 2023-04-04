@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/03 11:39:20 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/04 13:29:24 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,16 @@
 
 #ifndef PARSING_HPP
 # define PARSING_HPP
+
+typedef struct s_location
+{
+    std::string root_locaton;
+    std::vector<std::string> location;
+    std::vector<std::string> methods;
+    bool index;
+    
+} location;
+
 typedef struct s_server
 {
     private:
@@ -30,7 +40,12 @@ typedef struct s_server
     std::string host;
     std::vector<std::string>  error_page;
     std::vector<int>  error_num;
+    std::vector<int>  lent_server;
+    location *loc;
 } t_server;
+
+
+
 
 typedef struct s_parsing
 {
