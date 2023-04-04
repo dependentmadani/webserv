@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/04 15:53:40 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/04 17:29:36 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,39 @@ void fill_methods(t_server *serv, std::string str)
     }
 }
 
+void fill_index(t_server *serv, std::string str)
+{
+    std::stringstream ss(str);
+    std::string token;
+    while (getline(ss, token, '\t'))
+	{
+        std::stringstream jo(token);
+        while (getline(jo, token, ' '))
+		{
+			if (token != "\0")
+				serv->loc->index.push_back(token);
+            // std::cout << token << std::endl;
+        }
+    }
+}
+
+void fill_cgi(t_server *serv, std::string str)
+{
+    std::stringstream ss(str);
+    std::string token;
+    while (getline(ss, token, '\t'))
+	{
+        std::stringstream jo(token);
+        while (getline(jo, token, ' '))
+		{
+			if (token != "\0")
+				serv->loc->cgi_pass.push_back(token);
+            // std::cout << token << std::endl;
+        }
+    }
+}
+
+
 void parsing::check_location(t_server *serv, std::string str)
 {
     char *ss;
@@ -218,35 +251,39 @@ void parsing::check_location(t_server *serv, std::string str)
 	for (int i = 0; i < serv->loc->location.size() ; i++)
     {
 		std::string ptr = trim(serv->loc->location[i]);
-		j = 0;
+		
 		if (!strncmp(ptr.c_str(), "location", strlen("location")))
     	{
+            j = 0;
 			ss = new char [ptr.size() - (strlen("location") - 1)];
         	for (int i = strlen("location"); i < ptr.size() ; i++)
         	    ss[j++] = ptr[i];
         	ss[j] = '\0';
-        	serv->loc->root_locaton = static_cast<std::string>(ss);
-			serv->loc->root_locaton = trim(serv->loc->root_locaton);
-			size_t found= serv->loc->root_locaton.find("/");
+        	serv->loc->url_locaton = static_cast<std::string>(ss);
+			serv->loc->url_locaton = trim(serv->loc->url_locaton);
+			size_t found= serv->loc->url_locaton.find("/");
 			if(found == std::string::npos)
-				std::cout<<"Error from location root"<<std::endl;
+				std::cout<<"Error from location url"<<std::endl;
 			delete [] ss;
     	}
 		if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
 		{
+            j = 0;
 			ss = new char [ptr.size() - (strlen("autoindex") - 1)];
         	for (int i = strlen("autoindex"); i < ptr.size() ; i++)
         	    ss[j++] = ptr[i];
         	ss[j] = '\0';
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
+            delete [] ss;
 			if (!strcmp(ptr.c_str(), "on"))
-				serv->loc->index = true;
+				serv->loc->auto_index = true;
 			else
-				serv->loc->index = false;
+				serv->loc->auto_index = false;
 		}
 		if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
 		{
+            j = 0;
 			ss = new char [ptr.size() - (strlen("allow_methods") - 1)];
         	for (int i = strlen("allow_methods"); i < ptr.size() ; i++)
         	    ss[j++] = ptr[i];
@@ -260,9 +297,51 @@ void parsing::check_location(t_server *serv, std::string str)
 					strcmp(serv->loc->methods[i].c_str() ,"GET") && strcmp(serv->loc->methods[i].c_str() ,"DELETE")))
 					std::cout<< "Error from methodes" <<std::endl;
 			}
-			
+            delete [] ss;
 		}
+
+        if (!strncmp(ptr.c_str(), "root", strlen("root")))
+		{
+            j = 0;
+			ss = new char [ptr.size() - (strlen("root") - 1)];
+        	for (int i = strlen("root"); i < ptr.size() ; i++)
+        	    ss[j++] = ptr[i];
+        	ss[j] = '\0';
+			ptr = static_cast<std::string>(ss);
+			ptr = trim(ptr);
+            serv->loc->root_locaton = ptr;
+            delete [] ss;
+		}
+        if (!strncmp(ptr.c_str(), "index", strlen("index")))
+		{
+            j = 0;
+			ss = new char [ptr.size() - (strlen("index") - 1)];
+        	for (int i = strlen("index"); i < ptr.size() ; i++)
+        	    ss[j++] = ptr[i];
+        	ss[j] = '\0';
+			ptr = static_cast<std::string>(ss);
+			ptr = trim(ptr);
+            fill_index(serv, ptr);
+            delete [] ss;
+		}
+        if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
+		{
+            j =0;
+			ss = new char [ptr.size() - (strlen("cgi_pass") - 1)];
+        	for (int i = strlen("cgi_pass"); i < ptr.size() ; i++)
+        	    ss[j++] = ptr[i];
+        	ss[j] = '\0';
+			ptr = static_cast<std::string>(ss);
+			ptr = trim(ptr);
+            fill_cgi(serv, ptr);
+            delete [] ss;
+    	}    
 	}
+    for (size_t i = 0; i < serv->loc->cgi_pass.size(); i++)
+    {
+        std::cout<<"-----------------|"<<serv->loc->cgi_pass[i]<<std::endl;
+    }
+    
 }
 
 

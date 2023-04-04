@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/04 13:29:24 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/04 17:03:16 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,12 @@
 typedef struct s_location
 {
     std::string root_locaton;
+    std::string url_locaton;
     std::vector<std::string> location;
     std::vector<std::string> methods;
-    bool index;
+    std::vector<std::string> index;
+    std::vector<std::string> cgi_pass;
+    bool auto_index;
     
 } location;
 
