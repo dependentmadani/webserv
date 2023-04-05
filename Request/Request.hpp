@@ -38,6 +38,7 @@ class Request {
         ~Request();
 
         int     ParseRequest(char* request_message);
+        int     UseMethod();
         int     FirstLinerRequest(char *request_message);
         int     HeaderRequest(char *request_message);
         void    ft_http_code();
@@ -47,15 +48,23 @@ class Request {
         int     is_request_well_formed(char *request_message);
         int     is_body_size_good(char *request_message);
         int     get_matched_location_for_request_uri();
+        int     is_location_have_redirection();
+        int     is_method_allowed_in_location();
+        int     GET_method();
+        int     POST_method();
+        int     DELETE_method();
 
         //function to check in the header
         int     is_available(std::string, std::string);
         //function to check url for a character not allowed
         int     url_characters_checker();
         void    print_parse_vector();
+        std::string remove_space(std::string tmp);
+
 
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
+        std::vector<std::string>            allowed_methods;
 
         std::string getMethod() const;
         std::string getPath() const;

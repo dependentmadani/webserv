@@ -54,5 +54,6 @@ int main(int ac, char **av)
     close(server.getServerFd());
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
+    request.UseMethod();
     return (0);
 }

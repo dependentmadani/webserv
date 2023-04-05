@@ -15,23 +15,41 @@
 #include <vector>
 #include <string>
 #include <cstring>  
-#include <algorithm>
 
 
 #ifndef PARSING_HPP
 # define PARSING_HPP
+
+typedef struct s_location
+{
+    std::string root_locaton;
+    std::string url_location;
+    std::vector<std::string> location;
+    std::vector<std::string> methods;
+    std::vector<std::string> index;
+    std::vector<std::string> cgi_pass;
+    bool auto_index;
+    
+} location;
+
 typedef struct s_server
 {
-    // private:
-    // int error_pages;
+    private:
     public:
     int ind_port;
-    int max_client;
+    int number_of_locations;
+    unsigned long max_client;
     std::vector<std::string> server;
     std::string server_name;
     std::string host;
-    std::vector<std::string>  error;
+    std::vector<std::string>  error_page;
+    std::vector<int>  error_num;
+    std::vector<int>  lent_server;
+    location *loc;
 } t_server;
+
+
+
 
 typedef struct s_parsing
 {
@@ -47,6 +65,7 @@ typedef struct s_parsing
     void check_server_name(t_server *serv, std::string str);
     void check_error_pages(t_server *serv, std::string str);
     void check_max_client(t_server *serv, std::string str);
+    void check_location(t_server *serv, std::string str);
     std::vector<std::string>  get_vec();
     std::string trim(const std::string& str);
     

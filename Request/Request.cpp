@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 
-Request::Request() : _method(), _path(), _protocol() ,_header(), http_code()
+Request::Request() : _method(), _path(), _protocol() ,_header(), http_code(), allowed_methods()
 {
     _http_status = 0;
 }
@@ -30,9 +30,36 @@ int     Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     this->is_request_well_formed(request_message);
     this->get_matched_location_for_request_uri();
-    print_parse_vector();
+    this->is_location_have_redirection();
+    if (this->is_method_allowed_in_location())
+    {
+        _http_status = 405;
+        return ft_http_status(getHttpStatus());
+    }
+    // print_parse_vector();
     return 0;
 }
+
+int Request::UseMethod()
+{
+    if (_method == "GET")
+        this->GET_method();
+    else if (_method == "POST")
+        this->POST_method();
+    else if (_method == "DELETE")
+        this->DELETE_method();
+}
+
+int Request::GET_method()
+{
+    
+}
+
+int Request::POST_method()
+{}
+
+int Request::DELETE_method()
+{}
 
 int    Request::FirstLinerRequest(char *request_message)
 {
@@ -135,10 +162,6 @@ int Request::get_matched_location_for_request_uri()
     while ( ( pos = url.find("/") ) != std::string::npos)
     {
         tmp = url.substr(0, pos);
-        // if (tmp == "..")
-        //     --path_counter;
-        // else
-        //     ++path_counter;
         path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
         if (path_counter < 0)
         {
@@ -148,8 +171,63 @@ int Request::get_matched_location_for_request_uri()
         url.erase(0, pos + 1);
     }
     //need to check if its available
-
+    size_t number_of_location = _parse->serv[0]->number_of_locations;
+    bool check_availability = false;
+    for (size_t i = 0; i < number_of_location; ++i)
+    {
+        if (this->getPath() == _parse->serv[0]->loc[i].url_location)
+        {
+            check_availability = true;
+        }
+    }
+    if (!check_availability)
+    {
+        _http_status = 404;
+        return ft_http_status(getHttpStatus());
+    }
     return 0;
+}
+
+int Request::is_location_have_redirection()
+{
+    for (size_t i = 0; i < _parse->serv[0]->loc->location.size(); ++i)
+    {
+        if (_parse->serv[0]->loc->location[i].find("return 301") != std::string::npos)
+        {
+            size_t position_of_return = _parse->serv[0]->loc->location[i].find("return 301") + 10;
+            _http_status = 301;
+            _path = _parse->serv[0]->loc->location[i].substr(position_of_return, _parse->serv[0]->loc->location[i].size());
+            _path = remove_space(_path);
+            return ft_http_status(getHttpStatus());
+        }
+    }
+    return 0;
+}
+
+int Request::is_method_allowed_in_location()
+{
+    // for (size_t i = 0; i < _parse->serv[0]->loc->location.size(); ++i)
+    // {
+    //     size_t position_value = _parse->serv[0]->loc->location[i].find("allow_methods");
+    //     if (position_value != std::string::npos)
+    //     {
+    //         std::string tmp = _parse->serv[0]->loc->location[i].substr(position_value + 13, _parse->serv[0]->loc->location[i].size());
+    //         char **tmp_splitted = ft_split(tmp.c_str(), ' ');
+    //         std::cout << "before " << tmp.c_str() << std::endl;
+    //         int tmp_splitted_value = 0;
+    //         while (tmp_splitted[tmp_splitted_value])
+    //         {
+    //             std::cout << "this is the method " << tmp_splitted[tmp_splitted_value] << std::endl;
+    //             tmp_splitted_value++;
+    //         }
+    //     }
+    // }
+    for (size_t i = 0; i < _parse->serv[0]->loc->methods.size(); ++i)
+    {
+        if (this->getMethod() == _parse->serv[0]->loc->methods[i])
+            return 0;
+    }
+    return 1;
 }
 
 /*
@@ -188,7 +266,7 @@ int Request::check_method_protocol()
 int Request::ft_http_status(int value)
 {
     (void)value;
-    return 0;
+    return 111;
 }
 
 void    Request::ft_mime_type()
@@ -390,9 +468,26 @@ std::string Request::getProtocol() const
     return _protocol;
 }
 
+std::string Request::getMethod() const
+{
+    return _method;
+}
+
 void    Request::setParse(s_parsing* parsed)
 {
     this->_parse = parsed;
+}
+
+std::string Request::remove_space(std::string tmp)
+{
+    std::string finale = "";
+
+    for (size_t i = 0; i < tmp.size(); ++i)
+    {
+        if (tmp[i] != ' ')
+            finale += tmp[i];
+    }
+    return finale;
 }
 
 void    Request::print_parse_vector()
@@ -406,4 +501,5 @@ void    Request::print_parse_vector()
     }
     std::cout << _parse->serv[0]->server_name << std::endl;
     std::cout << _parse->serv[0]->max_client << std::endl;
+    std::cout << _parse->serv[0]->loc[0].url_location << std::endl;
 }
