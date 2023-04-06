@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/04 17:03:16 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/06 14:42:57 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ typedef struct s_server
 {
     private:
     public:
+    int num_location;
     int ind_port;
     unsigned long max_client;
     std::vector<std::string> server;
@@ -44,7 +45,7 @@ typedef struct s_server
     std::vector<std::string>  error_page;
     std::vector<int>  error_num;
     std::vector<int>  lent_server;
-    location *loc;
+    location **loc;
 } t_server;
 
 
@@ -55,6 +56,7 @@ typedef struct s_parsing
     private:
     // std::vector<std::string> server_name;
     public:
+    int num_serv;
     std::vector<std::string> vec;
     t_server **serv;
     void    copy_file(s_parsing *pars, std::string ptr);
@@ -64,7 +66,7 @@ typedef struct s_parsing
     void check_server_name(t_server *serv, std::string str);
     void check_error_pages(t_server *serv, std::string str);
     void check_max_client(t_server *serv, std::string str);
-    void check_location(t_server *serv, std::string str);
+    void check_location(location *loc, std::string str);
     std::vector<std::string>  get_vec();
     std::string trim(const std::string& str);
     

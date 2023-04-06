@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/04 17:29:36 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/06 14:44:09 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ void parsing::check_max_client(t_server *serv, std::string str)
 	
 // }
 
-void fill_methods(t_server *serv, std::string str)
+void fill_methods(location *loc, std::string str)
 {
     std::stringstream ss(str);
     std::string token;
@@ -202,13 +202,13 @@ void fill_methods(t_server *serv, std::string str)
         while (getline(jo, token, ' '))
 		{
 			if (token != "\0")
-				serv->loc->methods.push_back(token);
+				loc->methods.push_back(token);
             // std::cout << token << std::endl;
         }
     }
 }
 
-void fill_index(t_server *serv, std::string str)
+void fill_index(location *loc, std::string str)
 {
     std::stringstream ss(str);
     std::string token;
@@ -218,13 +218,13 @@ void fill_index(t_server *serv, std::string str)
         while (getline(jo, token, ' '))
 		{
 			if (token != "\0")
-				serv->loc->index.push_back(token);
+				loc->index.push_back(token);
             // std::cout << token << std::endl;
         }
     }
 }
 
-void fill_cgi(t_server *serv, std::string str)
+void fill_cgi(location *loc, std::string str)
 {
     std::stringstream ss(str);
     std::string token;
@@ -234,23 +234,23 @@ void fill_cgi(t_server *serv, std::string str)
         while (getline(jo, token, ' '))
 		{
 			if (token != "\0")
-				serv->loc->cgi_pass.push_back(token);
+				loc->cgi_pass.push_back(token);
             // std::cout << token << std::endl;
         }
     }
 }
 
 
-void parsing::check_location(t_server *serv, std::string str)
+void parsing::check_location(location *loc, std::string str)
 {
     char *ss;
     int  j = 0;
 	 std::string ptr;
     // str = trim(str);
-	// serv->loc->index = true;
-	for (int i = 0; i < serv->loc->location.size() ; i++)
+	// loc->index = true;
+	for (int i = 0; i < loc->location.size() ; i++)
     {
-		std::string ptr = trim(serv->loc->location[i]);
+		std::string ptr = trim(loc->location[i]);
 		
 		if (!strncmp(ptr.c_str(), "location", strlen("location")))
     	{
@@ -259,9 +259,9 @@ void parsing::check_location(t_server *serv, std::string str)
         	for (int i = strlen("location"); i < ptr.size() ; i++)
         	    ss[j++] = ptr[i];
         	ss[j] = '\0';
-        	serv->loc->url_locaton = static_cast<std::string>(ss);
-			serv->loc->url_locaton = trim(serv->loc->url_locaton);
-			size_t found= serv->loc->url_locaton.find("/");
+        	loc->url_locaton = static_cast<std::string>(ss);
+			loc->url_locaton = trim(loc->url_locaton);
+			size_t found= loc->url_locaton.find("/");
 			if(found == std::string::npos)
 				std::cout<<"Error from location url"<<std::endl;
 			delete [] ss;
@@ -277,9 +277,9 @@ void parsing::check_location(t_server *serv, std::string str)
 			ptr = trim(ptr);
             delete [] ss;
 			if (!strcmp(ptr.c_str(), "on"))
-				serv->loc->auto_index = true;
+				loc->auto_index = true;
 			else
-				serv->loc->auto_index = false;
+				loc->auto_index = false;
 		}
 		if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
 		{
@@ -290,11 +290,11 @@ void parsing::check_location(t_server *serv, std::string str)
         	ss[j] = '\0';
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
-			fill_methods(serv, ptr);
-			for (size_t i = 0; i < serv->loc->methods.size(); i++)
+			fill_methods(loc, ptr);
+			for (size_t i = 0; i < loc->methods.size(); i++)
 			{
-				if (serv->loc->methods.size() > 3 || (strcmp(serv->loc->methods[i].c_str() ,"POST") && 
-					strcmp(serv->loc->methods[i].c_str() ,"GET") && strcmp(serv->loc->methods[i].c_str() ,"DELETE")))
+				if (loc->methods.size() > 3 || (strcmp(loc->methods[i].c_str() ,"POST") && 
+					strcmp(loc->methods[i].c_str() ,"GET") && strcmp(loc->methods[i].c_str() ,"DELETE")))
 					std::cout<< "Error from methodes" <<std::endl;
 			}
             delete [] ss;
@@ -309,7 +309,7 @@ void parsing::check_location(t_server *serv, std::string str)
         	ss[j] = '\0';
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
-            serv->loc->root_locaton = ptr;
+            loc->root_locaton = ptr;
             delete [] ss;
 		}
         if (!strncmp(ptr.c_str(), "index", strlen("index")))
@@ -321,7 +321,7 @@ void parsing::check_location(t_server *serv, std::string str)
         	ss[j] = '\0';
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
-            fill_index(serv, ptr);
+            fill_index(loc, ptr);
             delete [] ss;
 		}
         if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
@@ -333,99 +333,90 @@ void parsing::check_location(t_server *serv, std::string str)
         	ss[j] = '\0';
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
-            fill_cgi(serv, ptr);
+            fill_cgi(loc, ptr);
             delete [] ss;
     	}    
 	}
-    for (size_t i = 0; i < serv->loc->cgi_pass.size(); i++)
-    {
-        std::cout<<"-----------------|"<<serv->loc->cgi_pass[i]<<std::endl;
-    }
     
 }
 
-
 void parsing::check_server(s_parsing *pars, int len)
 {
-	for (int i = 0; i < len ; i++)
-    {
-		int len = 0;
-       for (int j = 0; j < pars->serv[i]->server.size(); j++)
-       {
-		len++;
-        // pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
-        if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
-            break ;
-       }
-	   pars->serv[i]->lent_server.push_back(len);
-    }
     for (int i = 0; i < len ; i++)
     {
-       for (int j = 0; j < pars->serv[i]->server.size(); j++)
-       {
-        size_t found;
-        found = pars->serv[i]->server[j].find("listen");
-        if (found != std::string::npos)
+        int len = 0;
+        for (int j = 0; j < pars->serv[i]->server.size(); j++)
         {
-            check_listen(pars->serv[i], pars->serv[i]->server[j]);
-
+            len++;
+            if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
+                break ;
         }
-        found = pars->serv[i]->server[j].find("server_name");
-        if (found != std::string::npos)
+        pars->serv[i]->lent_server.push_back(len);
+        pars->serv[i]->loc = new location *[pars->serv[i]->server.size()];
+    }   
+    for (int i = 0; i < len ; i++)
+    {
+        int num = 0;
+        for (int j = 0; j < pars->serv[i]->server.size(); j++)
         {
-            check_server_name(pars->serv[i], pars->serv[i]->server[j]);
+            size_t found;
+            found = pars->serv[i]->server[j].find("listen");
+            if (found != std::string::npos)
+            {
+                check_listen(pars->serv[i], pars->serv[i]->server[j]);
+            }
+            found = pars->serv[i]->server[j].find("server_name");
+            if (found != std::string::npos)
+            {
+                check_server_name(pars->serv[i], pars->serv[i]->server[j]);
+            }
+            found = pars->serv[i]->server[j].find("max_client_body_size");
+            if (found != std::string::npos)
+            {
+                check_max_client(pars->serv[i], pars->serv[i]->server[j]);
+            }
+            found = pars->serv[i]->server[j].find("error_page");
+            if (found != std::string::npos)
+            {
+                check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
+            }
+            found = pars->serv[i]->server[j].find("location");
+            if (found != std::string::npos)
+            {
+                pars->serv[i]->loc[num] = new location();
+                // pars->serv[i]->loc[num]->auto_index = 0;
+                for (int k = j; k < pars->serv[i]->server.size() ; k++)
+                {
+                    size_t trouv = pars->serv[i]->server[k].find("]");
+                    if (trouv != std::string::npos)
+                    {
+                        pars->serv[i]->loc[num]->location.push_back(pars->serv[i]->server[k]);
+                        break ;
+                    }
+                    else
+                        pars->serv[i]->loc[num]->location.push_back(pars->serv[i]->server[k]);
+                }
+                check_location(pars->serv[i]->loc[num], pars->serv[i]->server[j]);
+                pars->serv[i]->num_location  = ++num;
+            }
+            
+            pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
+            if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
+                break;
         }
-        found = pars->serv[i]->server[j].find("max_client_body_size");
-        if (found != std::string::npos)
-        {
-            check_max_client(pars->serv[i], pars->serv[i]->server[j]);
-        }
-        found = pars->serv[i]->server[j].find("error_page");
-        if (found != std::string::npos)
-        {
-            check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
-        }
-        found = pars->serv[i]->server[j].find("location");
-        if (found != std::string::npos)
-        {
-            pars->serv[i]->loc = new location(); 
-			for (int k = j; k < pars->serv[i]->server.size() ; k++)
-    		{
-				size_t trouv = pars->serv[i]->server[k].find("]");
-				if (trouv != std::string::npos)
-					break ;
-				else
-					pars->serv[i]->loc->location.push_back(pars->serv[i]->server[k]);
-        	}
-			check_location(pars->serv[i], pars->serv[i]->server[j]);
-			
-        }
-        
-        pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
-        if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
-            break ;
-        // else
-        //     std::cout <<" ERRRRRROR "<<std::endl;
-        // std::cout<< j << " ************ |"<<pars->serv[i]->server[j]<<"|  ************"<<std::endl;
-        // if (pars->serv[i]->server[j])
-       }
     }
-	
-    // check_server_name(pars);
-    // check_error_pages(pars);
-    // check_client_max_size(pars);
 }
 
 void  parsing::check_key(s_parsing *pars)
 {
     int k = 0;
     pars->serv = new t_server*[pars->vec.size()];
+    pars->num_serv =0;
     for(int i=0;i < pars->vec.size() ;i++)
     {
         pars->vec[i].erase(std::remove_if(pars->vec[i].begin(), pars->vec[i].end(), whitespace), pars->vec[i].end());
         if (!strcmp(pars->vec[i].c_str(), "server") || pars->vec[i] == "\0")
         {
-            // std::cout<< i << " ************ |"<< pars->vec[i]<<"|  ************"<<std::endl;
             if(!strcmp(pars->vec[i].c_str(), "server"))
             {
                 pars->serv[k] = new t_server();
@@ -445,7 +436,8 @@ void  parsing::check_key(s_parsing *pars)
         // else
         //     std::cout<< i << " Error "<<std::endl;
     }
-   check_server(pars, k);
+    pars->num_serv = k;
+    check_server(pars, k);
     
 }
 
