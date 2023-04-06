@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/02 17:12:48 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/04 17:03:16 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ typedef struct s_server
     private:
     public:
     int ind_port;
-    int number_of_locations;
     unsigned long max_client;
     std::vector<std::string> server;
     std::string server_name;

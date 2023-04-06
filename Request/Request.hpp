@@ -18,19 +18,21 @@
 # include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
+# include <sys/stat.h>
 
 class Request {
 
     private:
         Server                              _server;
+        s_parsing                          *_parse;
         int                                 _http_status;
+        std::vector<std::string>            _file_name_path;
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
         std::string                         _protocol;
         std::string                         _body;
         std::map<std::string, std::string>  _header;
-        s_parsing                          *_parse;
 
 
     public:
@@ -51,6 +53,7 @@ class Request {
         int     is_location_have_redirection();
         int     is_method_allowed_in_location();
         int     GET_method();
+        int     get_request_resource();
         int     POST_method();
         int     DELETE_method();
 

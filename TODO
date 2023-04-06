@@ -1,0 +1,3 @@
+* Complete get_matched_location_for_request_uri() function, when i receive the global variables of root and index.
+
+* Should check the received _path from request, if it is a directory or a file.

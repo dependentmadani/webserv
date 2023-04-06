@@ -48,18 +48,43 @@ int Request::UseMethod()
         this->POST_method();
     else if (_method == "DELETE")
         this->DELETE_method();
+    return 0;
 }
 
 int Request::GET_method()
 {
-    
+    this->get_request_resource();
+    return 0;
+}
+
+int Request::get_request_resource()
+{
+    // std::ifstream ifs;
+    // std::string file_name_path;
+    struct stat stat_buff;
+    stat_buff.st_mode = S_ISREG(S_IRUSR); // S_ISREG Is nonzero for regular files, and S_IRUSR is for read permision for file owner
+
+    for (size_t i = 0; i < _file_name_path.size() ; ++i)
+    {
+        int stat_return = stat(_file_name_path[i].c_str(), &stat_buff);
+        if (stat_return != -1)
+        {
+            std::cout << "the file is available " << _file_name_path[i] << std::endl;
+            break ;
+        }
+    }
+    return 0;
 }
 
 int Request::POST_method()
-{}
+{
+    return 0;
+}
 
 int Request::DELETE_method()
-{}
+{
+    return 0;
+}
 
 int    Request::FirstLinerRequest(char *request_message)
 {
@@ -171,13 +196,31 @@ int Request::get_matched_location_for_request_uri()
         url.erase(0, pos + 1);
     }
     //need to check if its available
-    size_t number_of_location = _parse->serv[0]->number_of_locations;
+    size_t number_of_location = 2;
     bool check_availability = false;
     for (size_t i = 0; i < number_of_location; ++i)
     {
-        if (this->getPath() == _parse->serv[0]->loc[i].url_location)
+        int size_for_path = _parse->serv[0]->loc[i].url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i].url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i].url_location)
         {
-            check_availability = true;
+            if (!_parse->serv[0]->loc[i].root_locaton.empty())
+            {
+                if (!_parse->serv[0]->loc[i].index.empty())
+                {
+                    for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i].index.size(); ++index_indexes)
+                    {
+                        _file_name_path.push_back(_parse->serv[0]->loc[i].root_locaton + "/" + _parse->serv[0]->loc[i].index[index_indexes]);
+                    }
+                }
+                else
+                {
+                    //add with the global root if available coming from parse
+                }
+            }
+            else
+            {
+                //until i receive the global root and index coming from parse
+            }
         }
     }
     if (!check_availability)
@@ -206,22 +249,6 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-    // for (size_t i = 0; i < _parse->serv[0]->loc->location.size(); ++i)
-    // {
-    //     size_t position_value = _parse->serv[0]->loc->location[i].find("allow_methods");
-    //     if (position_value != std::string::npos)
-    //     {
-    //         std::string tmp = _parse->serv[0]->loc->location[i].substr(position_value + 13, _parse->serv[0]->loc->location[i].size());
-    //         char **tmp_splitted = ft_split(tmp.c_str(), ' ');
-    //         std::cout << "before " << tmp.c_str() << std::endl;
-    //         int tmp_splitted_value = 0;
-    //         while (tmp_splitted[tmp_splitted_value])
-    //         {
-    //             std::cout << "this is the method " << tmp_splitted[tmp_splitted_value] << std::endl;
-    //             tmp_splitted_value++;
-    //         }
-    //     }
-    // }
     for (size_t i = 0; i < _parse->serv[0]->loc->methods.size(); ++i)
     {
         if (this->getMethod() == _parse->serv[0]->loc->methods[i])
