@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/06 14:44:09 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/06 17:42:30 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,25 +172,6 @@ void parsing::check_max_client(t_server *serv, std::string str)
     }
 }
 
-// void fill_methods(std::string str)
-// {
-// 	std::stringstream ss(str);
-// 	while(getline(ss,str,(char)9))
-// 	{
-// 		// while(getline(ss,str, ' '))
-// 		// {
-// 		// 	// std::cout << str << std::endl; 
-// 		// }
-// 	}
-// 	// std::cout << "||||||||"<< str << std::endl; 
-// 	std::stringstream jo(str);
-// 	while(getline(jo,str, ' '))
-// 	{
-// 		std::cout << str << std::endl;
-// 	}
-// 	// std::cout <<"----------" <<str << std::endl; 
-	
-// }
 
 void fill_methods(location *loc, std::string str)
 {
@@ -203,7 +184,6 @@ void fill_methods(location *loc, std::string str)
 		{
 			if (token != "\0")
 				loc->methods.push_back(token);
-            // std::cout << token << std::endl;
         }
     }
 }
@@ -219,7 +199,6 @@ void fill_index(location *loc, std::string str)
 		{
 			if (token != "\0")
 				loc->index.push_back(token);
-            // std::cout << token << std::endl;
         }
     }
 }
@@ -235,23 +214,43 @@ void fill_cgi(location *loc, std::string str)
 		{
 			if (token != "\0")
 				loc->cgi_pass.push_back(token);
-            // std::cout << token << std::endl;
         }
     }
 }
 
+void fill_return(location *loc, std::string str)
+{
+    std::stringstream ss(str);
+    std::string token;
+    while (getline(ss, token, '\t'))
+	{
+        std::stringstream jo(token);
+        while (getline(jo, token, ' '))
+		{
+			if (token != "\0")
+			{
+                if (atoi(token.c_str()))
+                    loc->num_return = atoi(token.c_str());
+                else
+                    loc->return_url = token;
+            }
+        }
+    }
+}
 
 void parsing::check_location(location *loc, std::string str)
 {
     char *ss;
     int  j = 0;
-	 std::string ptr;
-    // str = trim(str);
-	// loc->index = true;
+    int flag = 0;
+	std::string ptr;
 	for (int i = 0; i < loc->location.size() ; i++)
     {
 		std::string ptr = trim(loc->location[i]);
-		
+		if (!strncmp(ptr.c_str(), "[", strlen("[]")))
+    	{
+            
+    	}
 		if (!strncmp(ptr.c_str(), "location", strlen("location")))
     	{
             j = 0;
@@ -266,7 +265,7 @@ void parsing::check_location(location *loc, std::string str)
 				std::cout<<"Error from location url"<<std::endl;
 			delete [] ss;
     	}
-		if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
+		else if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("autoindex") - 1)];
@@ -281,7 +280,20 @@ void parsing::check_location(location *loc, std::string str)
 			else
 				loc->auto_index = false;
 		}
-		if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
+        else if (!strncmp(ptr.c_str(), "return", strlen("return")))
+		{
+            j = 0;
+			ss = new char [ptr.size() - (strlen("return") - 1)];
+        	for (int i = strlen("return"); i < ptr.size() ; i++)
+        	    ss[j++] = ptr[i];
+        	ss[j] = '\0';
+			ptr = static_cast<std::string>(ss);
+			ptr = trim(ptr);
+            fill_return(loc, ptr);
+            delete [] ss;
+		}
+        
+		else if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("allow_methods") - 1)];
@@ -300,7 +312,7 @@ void parsing::check_location(location *loc, std::string str)
             delete [] ss;
 		}
 
-        if (!strncmp(ptr.c_str(), "root", strlen("root")))
+        else if (!strncmp(ptr.c_str(), "root", strlen("root")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("root") - 1)];
@@ -312,7 +324,7 @@ void parsing::check_location(location *loc, std::string str)
             loc->root_locaton = ptr;
             delete [] ss;
 		}
-        if (!strncmp(ptr.c_str(), "index", strlen("index")))
+        else if (!strncmp(ptr.c_str(), "index", strlen("index")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("index") - 1)];
@@ -324,7 +336,7 @@ void parsing::check_location(location *loc, std::string str)
             fill_index(loc, ptr);
             delete [] ss;
 		}
-        if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
+        else if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
 		{
             j =0;
 			ss = new char [ptr.size() - (strlen("cgi_pass") - 1)];
@@ -335,7 +347,12 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = trim(ptr);
             fill_cgi(loc, ptr);
             delete [] ss;
-    	}    
+    	}
+        else
+        {
+            std::cout<<"|----------|"<<flag<<"|----------|"<<ptr<<std::endl;
+           flag++;
+        }
 	}
     
 }
@@ -362,29 +379,20 @@ void parsing::check_server(s_parsing *pars, int len)
             size_t found;
             found = pars->serv[i]->server[j].find("listen");
             if (found != std::string::npos)
-            {
                 check_listen(pars->serv[i], pars->serv[i]->server[j]);
-            }
             found = pars->serv[i]->server[j].find("server_name");
             if (found != std::string::npos)
-            {
                 check_server_name(pars->serv[i], pars->serv[i]->server[j]);
-            }
             found = pars->serv[i]->server[j].find("max_client_body_size");
             if (found != std::string::npos)
-            {
                 check_max_client(pars->serv[i], pars->serv[i]->server[j]);
-            }
             found = pars->serv[i]->server[j].find("error_page");
             if (found != std::string::npos)
-            {
                 check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
-            }
             found = pars->serv[i]->server[j].find("location");
             if (found != std::string::npos)
             {
                 pars->serv[i]->loc[num] = new location();
-                // pars->serv[i]->loc[num]->auto_index = 0;
                 for (int k = j; k < pars->serv[i]->server.size() ; k++)
                 {
                     size_t trouv = pars->serv[i]->server[k].find("]");
@@ -439,9 +447,4 @@ void  parsing::check_key(s_parsing *pars)
     pars->num_serv = k;
     check_server(pars, k);
     
-}
-
-std::vector<std::string>  parsing::get_vec()
-{
-    return this->vec;
 }

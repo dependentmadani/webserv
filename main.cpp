@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/04 10:54:32 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/06 17:32:02 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,5 +34,5 @@ int main(int ac, char **av)
     }
     else
         std::cout<<"Error from number of arguments "<<std::endl;
-           
+        // system("leaks webserv");       
 }

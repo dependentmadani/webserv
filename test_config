@@ -5,7 +5,8 @@ server
     server_name			server_1
     max_client_body_size  42949672
     error_page 404 public/errors/404.html
-    location  / {
+    location  / 
+    {
         allow_methods GET POST DELETE
         redirect https://www.facebook.com/
         autoindex on
@@ -15,7 +16,8 @@ server
         cgi_pass php ./cgi-bin/php-cgi
         cgi_pass py /usr/local/bin/python3
     }
-    location /planet {
+    location /planet 
+    {
         allow_methods GET POST
         autoindex on
         root ./public/planet
@@ -23,11 +25,13 @@ server
         cgi_pass php ./cgi-bin/php-cgi
     }
 
-	location /planet/image {
+	location /planet/image 
+    {
         allow_methods GET 
         autoindex on
         root ./public
 		index index.html
         cgi_pass php ./cgi-bin/php-cgi
+        
     }
 }
