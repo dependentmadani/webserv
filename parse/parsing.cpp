@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/06 17:42:30 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/07 16:15:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,15 +242,15 @@ void parsing::check_location(location *loc, std::string str)
 {
     char *ss;
     int  j = 0;
-    int flag = 0;
+    int flag = 2;
 	std::string ptr;
+    loc->location_flag =0;
+    
 	for (int i = 0; i < loc->location.size() ; i++)
     {
-		std::string ptr = trim(loc->location[i]);
-		if (!strncmp(ptr.c_str(), "[", strlen("[]")))
-    	{
-            
-    	}
+
+        if (!isWhitespace(loc->location[i]))
+            ptr = trim(loc->location[i]);
 		if (!strncmp(ptr.c_str(), "location", strlen("location")))
     	{
             j = 0;
@@ -264,8 +264,9 @@ void parsing::check_location(location *loc, std::string str)
 			if(found == std::string::npos)
 				std::cout<<"Error from location url"<<std::endl;
 			delete [] ss;
+            flag++;
     	}
-		else if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
+		if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("autoindex") - 1)];
@@ -275,12 +276,13 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = static_cast<std::string>(ss);
 			ptr = trim(ptr);
             delete [] ss;
+            flag++;
 			if (!strcmp(ptr.c_str(), "on"))
 				loc->auto_index = true;
 			else
 				loc->auto_index = false;
 		}
-        else if (!strncmp(ptr.c_str(), "return", strlen("return")))
+        if (!strncmp(ptr.c_str(), "return", strlen("return")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("return") - 1)];
@@ -291,9 +293,10 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = trim(ptr);
             fill_return(loc, ptr);
             delete [] ss;
+            flag++;
 		}
         
-		else if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
+		if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("allow_methods") - 1)];
@@ -310,9 +313,9 @@ void parsing::check_location(location *loc, std::string str)
 					std::cout<< "Error from methodes" <<std::endl;
 			}
             delete [] ss;
+            flag++;
 		}
-
-        else if (!strncmp(ptr.c_str(), "root", strlen("root")))
+        if (!strncmp(ptr.c_str(), "root", strlen("root")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("root") - 1)];
@@ -323,8 +326,9 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = trim(ptr);
             loc->root_locaton = ptr;
             delete [] ss;
+            flag++;
 		}
-        else if (!strncmp(ptr.c_str(), "index", strlen("index")))
+        if (!strncmp(ptr.c_str(), "index", strlen("index")))
 		{
             j = 0;
 			ss = new char [ptr.size() - (strlen("index") - 1)];
@@ -335,10 +339,11 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = trim(ptr);
             fill_index(loc, ptr);
             delete [] ss;
+            flag++;
 		}
-        else if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
+        if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
 		{
-            j =0;
+            j = 0;
 			ss = new char [ptr.size() - (strlen("cgi_pass") - 1)];
         	for (int i = strlen("cgi_pass"); i < ptr.size() ; i++)
         	    ss[j++] = ptr[i];
@@ -347,14 +352,17 @@ void parsing::check_location(location *loc, std::string str)
 			ptr = trim(ptr);
             fill_cgi(loc, ptr);
             delete [] ss;
+            flag++;
     	}
-        else
+        if (isWhitespace(loc->location[i]))
         {
-            std::cout<<"|----------|"<<flag<<"|----------|"<<ptr<<std::endl;
-           flag++;
+            loc->location_flag++;
+            flag++;
         }
 	}
-    
+    //  std::cout<<flag<<"|++++++++|"<<loc->location_flag<<std::endl;
+    // if (flag != loc->location.size())
+    //     std::cout<<"ERROR FROM LOCATION "<<std::endl;
 }
 
 void parsing::check_server(s_parsing *pars, int len)
@@ -374,21 +382,37 @@ void parsing::check_server(s_parsing *pars, int len)
     for (int i = 0; i < len ; i++)
     {
         int num = 0;
+        int flag = 2;
+        pars->serv[i]->server_flag = 0;
         for (int j = 0; j < pars->serv[i]->server.size(); j++)
         {
             size_t found;
+            if (isWhitespace(pars->serv[i]->server[j]))
+                flag++;
             found = pars->serv[i]->server[j].find("listen");
             if (found != std::string::npos)
+            {
                 check_listen(pars->serv[i], pars->serv[i]->server[j]);
+                flag++;
+            }
             found = pars->serv[i]->server[j].find("server_name");
             if (found != std::string::npos)
+            {
                 check_server_name(pars->serv[i], pars->serv[i]->server[j]);
+                flag++;
+            }
             found = pars->serv[i]->server[j].find("max_client_body_size");
             if (found != std::string::npos)
-                check_max_client(pars->serv[i], pars->serv[i]->server[j]);
+            {
+               check_max_client(pars->serv[i], pars->serv[i]->server[j]);
+                flag++;
+            }   
             found = pars->serv[i]->server[j].find("error_page");
             if (found != std::string::npos)
+            {
                 check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
+                flag++;
+            }
             found = pars->serv[i]->server[j].find("location");
             if (found != std::string::npos)
             {
@@ -403,15 +427,22 @@ void parsing::check_server(s_parsing *pars, int len)
                     }
                     else
                         pars->serv[i]->loc[num]->location.push_back(pars->serv[i]->server[k]);
+                    flag++;
                 }
                 check_location(pars->serv[i]->loc[num], pars->serv[i]->server[j]);
+                pars->serv[i]->server_flag += pars->serv[i]->loc[num]->location_flag;
                 pars->serv[i]->num_location  = ++num;
             }
-            
             pars->serv[i]->server[j].erase(std::remove_if(pars->serv[i]->server[j].begin(),pars->serv[i]->server[j].end(), whitespace), pars->serv[i]->server[j].end());
-            if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1))
+            if (!strncmp(pars->serv[i]->server[j].c_str(), "}", 1) && j == pars->serv[i]->server.size()-1)
+            {
+                flag++;
                 break;
+            }
         }
+        std::cout<<flag - pars->serv[i]->server_flag<<"|++++++++|"<<flag<<std::endl;
+          if ((flag - pars->serv[i]->server_flag)!= pars->serv[i]->server.size())
+            std::cout<<"ERROR FROM SERVER "<<std::endl;
     }
 }
 
@@ -419,13 +450,21 @@ void  parsing::check_key(s_parsing *pars)
 {
     int k = 0;
     pars->serv = new t_server*[pars->vec.size()];
-    pars->num_serv =0;
+    pars->num_serv = 0;
+    int flag = 0;
+    int jojo =0;
     for(int i=0;i < pars->vec.size() ;i++)
     {
+        
         pars->vec[i].erase(std::remove_if(pars->vec[i].begin(), pars->vec[i].end(), whitespace), pars->vec[i].end());
-        if (!strcmp(pars->vec[i].c_str(), "server") || pars->vec[i] == "\0")
-        {
-            if(!strcmp(pars->vec[i].c_str(), "server"))
+        // if (!strcmp(pars->vec[i].c_str(), "server") || pars->vec[i] == "\0")
+        // {
+            if (isWhitespace(pars->vec[i]))
+            {
+                // std::cout<< flag << "|-------|"<<pars->vec[i]<<std::endl;
+                flag++;
+            }
+            else if(!strcmp(pars->vec[i].c_str(), "server"))
             {
                 pars->serv[k] = new t_server();
                 for(int j = i+1; j < pars->vec.size() ;j++)
@@ -437,12 +476,15 @@ void  parsing::check_key(s_parsing *pars)
                     }
                     else
                         pars->serv[k]->server.push_back(pars->vec[j]);
+                    flag++;
+                    jojo = j;
                 }
                 k++;
             }
-        }
-        // else
-        //     std::cout<< i << " Error "<<std::endl;
+        //    if (flag != i)
+        //     std::cout<<"|--------|"<<pars->vec[i]<<std::endl;
+            
+        // }
     }
     pars->num_serv = k;
     check_server(pars, k);

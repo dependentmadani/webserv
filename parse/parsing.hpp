@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/06 17:32:25 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/07 16:00:37 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_location
     std::string return_url;
     int num_return;
     bool auto_index;
+    int location_flag;
     
 } location;
 
@@ -48,6 +49,7 @@ typedef struct s_server
     std::vector<int>  error_num;
     std::vector<int>  lent_server;
     location **loc;
+    int server_flag;
 } t_server;
 
 
