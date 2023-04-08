@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/07 16:00:37 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/08 15:36:33 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,24 +53,24 @@ typedef struct s_server
 } t_server;
 
 
-
-
 typedef struct s_parsing
 {
     private:
     // std::vector<std::string> server_name;
     public:
     int num_serv;
+    int pars_flag;
+    int count_flag;
     std::vector<std::string> vec;
     t_server **serv;
     void    copy_file(s_parsing *pars, std::string ptr);
     void    check_key(s_parsing *pars);
-    void check_server(s_parsing *pars, int len);
+    void check_server(s_parsing *pars, size_t len);
     void check_listen(t_server *pars, std::string str);
     void check_server_name(t_server *serv, std::string str);
     void check_error_pages(t_server *serv, std::string str);
     void check_max_client(t_server *serv, std::string str);
-    void check_location(location *loc, std::string str);
+    void check_location(location *loc);
     std::string trim(const std::string& str);
     
 } parsing;
