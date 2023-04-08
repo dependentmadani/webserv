@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/08 15:42:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/08 17:03:54 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,7 +240,7 @@ void parsing::check_location(location *loc)
     size_t  j = 0;
     size_t flag = 2;
     std::string ptr;
-    loc->location_flag =0;
+    loc->location_flag = 0;
     
     for (size_t i = 0; i < loc->location.size() ; i++)
     {
@@ -351,10 +351,7 @@ void parsing::check_location(location *loc)
             flag++;
         }
         if (isWhitespace(loc->location[i]))
-        {
             loc->location_flag++;
-            flag++;
-        }
     }
     if (flag != loc->location.size())
     {
@@ -410,7 +407,7 @@ void parsing::check_server(s_parsing *pars, size_t len)
                 pars->serv[i]->loc[num] = new location();
                 for (size_t k = j; k < pars->serv[i]->server.size() ; k++)
                 {
-                    size_t trouv = pars->serv[i]->server[k].find("]");
+                    size_t trouv = pars->serv[i]->server[k].find("}");
                     if (trouv != std::string::npos)
                     {
                         pars->serv[i]->loc[num]->location.push_back(pars->serv[i]->server[k]);
@@ -482,7 +479,5 @@ void  parsing::check_key(s_parsing *pars)
     {
      std::cout<<"ERROR FROM PARS "<<std::endl;
      exit(0);
-    } 
-   
-    
+    }
 }
