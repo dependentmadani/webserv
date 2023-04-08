@@ -20,12 +20,17 @@
 # include <map>
 # include <sys/stat.h>
 
+# define DIRECTORY  5
+# define FILE       4
+# define ERROR      -1
+
 class Request {
 
     private:
         Server                              _server;
         s_parsing                          *_parse;
         int                                 _http_status;
+        int                                 _file_directory_check;
         std::vector<std::string>            _file_name_path;
         std::string                         _first_liner_header;
         std::string                         _method;
@@ -54,8 +59,17 @@ class Request {
         int     is_method_allowed_in_location();
         int     GET_method();
         int     get_request_resource();
+        int     get_resource_type();
+        int     if_location_has_cgi();
         int     POST_method();
         int     DELETE_method();
+
+        int     Is_directory();
+        int     is_uri_has_backslash_in_end();
+        int     is_dir_has_index_files();
+        bool    get_auto_index();
+
+        int     Is_file();
 
         //function to check in the header
         int     is_available(std::string, std::string);
@@ -63,6 +77,8 @@ class Request {
         int     url_characters_checker();
         void    print_parse_vector();
         std::string remove_space(std::string tmp);
+        //get the file_name_path value
+        void    reform_requestPath_locationPath();
 
 
         std::map<int, std::string>          http_code;

@@ -36,6 +36,7 @@ int     Request::ParseRequest(char *request_message)
         _http_status = 405;
         return ft_http_status(getHttpStatus());
     }
+    this->reform_requestPath_locationPath();
     // print_parse_vector();
     return 0;
 }
@@ -54,26 +55,111 @@ int Request::UseMethod()
 int Request::GET_method()
 {
     this->get_request_resource();
+    if (this->get_resource_type() == DIRECTORY)
+        return this->Is_directory();
+    else if (this->get_resource_type() == FILE)
+        return this->Is_file();
     return 0;
 }
 
 int Request::get_request_resource()
 {
-    // std::ifstream ifs;
-    // std::string file_name_path;
     struct stat stat_buff;
-    stat_buff.st_mode = S_ISREG(S_IRUSR); // S_ISREG Is nonzero for regular files, and S_IRUSR is for read permision for file owner
 
-    for (size_t i = 0; i < _file_name_path.size() ; ++i)
+    for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end() ; ++b)
     {
-        int stat_return = stat(_file_name_path[i].c_str(), &stat_buff);
+        int stat_return = stat((*b).c_str(), &stat_buff);
         if (stat_return != -1)
         {
-            std::cout << "the file is available " << _file_name_path[i] << std::endl;
-            break ;
+            std::cout << "the file is available " << *(b) << std::endl;
+        }
+        else
+        {
+            _file_name_path.erase(b);
+            b = _file_name_path.begin();
         }
     }
     return 0;
+}
+
+int     Request::if_location_has_cgi()
+{
+    
+}
+
+int    Request::Is_directory()
+{
+    if (is_uri_has_backslash_in_end())
+    {
+        if ( is_dir_has_index_files() )
+        {
+            if ( get_auto_index() )
+            {
+                _http_status = 403;
+                return ft_http_status(getHttpStatus());
+            }
+            else
+            {
+                //build an autoindex page in response.
+                _http_status = 200;
+                return ft_http_status(getHttpStatus());
+            }
+        }
+        else
+        {
+
+        }
+    }
+    else
+    {
+        //redirect the request by adding "/" to the request path.
+        _http_status = 301;
+        return ft_http_status(getHttpStatus());
+    }
+}
+
+int     Request::is_uri_has_backslash_in_end()
+{
+    if (_path[_path.size() - 1] == '/' && _path.size() != 1)
+        return 1;
+    return 0;
+}
+
+int     Request::is_dir_has_index_files()
+{
+    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    {
+        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        {
+            if (!_parse->serv[0]->loc[i]->index.empty())
+                return 1;
+        }
+    }
+    return 0;
+}
+
+bool Request::get_auto_index()
+{
+    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    {
+        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        {
+            return _parse->serv[0]->loc[i]->auto_index;
+        }
+    }
+    return false;
+}
+
+int    Request::Is_file()
+{
+
+}
+
+int Request::get_resource_type()
+{
+    return _file_directory_check;
 }
 
 int Request::POST_method()
@@ -200,27 +286,10 @@ int Request::get_matched_location_for_request_uri()
     bool check_availability = false;
     for (size_t i = 0; i < number_of_location; ++i)
     {
-        int size_for_path = _parse->serv[0]->loc[i].url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i].url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i].url_location)
+        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
         {
-            if (!_parse->serv[0]->loc[i].root_locaton.empty())
-            {
-                if (!_parse->serv[0]->loc[i].index.empty())
-                {
-                    for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i].index.size(); ++index_indexes)
-                    {
-                        _file_name_path.push_back(_parse->serv[0]->loc[i].root_locaton + "/" + _parse->serv[0]->loc[i].index[index_indexes]);
-                    }
-                }
-                else
-                {
-                    //add with the global root if available coming from parse
-                }
-            }
-            else
-            {
-                //until i receive the global root and index coming from parse
-            }
+            check_availability = true;
         }
     }
     if (!check_availability)
@@ -233,13 +302,13 @@ int Request::get_matched_location_for_request_uri()
 
 int Request::is_location_have_redirection()
 {
-    for (size_t i = 0; i < _parse->serv[0]->loc->location.size(); ++i)
+    for (size_t i = 0; i < _parse->serv[0]->loc[1]->location.size(); ++i)
     {
-        if (_parse->serv[0]->loc->location[i].find("return 301") != std::string::npos)
+        if (_parse->serv[0]->loc[1]->location[i].find("return 301") != std::string::npos)
         {
-            size_t position_of_return = _parse->serv[0]->loc->location[i].find("return 301") + 10;
+            size_t position_of_return = _parse->serv[0]->loc[1]->location[i].find("return 301") + 10;
             _http_status = 301;
-            _path = _parse->serv[0]->loc->location[i].substr(position_of_return, _parse->serv[0]->loc->location[i].size());
+            _path = _parse->serv[0]->loc[1]->location[i].substr(position_of_return, _parse->serv[0]->loc[1]->location[i].size());
             _path = remove_space(_path);
             return ft_http_status(getHttpStatus());
         }
@@ -249,12 +318,62 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-    for (size_t i = 0; i < _parse->serv[0]->loc->methods.size(); ++i)
+    for (size_t i = 0; i < _parse->serv[0]->loc[1]->methods.size(); ++i)
     {
-        if (this->getMethod() == _parse->serv[0]->loc->methods[i])
+        if (this->getMethod() == _parse->serv[0]->loc[1]->methods[i])
             return 0;
     }
     return 1;
+}
+
+void    Request::reform_requestPath_locationPath()
+{
+    std::string get_root;
+    struct stat stat_buff;
+
+    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    {
+        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
+        // std::cout << "size of url_location: " << _parse->serv[0]->loc[i]->url_location.size() << ", size of request path: " << getPath().size() << " " << getPath() << std::endl;
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        {
+            if (this->getPath()[_parse->serv[0]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
+                get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size() + 1, this->getPath().size());
+            else if (this->getPath().size() == 1)
+                get_root = this->getPath();
+            else
+                get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size(), this->getPath().size());
+            while (get_root[get_root.size() - 1] == '/' && this->getPath().size() != 1)
+            {
+                get_root.resize(get_root.size() - 1);
+            }
+            std::string complete_path = _parse->serv[0]->loc[i]->root_location + "/" + get_root;
+            while (complete_path[complete_path.size() - 1] == '/')
+            {
+                complete_path.resize(complete_path.size() - 1);
+            }
+            stat(complete_path.c_str(), &stat_buff);
+            // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
+            if (S_ISDIR(stat_buff.st_mode))
+            {
+                if (!_parse->serv[0]->loc[i]->index.empty())
+                {
+                    _file_directory_check = DIRECTORY;
+                    for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i]->index.size(); ++index_indexes)
+                    {
+                        _file_name_path.push_back(complete_path + "/" + _parse->serv[0]->loc[i]->index[index_indexes]);
+                    }
+                }
+            }
+            else if (S_ISREG(stat_buff.st_mode))
+            {
+                _file_directory_check = FILE;
+                _file_name_path.push_back(complete_path);
+            }
+            else
+                _file_directory_check = ERROR;
+        }
+    }
 }
 
 /*
@@ -528,5 +647,5 @@ void    Request::print_parse_vector()
     }
     std::cout << _parse->serv[0]->server_name << std::endl;
     std::cout << _parse->serv[0]->max_client << std::endl;
-    std::cout << _parse->serv[0]->loc[0].url_location << std::endl;
+    std::cout << _parse->serv[0]->loc[1]->url_location << std::endl;
 }
