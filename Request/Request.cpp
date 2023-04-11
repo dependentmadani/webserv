@@ -84,7 +84,7 @@ int Request::get_request_resource()
 
 int     Request::if_location_has_cgi()
 {
-    
+    return 0;
 }
 
 int    Request::Is_directory()
@@ -116,6 +116,7 @@ int    Request::Is_directory()
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
+    return 0;
 }
 
 int     Request::is_uri_has_backslash_in_end()
@@ -154,7 +155,7 @@ bool Request::get_auto_index()
 
 int    Request::Is_file()
 {
-
+    return 0;
 }
 
 int Request::get_resource_type()
