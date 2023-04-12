@@ -1,0 +1,14 @@
+<!-- * Complete get_matched_location_for_request_uri() function, when i receive the global variables of root and index. -->
+
+<!-- * Check if there is redirection file, to use it instead of root with index -->
+
+<!-- * reform the file_name_path, to check _path and replace the prefix with root (depending on location path)
+get_matched_location_for_request_uri() function. -->
+
+<!-- * Should check the received _path from request, if it is a directory or a file. -->
+
+<!-- * if there is a specified file in path in request, use it instead of index -->
+
+* work with CGI in get method
+
+* build an autoindex page in response.
