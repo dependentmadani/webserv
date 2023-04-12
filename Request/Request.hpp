@@ -31,6 +31,7 @@ class Request {
         s_parsing                          *_parse;
         int                                 _http_status;
         int                                 _file_directory_check;
+        int                                 _location_index;
         std::vector<std::string>            _file_name_path;
         std::string                         _first_liner_header;
         std::string                         _method;

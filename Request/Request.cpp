@@ -14,6 +14,7 @@
 
 Request::Request() : _method(), _path(), _protocol() ,_header(), http_code(), allowed_methods()
 {
+    _location_index = 0;
     _http_status = 0;
 }
 
@@ -54,12 +55,16 @@ int Request::UseMethod()
 
 int Request::GET_method()
 {
-    this->get_request_resource();
+    if (this->get_request_resource())
+    {
+        _http_status = 404;
+        return this->ft_http_status(getHttpStatus());
+    }
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
         return this->Is_file();
-    return 0;
+    return 1;
 }
 
 int Request::get_request_resource()
@@ -72,26 +77,34 @@ int Request::get_request_resource()
         if (stat_return != -1)
         {
             std::cout << "the file is available " << *(b) << std::endl;
+            return 0;
         }
-        else
-        {
-            _file_name_path.erase(b);
-            b = _file_name_path.begin();
-        }
+        // else
+        // {
+        //     _file_name_path.erase(b);
+        //     b = _file_name_path.begin();
+        // }
     }
-    return 0;
+    return 1;
 }
 
 int     Request::if_location_has_cgi()
 {
-    return 0;
+    if (_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
+    {
+        _http_status = 200;
+        return ft_http_status(getHttpStatus());
+    }
+    //call the constructor of cgi, than get the data from cgi. All of that as an else condition
+    _http_status = 0; //to check depends on cgi
+    return ft_http_status(getHttpStatus());
 }
 
 int    Request::Is_directory()
 {
     if (is_uri_has_backslash_in_end())
     {
-        if ( is_dir_has_index_files() )
+        if ( !is_dir_has_index_files() )
         {
             if ( get_auto_index() )
             {
@@ -107,7 +120,8 @@ int    Request::Is_directory()
         }
         else
         {
-
+            //if this directory has an index file, it should check for cgi in location
+            return this->if_location_has_cgi();
         }
     }
     else
@@ -121,7 +135,7 @@ int    Request::Is_directory()
 
 int     Request::is_uri_has_backslash_in_end()
 {
-    if (_path[_path.size() - 1] == '/' && _path.size() != 1)
+    if (_path[_path.size() - 1] == '/')
         return 1;
     return 0;
 }
@@ -155,7 +169,7 @@ bool Request::get_auto_index()
 
 int    Request::Is_file()
 {
-    return 0;
+    return this->if_location_has_cgi();
 }
 
 int Request::get_resource_type()
@@ -165,6 +179,7 @@ int Request::get_resource_type()
 
 int Request::POST_method()
 {
+    
     return 0;
 }
 
@@ -338,6 +353,7 @@ void    Request::reform_requestPath_locationPath()
         // std::cout << "size of url_location: " << _parse->serv[0]->loc[i]->url_location.size() << ", size of request path: " << getPath().size() << " " << getPath() << std::endl;
         if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
         {
+            _location_index = i;
             if (this->getPath()[_parse->serv[0]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
                 get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size() + 1, this->getPath().size());
             else if (this->getPath().size() == 1)
