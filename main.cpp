@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/23 15:53:51 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/12 14:27:49 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ int main(int ac, char **av)
     close(server.getServerFd());
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
+
     request.UseMethod();
+    // request.is_location_has_cgi();
     return (0);
 }

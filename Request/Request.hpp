@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/27 12:16:51 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/04/12 12:28:28 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,16 @@ class Request {
         //get the file_name_path value
         void    reform_requestPath_locationPath();
 
+        /* POST */
+        int     upload_post_request();
+        bool    location_support_upload();
+        int     If_is_directory();
+        bool    is_location_has_cgi();
+        int     request_post_run_cgi();
+        int     If_is_file();
 
+
+        
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;

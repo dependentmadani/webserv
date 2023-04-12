@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/27 12:16:45 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/04/12 14:30:38 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ Request::~Request()
 int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
-
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
     if (check_method_protocol())
@@ -54,7 +53,11 @@ int Request::UseMethod()
 
 int Request::GET_method()
 {
-    this->get_request_resource();
+    if (!get_request_resource())
+    {
+        _http_status = 404;
+        return ft_http_status(getHttpStatus());
+    }
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
@@ -72,6 +75,7 @@ int Request::get_request_resource()
         if (stat_return != -1)
         {
             std::cout << "the file is available " << *(b) << std::endl;
+            return 1;
         }
         else
         {
@@ -163,10 +167,6 @@ int Request::get_resource_type()
     return _file_directory_check;
 }
 
-int Request::POST_method()
-{
-    return 0;
-}
 
 int Request::DELETE_method()
 {
@@ -649,4 +649,89 @@ void    Request::print_parse_vector()
     std::cout << _parse->serv[0]->server_name << std::endl;
     std::cout << _parse->serv[0]->max_client << std::endl;
     std::cout << _parse->serv[0]->loc[1]->url_location << std::endl;
+}
+
+int Request::POST_method()
+{
+    if (location_support_upload())
+        upload_post_request();
+    else
+    {
+        if (get_request_resource())
+        {
+            if (this->get_resource_type() == DIRECTORY)
+                return this->If_is_directory();
+            else if (this->get_resource_type() == FILE)
+                return this->If_is_file();
+        }
+        else
+        {
+            _http_status = 404;
+            return ft_http_status(getHttpStatus());
+        }  
+    }
+    return 0;
+}
+int Request::upload_post_request()
+{
+    _http_status = 201;
+    return ft_http_status(getHttpStatus());
+}
+
+bool Request::location_support_upload()
+{
+    return true;
+    return false;
+}
+int Request::If_is_file()
+{
+    if (is_location_has_cgi())
+        request_post_run_cgi();
+    else
+    {
+        _http_status = 403;
+        return ft_http_status(getHttpStatus()); 
+    }
+    return (0);
+}
+
+
+int    Request::If_is_directory()
+{
+    if (is_uri_has_backslash_in_end())
+    {
+        if ( is_dir_has_index_files() )
+        {
+            if (is_location_has_cgi())
+                request_post_run_cgi();
+            else
+            {
+                _http_status = 403;
+                return ft_http_status(getHttpStatus()); 
+            }
+        }
+        else
+        {
+            _http_status = 404;
+            return ft_http_status(getHttpStatus());     
+        }
+    }
+    else
+    {
+        _http_status = 301;
+        return ft_http_status(getHttpStatus());
+    }
+    return 0;
+}
+bool Request::is_location_has_cgi()
+{
+    if (this->_parse->serv[0]->loc[0]->cgi_pass.size())
+    {
+        return true;
+    }
+    return false;
+}
+int     Request::request_post_run_cgi()
+{
+   return (0);
 }
