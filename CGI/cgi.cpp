@@ -10,4 +10,18 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "cgi.hpp"
 
+cgi::cgi()
+{}
+
+cgi::~cgi()
+{}
+
+cgi::cgi(std::string code, Request request, std::string body)
+{
+    
+}
+
+std::string get_data()
+{}
