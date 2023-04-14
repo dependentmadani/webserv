@@ -6,11 +6,12 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/12 14:30:38 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/14 14:06:12 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include "../cgi-bin/cgi.hpp"
 
 Request::Request() : _method(), _path(), _protocol() ,_header(), http_code(), allowed_methods()
 {
@@ -111,7 +112,7 @@ int    Request::Is_directory()
         }
         else
         {
-
+            
         }
     }
     else
@@ -733,5 +734,8 @@ bool Request::is_location_has_cgi()
 }
 int     Request::request_post_run_cgi()
 {
-   return (0);
+    // CGI cgi;
+    // cgi.fill_cgi(this->_parse->serv[0]->loc[0]);
+    
+    return (0);
 }

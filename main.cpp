@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/12 14:27:49 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/14 17:24:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Server/Server.hpp"
 #include "Request/Request.hpp"
 #include "parse/parsing.hpp"
-
+#include "./cgi-bin/cgi.hpp"
 int main(int ac, char **av)
 {
     std::ifstream file;
@@ -54,8 +54,12 @@ int main(int ac, char **av)
     close(server.getServerFd());
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
-
     request.UseMethod();
+    CGI cgi;
+    std::string str = "script.pl";
+    cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
+    
+    cgi.handle_cgi_request(3);
     // request.is_location_has_cgi();
     return (0);
 }

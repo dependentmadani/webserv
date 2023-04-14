@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/25 12:09:05 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/04/14 17:21:37 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,6 @@ int    Server::recv_data(struct pollfd *poll)
 	std::cout << "\n\n" << "===============   "  << data << " BYTES  RECEIVED   ===============\n";
 	std::cout << _buffer;
 	std::cout << "\n======================================================" << std::endl;
-
 	return (data);
 }
 
