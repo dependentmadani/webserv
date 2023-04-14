@@ -19,6 +19,9 @@
 # include <iostream>
 # include <map>
 # include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/dir.h>
+# include <unistd.h>
 
 # define DIRECTORY  5
 # define FILE       4
@@ -31,7 +34,9 @@ class Request {
         s_parsing                          *_parse;
         int                                 _http_status;
         int                                 _file_directory_check;
+        int                                 _location_index;
         std::vector<std::string>            _file_name_path;
+        std::string                         _directory_path;
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
@@ -65,9 +70,13 @@ class Request {
         int     DELETE_method();
 
         int     Is_directory();
+        int     Is_directory_for_DELETE();
+        int     Is_file_for_DELETE();
         int     is_uri_has_backslash_in_end();
         int     is_dir_has_index_files();
         bool    get_auto_index();
+        int     delete_all_folder_content(std::string, int);
+        int     has_write_access_on_folder();
 
         int     Is_file();
 
