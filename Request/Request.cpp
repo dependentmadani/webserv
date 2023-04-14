@@ -88,11 +88,13 @@ int     Request::if_location_has_cgi()
     if (_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
     {
         _http_status = 200;
-        return ft_http_status(getHttpStatus());
+        ft_http_status(getHttpStatus());
+        return 0;
     }
     //call the constructor of cgi, than get the data from cgi. All of that as an else condition
     _http_status = 0; //to check depends on cgi
-    return ft_http_status(getHttpStatus());
+    ft_http_status(getHttpStatus());
+    return 1;
 }
 
 int    Request::Is_directory()
@@ -188,9 +190,7 @@ int Request::DELETE_method()
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory_for_DELETE();
     else if (this->get_resource_type() == FILE)
-    {
-
-    }
+        return this->Is_file_for_DELETE();
     return 0;
 }
 
@@ -216,15 +216,25 @@ int    Request::Is_directory_for_DELETE()
         else
         {
             //delete all folder content
-            if (this->delete_all_folder_content())
+            if (this->delete_all_folder_content(_directory_path, DIRECTORY))
             {
-                std::cout << "well, all is good" << std::endl;
+                // std::cout << "well, all is good" << std::endl;
                 _http_status = 204;
                 return ft_http_status(getHttpStatus());
             }
             else
             {
-                std::cout << "those things are not good" << std::endl;
+                // std::cout << "those things are not good" << std::endl;
+                if (this->has_write_access_on_folder())
+                {
+                    _http_status = 500;
+                    return ft_http_status(getHttpStatus());
+                }
+                else
+                {
+                    _http_status = 403;
+                    return ft_http_status(getHttpStatus());
+                }
             }
         }
     }
@@ -237,33 +247,71 @@ int    Request::Is_directory_for_DELETE()
     return 0;
 }
 
-int Request::delete_all_folder_content()
+int Request::Is_file_for_DELETE()
+{
+    if (this->if_location_has_cgi())
+    {
+        std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
+        //nothing to do here for the moment. waiting for cgi to be done.
+        //return code depend on cgi
+    }
+    else
+    {
+        std::cout << "was here to delete" << std::endl;
+        return this->delete_all_folder_content(_file_name_path[0], FILE);
+    }
+    return 0;
+}
+
+int Request::delete_all_folder_content(std::string folder_file, int type)
 {
     DIR *dir;
     struct dirent *ent;
 
-    if ((dir = opendir(_directory_path.c_str())) != NULL) {
+    if ((dir = opendir(folder_file.c_str())) != NULL) {
       /* print all the files and directories within directory */
         while ((ent = readdir (dir)) != NULL) {
-        // if (!strcmp(ent->d_name, ".") && !strcmp(ent->d_name, ".."))
-        // {
-            std::string tmp = _directory_path + "/" + ent->d_name;
-            std::cout << "the file is: " << tmp << std::endl;
-            if (!std::remove(tmp.c_str())) {
-                std::cout << "well removed" << std::endl;
-            }
-            else {
-                if (strcmp(ent->d_name, ".") || strcmp(ent->d_name, ".."))
-                {
-                    std::cout << "something wrong: " << ent->d_name << std::endl;
+
+            if ((!strcmp(ent->d_name, ".") || strcmp(ent->d_name, "..")) && (strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))) {
+                std::string tmp;
+                if (type == DIRECTORY)
+                    tmp = folder_file + "/" + ent->d_name;
+                else
+                    tmp = folder_file;
+                std::cout << "the file is: " << tmp << std::endl;
+                std::cout << "the file would be: " << ent->d_name << std::endl;
+                if (!std::remove(tmp.c_str())) {
+                    std::cout << "well removed file" << std::endl;
+                }
+                else {
+                    std::cout << "something wrong with file: " << ent->d_name << std::endl;
                     return 0;
                 }
             }
-        // }
-        // std::cout <<  ent->d_name << std::endl;
-      }
-      closedir (dir);
+        }
+        closedir (dir);
     }
+    else if (type == FILE)
+    {
+        std::cout << "I believe it reached here: " << folder_file << std::endl;
+        if (!std::remove(folder_file.c_str())) {
+            std::cout << "well removed the file" << std::endl;
+        }
+        else {
+            std::cout << "something wrong in file" << std::endl;
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int Request::has_write_access_on_folder()
+{
+    int check_access = 0;
+
+    check_access = access(_directory_path.c_str(), W_OK);
+    if ( check_access != 0 )
+        return 0;
     return 1;
 }
 
