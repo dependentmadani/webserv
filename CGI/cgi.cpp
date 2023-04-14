@@ -20,8 +20,10 @@ cgi::~cgi()
 
 cgi::cgi(std::string code, Request request, std::string body)
 {
-    
+    (void)code, (void)request, (void)body;
 }
 
 std::string get_data()
-{}
+{
+    return NULL;
+}
