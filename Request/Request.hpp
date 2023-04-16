@@ -43,6 +43,8 @@ class Request {
         std::string                         _protocol;
         std::string                         _body;
         std::map<std::string, std::string>  _header;
+        std::map<std::string, std::string>  _Response;
+        std::string                         _response_as_string;
 
 
     public:
@@ -98,6 +100,7 @@ class Request {
         std::string getPath() const;
         std::string getProtocol() const;
         std::string getHeader() const;
+        std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
 };
