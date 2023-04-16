@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 17:43:35 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/16 23:03:27 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
         }
     }
     char *str = getcwd(NULL, 0);
+    _pwd = str;
     std::string s = "SCRIPT_FILENAME=";
     s += str;
     s += "/cgi-bin";
@@ -124,22 +125,23 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
    _cgi_script = const_cast<char*> (serv->loc[0]->cgi_pass[1].c_str());
     
 }
+// void handle_cgi_request(char **env)
 void CGI::handle_cgi_request(Request& req,char **env)
 {
-    char **ptr =  new char *;
-    std::string hh = "script.sh";
-    char *pp = const_cast<char*> (hh.c_str());
+    char **ptr =  new char *[2];
+    std::string tmp = _pwd;
+    tmp +="/";
+    tmp += _cgi_script+2;
+    char *pp = const_cast<char*> (tmp.c_str());
     ptr[0] = pp;
     ptr[1] = NULL;
     
     std::stringstream ss;
-    (void)req;
     std::string str = ss.str();
     std::ofstream file("file.txt");
     file << req.getBody(); 
     file.close();
     int fd = open("file.txt", O_RDONLY, 644);
-    std::cout<<ptr[0]<<"|---------|" <<"|********|"<<req.getBody()<<std::endl;
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -156,9 +158,3 @@ void CGI::handle_cgi_request(Request& req,char **env)
     else 
         waitpid(pid, NULL, 0);
 }
-// int main(int ac , char **av, char **env)
-// {
-    
-//     std::string str = "script.pl";
-//     handle_cgi_request(str, env, 4, "POST");
-// }
