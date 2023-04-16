@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/14 14:04:22 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/15 14:15:23 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ class Request {
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
 
+        std::string getBody() const;
         std::string getMethod() const;
         std::string getPath() const;
         std::string getProtocol() const;
