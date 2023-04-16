@@ -1,11 +1,29 @@
-START -> _BLANK.START  | "server".Server | EOF
-Server -> _BLANK.Server | "{".ServerToken
-ServerToken -> _BLANK.ServerToken | _END_BRACE.START | _ServerListToken._Token.ServerToken | "location"._Token.Location
+<!-- * Complete get_matched_location_for_request_uri() function, when i receive the global variables of root and index. -->
 
-Location -> _BLANK.Location | "{".LocationToken
-LocationToken -> _BLANK.LocationToken | _END_BRACE.ServerToken | _LocationListToken._Token.LocationToken
-_ServerListToken -> "listen"|"server_name"|"max_client_body_size"|"error_page"
-_LocationListToken -> "allow_methods"|"redirect"|"auto_index"|"root"|"index"|"upload_pass"|"cgi_pass"
-_Token -> [\t|\v|\r|\f]+.[^\n{}]*
-_END_BRACE -> "}"
-_BLANK -> \n|\t|\v|\r|\f
+<!-- * Check if there is redirection file, to use it instead of root with index -->
+
+<!-- * reform the file_name_path, to check _path and replace the prefix with root (depending on location path)
+get_matched_location_for_request_uri() function. -->
+
+<!-- * Should check the received _path from request, if it is a directory or a file. -->
+
+<!-- * if there is a specified file in path in request, use it instead of index -->
+
+* work with CGI in get method
+
+* build an autoindex page in response.
+
+_metaVars["SERVER_PROTOCOL"] = clientInfo->getHeader().getProtocol();
+        _metaVars["SERVER_PORT"] = clientInfo->getServerConf().getService();
+        _metaVars["REQUEST_METHOD"] = clientInfo->getHeader().getRequestType();
+        _metaVars["PATH_INFO"] = clientInfo->getRequestedPath();
+        _metaVars["SCRIPT_FILENAME"] = clientInfo->geReqFileFullPath();
+        _metaVars["SCRIPT_NAME"] = clientInfo->getCGIPath();
+        _metaVars["QUERY_STRING"] = clientInfo->getHeader().getPath().getParams();
+        _metaVars["REMOTE_ADDR"] = clientInfo->getIpAddress();
+        _metaVars["REMOTE_PORT"] = clientInfo->getService();
+        _metaVars["REDIRECT_STATUS"] = "200";
+        if (clientInfo->getHeader().has("Content-type"))
+            _metaVars["CONTENT_TYPE"] = clientInfo->getHeader().valueOf("Content-type");
+        if (clientInfo->getHeader().has("Content-length"))
+            _metaVars["CONTENT_LENGTH"] = std::to_string(clientInfo->getContentLength());

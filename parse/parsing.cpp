@@ -254,9 +254,9 @@ void parsing::check_location(location *loc)
             for (size_t i = strlen("location"); i < ptr.size() ; i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
-            loc->url_locaton = static_cast<std::string>(ss);
-            loc->url_locaton = trim(loc->url_locaton);
-            size_t found= loc->url_locaton.find("/");
+            loc->url_location = static_cast<std::string>(ss);
+            loc->url_location = trim(loc->url_location);
+            size_t found= loc->url_location.find("/");
             if(found == std::string::npos)
                 std::cout<<"Error from location url"<<std::endl;
             delete [] ss;
@@ -320,7 +320,7 @@ void parsing::check_location(location *loc)
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
             ptr = trim(ptr);
-            loc->root_locaton = ptr;
+            loc->root_location = ptr;
             delete [] ss;
             flag++;
         }

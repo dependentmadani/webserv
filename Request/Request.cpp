@@ -6,11 +6,12 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/12 14:30:38 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/16 17:12:34 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include "../cgi-bin/cgi.hpp"
 
 Request::Request() : _method(), _path(), _protocol() ,_header(), http_code(), allowed_methods()
 {
@@ -23,6 +24,14 @@ Request::~Request()
 int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
+      
+    // std::cout<<"|||"<<std::endl;
+    // int j= 0;
+    // for(;splited_request[j];j++)
+    // {
+    //     // std::cout<<splited_request[j];
+    // }
+    // std::cout<<j<<"|--------|"<< splited_request[1] <<"|------|"<<std::endl;
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
     if (check_method_protocol())
@@ -111,7 +120,7 @@ int    Request::Is_directory()
         }
         else
         {
-
+            
         }
     }
     else
@@ -216,6 +225,8 @@ int    Request::HeaderRequest(char *request_message)
     // char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
 
     // splited_header = strtok_r(NULL, "\r\n", &tmp);
+
+    
     int i = 1;
     while (splited_header[i] != NULL)
     {
@@ -615,6 +626,12 @@ std::string Request::getProtocol() const
     return _protocol;
 }
 
+std::string Request::getBody() const
+{
+    return _body;
+}
+
+
 std::string Request::getMethod() const
 {
     return _method;
@@ -733,5 +750,10 @@ bool Request::is_location_has_cgi()
 }
 int     Request::request_post_run_cgi()
 {
-   return (0);
+
+    
+    // CGI cgi;
+    // cgi.fill_cgi(this->_parse->serv[0]->loc[0]);
+    
+    return (0);
 }

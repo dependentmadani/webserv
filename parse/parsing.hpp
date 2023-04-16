@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/08 15:36:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/14 14:18:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cstring>  
+#include <cstring> 
 
 
 #ifndef PARSING_HPP
@@ -22,8 +22,8 @@
 
 typedef struct s_location
 {
-    std::string root_locaton;
-    std::string url_locaton;
+    std::string root_location;
+    std::string url_location;
     std::vector<std::string> location;
     std::vector<std::string> methods;
     std::vector<std::string> index;
