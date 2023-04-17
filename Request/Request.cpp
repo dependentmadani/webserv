@@ -566,17 +566,23 @@ int Request::check_method_protocol()
 int Request::ft_http_status(int value)
 {
     (void)value;
-    // _response_as_string = "HTTP/1.1 404 Not Found\r\nContent-type: text/html; charset=UTF-8\r\nContent-Length: 190\r\nConnection: keep-alive\r\n\r\n<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<div class=\"container\">\n<h2>404</h2>\n<h3>Oops, nothing here...</h3>\n<p>Please Check the URL</p>\n</div>\n</body>\n</html>";
-    _response_as_string = "HTTP/1.1 200 OK\r\n"
-    "Date: Thu, 19 Feb 2009 12:27:04 GMT\r\n"
-    "Server: webserv/1.0\r\n"
-    "Last-Modified: Wed, 18 Jun 2003 16:05:58 GMT\r\n"
-    "Content-Type: text/html; charset=UTF-8\r\n"
-    "Content-Length: 15\r\n"
-    "Accept-Ranges: bytes\r\n"
-    "Connection: close\r\n"
-    "\r\n"
-    "sdfkjsdnbfkjbsf";
+    _response_as_string = "HTTP/1.1 404 Not Found\r\nContent-type: text/html; charset=UTF-8\r\nContent-Length: 190\r\nConnection: keep-alive\r\n\r\n<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<div class=\"container\">\n<h2>404</h2>\n<h3>Oops, nothing here...</h3>\n<p>Please Check the URL</p>\n</div>\n</body>\n</html>";
+    // _response_as_string = "HTTP/1.1 200 OK\r\n"
+    // "Date: Thu, 19 Feb 2009 12:27:04 GMT\r\n"
+    // "Server: webserv/1.0\r\n"
+    // "Last-Modified: Wed, 16 Mar 2023 22:05:58 GMT\r\n"
+    // "Content-Type: text/html; charset=UTF-8\r\n"
+    // "Content-Length: 190\r\n"
+    // "Connection: close\r\n"
+    // "\r\n"
+    // "<!DOCTYPE html>"
+    // "<html lang=\"en\">"
+    // "<body>"
+    // "<h2>404</h2>"
+    // "<h3>Oops, nothing here...</h3>"
+    // "<p>Please Check the URL</p>"
+    // "</body>"
+    // "</html>";
     return 111;
 }
 
