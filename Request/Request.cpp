@@ -12,10 +12,10 @@
 
 #include "Request.hpp"
 
-Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_header(), _Response(), http_code(), allowed_methods()
+Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_response_header(), _response_body(), http_code(), allowed_methods()
 {
     _location_index = 0;
-    _http_status = 0;
+    _http_status = 200;
 }
 
 Request::~Request()
@@ -53,6 +53,27 @@ int Request::UseMethod()
     return 0;
 }
 
+void    Request::build_response()
+{
+    std::ostringstream converted;
+
+    converted << this->getHttpStatus();
+    _response_header["http_version"] = "HTTP/1.1";
+    _response_header["return_code"] = converted.str();
+    _response_header["status"] = http_code[this->getHttpStatus()];
+    _response_header["location"] = _path;
+    std::string file_type;
+
+    int position_extension = _available_file_path.find_last_of(".");
+    file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
+    _response_header["content_type"] = mime_type[file_type];
+    converted.str("");
+    converted.clear();
+    converted << (int)_content_length;
+    _response_header["content_length"] = converted.str();
+    std::cout << "the string: " << _response_header["content_length"] << ", and: " << _response_header["return_code"] << std::endl;
+}
+
 int Request::GET_method()
 {
     if (this->get_request_resource())
@@ -76,6 +97,8 @@ int Request::get_request_resource()
         int stat_return = stat((*b).c_str(), &stat_buff);
         if (stat_return != -1)
         {
+            _available_file_path = *b;
+            _content_length = stat_buff.st_size;
             std::cout << "the file is available " << *(b) << std::endl;
             return 0;
         }
@@ -92,7 +115,7 @@ int     Request::if_location_has_cgi()
         return 0;
     }
     //call the constructor of cgi, than get the data from cgi. All of that as an else condition
-    _http_status = 0; //to check depends on cgi
+    _http_status = 200; //to check depends on cgi
     ft_http_status(getHttpStatus());
     return 1;
 }
@@ -364,7 +387,7 @@ int    Request::HeaderRequest(char *request_message)
         if (std::string(splited_header[i]).find(":") != std::string::npos)
         {
             char **split_each_line = ft_split(splited_header[i], ':');
-            _header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+            _response_header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
             i++;
         }
         else
@@ -416,7 +439,11 @@ int Request::get_matched_location_for_request_uri()
     while ( ( pos = url.find("/") ) != std::string::npos)
     {
         tmp = url.substr(0, pos);
-        path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+        // path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+        if (tmp == "..")
+            --path_counter;
+        else
+            ++path_counter;
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -520,6 +547,7 @@ void    Request::reform_requestPath_locationPath()
             else if (S_ISREG(stat_buff.st_mode))
             {
                 _file_directory_check = FILE;
+                _content_length = stat_buff.st_size;
                 _file_name_path.push_back(complete_path);
             }
             else
@@ -589,6 +617,7 @@ int Request::ft_http_status(int value)
 void    Request::ft_mime_type()
 {
     //text
+    mime_type["php"]  = "text/html";
     mime_type["html"]  = "text/html";
     mime_type["htm"]   = "text/html";
     mime_type["shtml"] = "text/html";
@@ -604,7 +633,7 @@ void    Request::ft_mime_type()
     mime_type["rss"]   = "application/rss+xml";
     //text
     mime_type["mml"]   = "text/mathml";
-    mime_type["txt"]   = "text/plain ";
+    mime_type["txt"]   = "text/plain";
     mime_type["jad"]   = "text/vnd.sun.j2me.app-descriptor";
     mime_type["wml"]   = "text/vnd.wap.wml";
     mime_type["htc"]   = "text/x-component";
@@ -743,9 +772,9 @@ void    Request::ft_http_code()
 
 int Request::is_available(std::string key, std::string value)
 {
-    int val = _header.count(key);
+    int val = _response_header.count(key);
 
-    if (val && !value.empty() && _header[key] != value)
+    if (val && !value.empty() && _response_header[key] != value)
         return 0;
     if (!val)
         return 0;

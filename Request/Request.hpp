@@ -18,6 +18,7 @@
 # include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
+# include <sstream>
 # include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/dir.h>
@@ -35,15 +36,17 @@ class Request {
         int                                 _http_status;
         int                                 _file_directory_check;
         int                                 _location_index;
+        int                                 _content_length;
         std::vector<std::string>            _file_name_path;
+        std::string                         _available_file_path;
         std::string                         _directory_path;
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
         std::string                         _protocol;
         std::string                         _body;
-        std::map<std::string, std::string>  _header;
-        std::map<std::string, std::string>  _Response;
+        std::map<std::string, std::string>  _response_header;
+        std::map<std::string, std::string>  _response_body;
         std::string                         _response_as_string;
 
 
@@ -90,6 +93,9 @@ class Request {
         std::string remove_space(std::string tmp);
         //get the file_name_path value
         void    reform_requestPath_locationPath();
+
+        /*Response functions*/
+        void    build_response();
 
 
         std::map<int, std::string>          http_code;

@@ -14,7 +14,9 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cstring>  
+#include <cstring>
+#include <stdlib.h>
+#include <algorithm>
 
 
 #ifndef PARSING_HPP
