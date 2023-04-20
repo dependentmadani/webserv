@@ -18,6 +18,7 @@
 # include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
+# include <string>
 # include <sstream>
 # include <sys/stat.h>
 # include <sys/types.h>
@@ -45,10 +46,10 @@ class Request {
         std::string                         _path;
         std::string                         _protocol;
         std::string                         _body;
-        std::map<std::string, std::string>  _response_header;
-        std::map<std::string, std::string>  _response_body;
-        std::string                         _response_as_string;
-
+        std::map<std::string, std::string>  _response;
+        std::map<std::string, std::string>  _response_final;
+        // std::map<std::string, std::string>  _response_body;
+        std::string                         _response_body_as_string;
 
     public:
         Request();
@@ -75,6 +76,7 @@ class Request {
         int     DELETE_method();
 
         int     Is_directory();
+        void    build_autoindex_page();
         int     Is_directory_for_DELETE();
         int     Is_file_for_DELETE();
         int     is_uri_has_backslash_in_end();
@@ -101,6 +103,7 @@ class Request {
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
+        std::string                         Response;
 
         std::string getMethod() const;
         std::string getPath() const;

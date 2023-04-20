@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 
-Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_response_header(), _response_body(), http_code(), allowed_methods()
+Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_response(), http_code(), allowed_methods()
 {
     _location_index = 0;
     _http_status = 200;
@@ -58,20 +58,44 @@ void    Request::build_response()
     std::ostringstream converted;
 
     converted << this->getHttpStatus();
-    _response_header["http_version"] = "HTTP/1.1";
-    _response_header["return_code"] = converted.str();
-    _response_header["status"] = http_code[this->getHttpStatus()];
-    _response_header["location"] = _path;
+    // _response["http_version"] = "HTTP/1.1";
+    // _response["return_code"] = converted.str();
+    // _response["status"] = http_code[this->getHttpStatus()];
+    Response = "HTTP/1.1 " + converted.str() + " " + http_code[this->getHttpStatus()] + "\r\n";
+    // _response_final["Location"] = "http://" + _parse->serv[0]->server_name +_path; // to make a variable to contruct the full location
     std::string file_type;
 
     int position_extension = _available_file_path.find_last_of(".");
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
-    _response_header["content_type"] = mime_type[file_type];
+    _response_final["Content_Type"] = mime_type[file_type];
     converted.str("");
     converted.clear();
-    converted << (int)_content_length;
-    _response_header["content_length"] = converted.str();
-    std::cout << "the string: " << _response_header["content_length"] << ", and: " << _response_header["return_code"] << std::endl;
+    converted << _content_length;
+    _response_final["Connection"] = "closed";
+    _response_final["Content_Length"] = converted.str();
+
+    // std::cout << "the string: " << _response["content_length"] << ", and: " << _response["return_code"] << std::endl;
+
+    /*
+    The response http should include:
+    -The http version
+    -The return code
+    -The status
+    -The date specifies the date and time the http response was generated
+    -The server describes the webserver software used to generate the response
+    -The content-length describes the length of the response
+    -The content-type describes the media type of the resource returned.
+    */
+   Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
+   Response.append("Server: webserv/1.0\r\n");
+   std::map<std::string, std::string>::iterator b = _response_final.begin();
+   for (; b != _response_final.end(); ++b)
+   {
+        std::string add_line = b->first + ": " + b->second + "\r\n";
+        Response.append(add_line);
+   }
+   Response.append("\r\n");
+   Response.append(_response_body_as_string);
 }
 
 int Request::GET_method()
@@ -134,6 +158,7 @@ int    Request::Is_directory()
             else
             {
                 //build an autoindex page in response.
+                this->build_autoindex_page();
                 _http_status = 200;
                 return ft_http_status(getHttpStatus());
             }
@@ -147,6 +172,7 @@ int    Request::Is_directory()
     else
     {
         //redirect the request by adding "/" to the request path.
+        this->build_autoindex_page();
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
@@ -189,7 +215,22 @@ bool Request::get_auto_index()
 
 int    Request::Is_file()
 {
-    return this->if_location_has_cgi();
+    std::ifstream   file;
+    std::string     line;
+
+    file.open(_available_file_path.c_str());
+    if (!_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
+        return this->if_location_has_cgi();
+    if (file.is_open())
+    {
+        while(file)
+        {
+            std::getline(file, line);
+            _response_body_as_string.append(line);
+        }
+        // close(file);
+    }
+    return 0;
 }
 
 int Request::get_resource_type()
@@ -387,7 +428,7 @@ int    Request::HeaderRequest(char *request_message)
         if (std::string(splited_header[i]).find(":") != std::string::npos)
         {
             char **split_each_line = ft_split(splited_header[i], ':');
-            _response_header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+            _response[std::string(split_each_line[0])] = std::string(split_each_line[1]);
             i++;
         }
         else
@@ -594,8 +635,8 @@ int Request::check_method_protocol()
 int Request::ft_http_status(int value)
 {
     (void)value;
-    _response_as_string = "HTTP/1.1 404 Not Found\r\nContent-type: text/html; charset=UTF-8\r\nContent-Length: 190\r\nConnection: keep-alive\r\n\r\n<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<div class=\"container\">\n<h2>404</h2>\n<h3>Oops, nothing here...</h3>\n<p>Please Check the URL</p>\n</div>\n</body>\n</html>";
-    // _response_as_string = "HTTP/1.1 200 OK\r\n"
+    // _response_body_as_string = "HTTP/1.1 404 Not Found\r\nContent-type: text/html; charset=UTF-8\r\nContent-Length: 190\r\nConnection: keep-alive\r\n\r\n<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<div class=\"container\">\n<h2>404</h2>\n<h3>Oops, nothing here...</h3>\n<p>Please Check the URL</p>\n</div>\n</body>\n</html>";
+    // _response_body_as_string = "HTTP/1.1 200 OK\r\n"
     // "Date: Thu, 19 Feb 2009 12:27:04 GMT\r\n"
     // "Server: webserv/1.0\r\n"
     // "Last-Modified: Wed, 16 Mar 2023 22:05:58 GMT\r\n"
@@ -772,9 +813,9 @@ void    Request::ft_http_code()
 
 int Request::is_available(std::string key, std::string value)
 {
-    int val = _response_header.count(key);
+    int val = _response.count(key);
 
-    if (val && !value.empty() && _response_header[key] != value)
+    if (val && !value.empty() && _response[key] != value)
         return 0;
     if (!val)
         return 0;
@@ -821,7 +862,7 @@ std::string Request::getMethod() const
 
 std::string Request::getResponse()
 {
-    return _response_as_string;
+    return _response_body_as_string;
 }
 
 void    Request::setParse(s_parsing* parsed)
@@ -853,4 +894,22 @@ void    Request::print_parse_vector()
     std::cout << _parse->serv[0]->server_name << std::endl;
     std::cout << _parse->serv[0]->max_client << std::endl;
     std::cout << _parse->serv[0]->loc[1]->url_location << std::endl;
+}
+
+void    Request::build_autoindex_page(){
+    DIR *dir;
+    struct dirent *files;
+
+    dir = opendir(_directory_path.c_str());
+    _response_body_as_string = "<!DOCTYPE html><html><body>";
+    while ((files = readdir(dir)) != NULL)
+    {
+        _response_body_as_string.append("<a href=\"/" + _directory_path + "/");
+        _response_body_as_string.append(files->d_name);
+        _response_body_as_string.append("\">");
+        _response_body_as_string.append(files->d_name);
+        _response_body_as_string.append("</a><br>");
+    }
+    closedir(dir);
+    _response_body_as_string.append("</body></html>");
 }
