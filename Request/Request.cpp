@@ -16,6 +16,7 @@ Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_respon
 {
     _location_index = 0;
     _http_status = 200;
+    _content_length = 0;
 }
 
 Request::~Request()
@@ -67,12 +68,14 @@ void    Request::build_response()
 
     int position_extension = _available_file_path.find_last_of(".");
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
-    _response_final["Content_Type"] = mime_type[file_type];
+    if (!file_type.empty())
+        _response_final["Content_Type"] = mime_type[file_type];
     converted.str("");
     converted.clear();
     converted << _content_length;
     _response_final["Connection"] = "closed";
-    _response_final["Content_Length"] = converted.str();
+    if (_content_length)
+        _response_final["Content_Length"] = converted.str();
 
     // std::cout << "the string: " << _response["content_length"] << ", and: " << _response["return_code"] << std::endl;
 
@@ -100,7 +103,7 @@ void    Request::build_response()
 
 int Request::GET_method()
 {
-    if (this->get_request_resource())
+    if (this->get_request_resource() && !_parse->serv[0]->loc[_location_index]->auto_index)
     {
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
@@ -150,7 +153,7 @@ int    Request::Is_directory()
     {
         if ( !is_dir_has_index_files() )
         {
-            if ( get_auto_index() )
+            if ( !get_auto_index() )
             {
                 _http_status = 403;
                 return ft_http_status(getHttpStatus());
@@ -158,7 +161,10 @@ int    Request::Is_directory()
             else
             {
                 //build an autoindex page in response.
+                // if (_parse->serv[0]->loc[_parse->serv[0]->num_location]->index.empty())
                 this->build_autoindex_page();
+                // else
+                //     this->Is_file();
                 _http_status = 200;
                 return ft_http_status(getHttpStatus());
             }
@@ -171,6 +177,11 @@ int    Request::Is_directory()
     }
     else
     {
+        if ( !get_auto_index() )
+        {
+            _http_status = 403;
+            return ft_http_status(getHttpStatus());
+        }
         //redirect the request by adding "/" to the request path.
         this->build_autoindex_page();
         _http_status = 301;
@@ -202,14 +213,14 @@ int     Request::is_dir_has_index_files()
 
 bool Request::get_auto_index()
 {
-    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
-    {
-        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+    // for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    // {
+        int size_for_path = _parse->serv[0]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[_location_index]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[_location_index]->url_location)
         {
-            return _parse->serv[0]->loc[i]->auto_index;
+            return _parse->serv[0]->loc[_location_index]->auto_index;
         }
-    }
+    // }
     return false;
 }
 
@@ -575,10 +586,11 @@ void    Request::reform_requestPath_locationPath()
             // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
             if (S_ISDIR(stat_buff.st_mode))
             {
+                std::cout << "complete path: " << complete_path << std::endl;
+                _directory_path = complete_path;
+                _file_directory_check = DIRECTORY;
                 if (!_parse->serv[0]->loc[i]->index.empty())
                 {
-                    _file_directory_check = DIRECTORY;
-                    _directory_path = complete_path;
                     for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i]->index.size(); ++index_indexes)
                     {
                         _file_name_path.push_back(complete_path + "/" + _parse->serv[0]->loc[i]->index[index_indexes]);
@@ -597,6 +609,7 @@ void    Request::reform_requestPath_locationPath()
             }
         }
     }
+    // std::cout << "the location is: " << _location_index << std::endl;
 }
 
 /*
@@ -634,25 +647,47 @@ int Request::check_method_protocol()
 //this function will be able to use response, where it will build a http message
 int Request::ft_http_status(int value)
 {
-    (void)value;
-    // _response_body_as_string = "HTTP/1.1 404 Not Found\r\nContent-type: text/html; charset=UTF-8\r\nContent-Length: 190\r\nConnection: keep-alive\r\n\r\n<!DOCTYPE html>\n<html lang=\"en\">\n<body>\n<div class=\"container\">\n<h2>404</h2>\n<h3>Oops, nothing here...</h3>\n<p>Please Check the URL</p>\n</div>\n</body>\n</html>";
-    // _response_body_as_string = "HTTP/1.1 200 OK\r\n"
-    // "Date: Thu, 19 Feb 2009 12:27:04 GMT\r\n"
-    // "Server: webserv/1.0\r\n"
-    // "Last-Modified: Wed, 16 Mar 2023 22:05:58 GMT\r\n"
-    // "Content-Type: text/html; charset=UTF-8\r\n"
-    // "Content-Length: 190\r\n"
-    // "Connection: close\r\n"
-    // "\r\n"
-    // "<!DOCTYPE html>"
-    // "<html lang=\"en\">"
-    // "<body>"
-    // "<h2>404</h2>"
-    // "<h3>Oops, nothing here...</h3>"
-    // "<p>Please Check the URL</p>"
-    // "</body>"
-    // "</html>";
-    return 111;
+    if (value < 300 || value == 301)
+        return 1;
+    if (!_parse->serv[0]->error_num.empty()) {
+    for (size_t i = 0; i < _parse->serv[0]->error_num.size(); ++i) {
+        
+        if (_parse->serv[0]->error_num[i] == value)
+        {
+            _response_body_as_string = read_file(_parse->serv[0]->error_page[i]);
+            return value;
+        }
+    }
+    }
+    _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2>";
+    std::ostringstream converted;
+    converted << this->getHttpStatus();
+    _response_body_as_string.append(converted.str());
+    _response_body_as_string.append("</h2>\n<h3>" + http_code[this->getHttpStatus()]);
+    _response_body_as_string.append("</h3></body></html>");
+    return this->getHttpStatus();
+}
+
+std::string Request::read_file(std::string file)
+{
+    std::ifstream   read_file;
+    std::string     line;
+    std::string     final_output;
+
+    read_file.open(file.c_str());
+    if (read_file.is_open())
+    {
+        while(read_file)
+        {
+            std::getline(read_file, line);
+            final_output.append(line);
+        }
+    }
+    else {
+        perror("");
+        return std::string("");
+    }
+    return final_output;
 }
 
 void    Request::ft_mime_type()
@@ -893,7 +928,7 @@ void    Request::print_parse_vector()
     }
     std::cout << _parse->serv[0]->server_name << std::endl;
     std::cout << _parse->serv[0]->max_client << std::endl;
-    std::cout << _parse->serv[0]->loc[1]->url_location << std::endl;
+    std::cout << _parse->serv[0]->loc[_location_index]->url_location << std::endl;
 }
 
 void    Request::build_autoindex_page(){
@@ -902,13 +937,19 @@ void    Request::build_autoindex_page(){
 
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
+    //for "." and ".." directories, need to be added
+    _response_body_as_string.append("<a href=\"" + _directory_path + "/.\">.</a><br>");
+    _response_body_as_string.append("<a href=\"" + _directory_path + "/..\">..</a><br>");
+    //this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
-        _response_body_as_string.append("<a href=\"/" + _directory_path + "/");
+        if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
+        _response_body_as_string.append("<a href=\"" + _directory_path + "/");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("\">");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("</a><br>");
+        }
     }
     closedir(dir);
     _response_body_as_string.append("</body></html>");

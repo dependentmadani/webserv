@@ -95,6 +95,7 @@ class Request {
         std::string remove_space(std::string tmp);
         //get the file_name_path value
         void    reform_requestPath_locationPath();
+        std::string read_file(std::string);
 
         /*Response functions*/
         void    build_response();
