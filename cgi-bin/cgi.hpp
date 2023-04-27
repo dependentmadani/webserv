@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 22:55:31 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/17 14:32:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ public:
     CGI();
     ~CGI();
  void fill_cgi(char *buffer, t_server *serv);
- void handle_cgi_request(Request& req,char **env);
+ void handle_cgi_request(Request& req);
 };
 
 #endif

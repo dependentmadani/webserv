@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 23:03:27 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/17 15:24:13 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,15 +118,10 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
         _env[i] = new char [_envcgi[i].size()];
         _env[i]  = const_cast<char*> (_envcgi[i].c_str());
     }
-    // for (size_t i = 0; i < _envcgi.size(); i++)
-    // {
-    //     std::cout<< "|******|"<<_env[i]<<std::endl;
-    // }
    _cgi_script = const_cast<char*> (serv->loc[0]->cgi_pass[1].c_str());
     
 }
-// void handle_cgi_request(char **env)
-void CGI::handle_cgi_request(Request& req,char **env)
+void CGI::handle_cgi_request(Request& req)
 {
     char **ptr =  new char *[2];
     std::string tmp = _pwd;
@@ -148,10 +143,11 @@ void CGI::handle_cgi_request(Request& req,char **env)
         std::cerr << "Error forking process" << std::endl;
         exit(1);
     }
+    // std::cerr << "Error forking process" << std::endl;
     else if (pid == 0)
     {
         dup2(fd, STDIN_FILENO);
-        execve(ptr[0], ptr, env);
+        execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
     }

@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/16 17:12:34 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/27 19:43:56 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,6 @@ Request::~Request()
 int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
-      
-    // std::cout<<"|||"<<std::endl;
-    // int j= 0;
-    // for(;splited_request[j];j++)
-    // {
-    //     // std::cout<<splited_request[j];
-    // }
-    // std::cout<<j<<"|--------|"<< splited_request[1] <<"|------|"<<std::endl;
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
     if (check_method_protocol())
@@ -603,6 +595,10 @@ int Request::url_characters_checker()
 
 int Request::is_body_size_good(char *request_message)
 {
+    for (size_t i = 0; i < request_message[i]; i++)
+    {
+        std::cout<<request_message[i];
+    }
     char *tmp_request_body = strstr(request_message, "\r\n\r\n");
     tmp_request_body[0] = '\0';
     _body = std::string(tmp_request_body + 4);
@@ -671,7 +667,9 @@ void    Request::print_parse_vector()
 int Request::POST_method()
 {
     if (location_support_upload())
+    {
         upload_post_request();
+    }
     else
     {
         if (get_request_resource())
@@ -697,7 +695,10 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    return true;
+    std::string value = _header.at("Content-Type");
+    size_t find = value.find("multipart/form-data");
+    if (find != std::string::npos)
+        return true;
     return false;
 }
 int Request::If_is_file()
@@ -750,10 +751,12 @@ bool Request::is_location_has_cgi()
 }
 int     Request::request_post_run_cgi()
 {
-
-    
-    // CGI cgi;
-    // cgi.fill_cgi(this->_parse->serv[0]->loc[0]);
+    Server server;
+    CGI cgi;
+    // std::cerr << "|****************|" << std::endl;
+    is_body_size_good(server.getBuffer());
+    cgi.fill_cgi(server.getBuffer(), _parse->serv[0]);
+    cgi.handle_cgi_request(*this);
     
     return (0);
 }

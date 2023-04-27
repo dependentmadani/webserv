@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 23:05:27 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/27 17:45:23 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,10 @@ int main(int ac, char **av,char **env)
         }
     }
     else
+    {
         std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
+        exit(1);
+    }
     Server  server(pars->serv[0]->ind_port);
     struct pollfd theOne;
     memset(&theOne, 0, sizeof(theOne));
@@ -55,10 +58,11 @@ int main(int ac, char **av,char **env)
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
-    CGI cgi;
     request.is_body_size_good(server.getBuffer());
-    cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
-    cgi.handle_cgi_request(request,env);
+    // CGI cgi;
+    // request.is_body_size_good(server.getBuffer());
+    // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
+    // cgi.handle_cgi_request(request,env);
     // request.is_location_has_cgi();
     return (0);
 }
