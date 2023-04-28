@@ -40,6 +40,7 @@ class Server {
         int                 getServerFd() const;
         char               *getBuffer();
         std::vector<int>    getSocket_client() const;
+        int                 getSocket_fd() const;
         void                setParse(s_parsing* );
 
     private:

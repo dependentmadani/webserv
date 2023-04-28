@@ -50,10 +50,19 @@ int main(int ac, char **av)
     theOne.fd = (server.getSocket_client())[0];
     theOne.events = POLLIN;
     server.recv_data(&theOne);
-    close(theOne.fd);
-    close(server.getServerFd());
+    request.ft_http_code();
+    request.ft_mime_type();
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
+    request.build_response();
+    int e = send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+    (void)e;// std::cout << "all good at this place :): " << theOne.fd << std::endl;
+    // std::cout << "return of send ft: " << e <<  ", len of the string: " << strlen(request.getResponse().c_str()) << std::endl;
+    std::cout << "----------------------------------" << std::endl;
+    std::cout << request.Response << std::endl;
+    close(theOne.fd);
+    close(server.getServerFd());
+    close(server.getSocket_client()[0]);
     return (0);
 }

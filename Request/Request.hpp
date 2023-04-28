@@ -18,6 +18,8 @@
 # include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
+# include <string>
+# include <sstream>
 # include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/dir.h>
@@ -35,15 +37,19 @@ class Request {
         int                                 _http_status;
         int                                 _file_directory_check;
         int                                 _location_index;
+        int                                 _content_length;
         std::vector<std::string>            _file_name_path;
+        std::string                         _available_file_path;
         std::string                         _directory_path;
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
         std::string                         _protocol;
         std::string                         _body;
-        std::map<std::string, std::string>  _header;
-
+        std::map<std::string, std::string>  _response;
+        std::map<std::string, std::string>  _response_final;
+        // std::map<std::string, std::string>  _response_body;
+        std::string                         _response_body_as_string;
 
     public:
         Request();
@@ -70,6 +76,7 @@ class Request {
         int     DELETE_method();
 
         int     Is_directory();
+        void    build_autoindex_page();
         int     Is_directory_for_DELETE();
         int     Is_file_for_DELETE();
         int     is_uri_has_backslash_in_end();
@@ -88,16 +95,22 @@ class Request {
         std::string remove_space(std::string tmp);
         //get the file_name_path value
         void    reform_requestPath_locationPath();
+        std::string read_file(std::string);
+
+        /*Response functions*/
+        void    build_response();
 
 
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
+        std::string                         Response;
 
         std::string getMethod() const;
         std::string getPath() const;
         std::string getProtocol() const;
         std::string getHeader() const;
+        std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
 };
