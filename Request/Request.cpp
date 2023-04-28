@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/28 15:06:56 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 15:34:32 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -595,10 +595,6 @@ int Request::url_characters_checker()
 
 int Request::is_body_size_good(char *request_message)
 {
-    // for (size_t i = 0; i < request_message[i]; i++)
-    // {
-    //     std::cout<<request_message[i];
-    // }
     char *tmp_request_body = strstr(request_message, "\r\n\r\n");
     tmp_request_body[0] = '\0';
     _body = std::string(tmp_request_body + 4);

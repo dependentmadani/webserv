@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/28 15:07:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 15:32:53 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,7 @@ int main(int ac, char **av)
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
-    
-    // request.is_body_size_good(server.getBuffer());
+    request.is_body_size_good(server.getBuffer());
     // CGI cgi;
     // request.is_body_size_good(server.getBuffer());
     // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
