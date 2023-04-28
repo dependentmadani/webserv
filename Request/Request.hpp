@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/28 09:06:04 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 17:34:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 # define DIRECTORY  5
 # define FILE       4
 # define ERROR      -1
-
 
 class Request {
 
