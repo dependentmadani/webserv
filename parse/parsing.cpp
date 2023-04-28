@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/08 17:03:54 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 15:04:56 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void parsing::copy_file(parsing *pars, std::string ptr)
         pars->vec.push_back(line); 
 }
 
-bool isNumber(char * str)
+bool isNumber(char const * str)
 {
     for (size_t i =0;str[i];i++) 
     {
@@ -79,6 +79,12 @@ bool isWhitespace(std::string str)
     return false;
 }
 
+void   print_error()
+{
+    std::cout<<"Error missing roules"<<std::endl;
+    exit(1);
+}
+
 void parsing::check_listen(t_server *serv, std::string str)
 {
     char  *ptr;
@@ -89,6 +95,8 @@ void parsing::check_listen(t_server *serv, std::string str)
     {
 
             str = str.c_str() + strlen("listen");
+            if (!str.length())
+                print_error();
             str = trim(str);
             ss = const_cast<char*>(str.c_str());
             ptr = strtok(ss, ":");
@@ -118,37 +126,32 @@ void parsing::check_server_name(t_server *serv, std::string str)
 
 void parsing::check_error_pages(t_server *serv, std::string str)
 {
-    char *ss;
-    char *s2;
     str = trim(str);
-    size_t lent =  0;
-    int j = 10;
-    int k;
+	std::vector<std::string>  hold_error;
     if (!strncmp(str.c_str(), "error_page",strlen("error_page")))
     {
-        lent = ft_len(str,' ');
-        if (lent != 3)
-            lent = ft_len(str, 9)+ lent -1;
-        ss = const_cast<char*>(str.c_str());
-        s2 = new char[strlen(ss) -j + 1];
-        for (size_t i = 0; i < lent -1 ; i++)
-        {
-            for ( ; ss[j] == ' ' || ss[j]  == '\t' ; j++);
-            k = 0;
-            for (; ss[j] ; j++)
-            {
-                if (ss[j] == ' ' || ss[j] ==  '\t')
-                    break;
-                s2[k++] = ss[j];
-            }
-            s2[k] = '\0';
-            std::string ptr(s2);
-            if (isNumber(s2))
-                 serv->error_num.push_back(atoi(s2));
-            else
-                serv->error_page.push_back(ptr);
-        }
-        delete [] s2;  
+		std::stringstream ss(str);
+    	std::string token;
+    	while (getline(ss, token, '\t'))
+    	{
+        	std::stringstream jo(token);
+        	while (getline(jo, token, ' '))
+        	{
+            	if (token != "\0")
+                {
+					hold_error.push_back(token);
+				}
+        	}
+    	}
+		for (size_t i = 0; i < hold_error.size(); i++)
+		{
+            if (isNumber(hold_error[i].c_str()))
+                serv->error_num.push_back(atoi(hold_error[i].c_str()));
+            else if (hold_error[i].compare("error_page"))
+                serv->error_page.push_back(hold_error[i]);
+		}
+		if (hold_error.size() != 3)
+			print_error();
     }
 }
 
@@ -159,12 +162,17 @@ void parsing::check_max_client(t_server *serv, std::string str)
     if (!strncmp(str.c_str(), "max_client_body_size", strlen("max_client_body_size")))
     {
             str = str.c_str()+ strlen("max_client_body_size")+1;
+            if (!str.length())
+                print_error();
             str = trim(str);
             ss = const_cast<char*>(str.c_str());
             if (isNumber(ss))
                 serv-> max_client = atol(ss);
-             else
+            else
+            {
                 std::cout<<"Error max_client_body_size"<<std::endl;
+                exit(1);
+            }
     }
 }
 
@@ -241,7 +249,7 @@ void parsing::check_location(location *loc)
     size_t flag = 2;
     std::string ptr;
     loc->location_flag = 0;
-    
+    loc->flag_auto = 0;
     for (size_t i = 0; i < loc->location.size() ; i++)
     {
 
@@ -265,6 +273,7 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "autoindex", strlen("autoindex")))
         {
             j = 0;
+            loc->flag_auto++;
             ss = new char [ptr.size() - (strlen("autoindex") - 1)];
             for (size_t i = strlen("autoindex"); i < ptr.size() ; i++)
                 ss[j++] = ptr[i];
@@ -355,9 +364,11 @@ void parsing::check_location(location *loc)
     }
     if (flag != loc->location.size())
     {
-        std::cout<<"ERROR FROM LOCATION "<<std::endl;
+        std::cout<< "ERROR FROM LOCATION "<<std::endl;
         exit(0);
     }
+    if (loc->root_location.empty() || loc->methods.empty() ||  loc->index.empty() ||  loc->cgi_pass.empty()|| !loc->flag_auto)
+        print_error();
 }
 
 void parsing::check_server(s_parsing *pars, size_t len)
@@ -369,6 +380,10 @@ void parsing::check_server(s_parsing *pars, size_t len)
         size_t num = 0;
         size_t flag = 2;
         pars->serv[i]->server_flag = 0;
+        pars->serv[i]->ind_port = -1;
+        pars->serv[i]->flag_max_client =0;
+        pars->serv[i]->location_falg = 0;
+        pars->serv[i]->error_flag = 0;
         for (size_t j = 0; j < pars->serv[i]->server.size(); j++)
         {
             size_t found;
@@ -392,18 +407,21 @@ void parsing::check_server(s_parsing *pars, size_t len)
             found = pars->serv[i]->server[j].find("max_client_body_size");
             if (found != std::string::npos)
             {
-               check_max_client(pars->serv[i], pars->serv[i]->server[j]);
+                pars->serv[i]->flag_max_client++;
+                check_max_client(pars->serv[i], pars->serv[i]->server[j]);
                 flag++;
             }   
             found = pars->serv[i]->server[j].find("error_page");
             if (found != std::string::npos)
             {
+                pars->serv[i]->error_flag++;
                 check_error_pages(pars->serv[i], pars->serv[i]->server[j]);
                 flag++;
             }
             found = pars->serv[i]->server[j].find("location");
             if (found != std::string::npos)
             {
+                pars->serv[i]->location_falg++;
                 pars->serv[i]->loc[num] = new location();
                 for (size_t k = j; k < pars->serv[i]->server.size() ; k++)
                 {
@@ -436,6 +454,10 @@ void parsing::check_server(s_parsing *pars, size_t len)
           std::cout<<"ERROR FROM SERVER "<<std::endl;
           exit(0);
         }
+        if (pars->serv[i]->ind_port < 0 || pars->serv[i]->host.empty() ||
+         !pars->serv[i]->flag_max_client || !pars->serv[i]->location_falg || 
+         ! pars->serv[i]->error_flag || !pars->serv[i]->error_num.size() || !pars->serv[i]->error_page.size())
+            print_error();
     }
 }
 

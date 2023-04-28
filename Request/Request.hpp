@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/15 14:15:23 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 09:06:04 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,6 @@ class Request {
         std::string                         _protocol;
         std::string                         _body;
         std::map<std::string, std::string>  _header;
-
-
     public:
         Request();
         ~Request();
