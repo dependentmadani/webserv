@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 17:37:19 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 18:49:46 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,22 +50,10 @@ int main(int ac, char **av)
     theOne.fd = (server.getSocket_client())[0];
     theOne.events = POLLIN;
     server.recv_data(&theOne);
-    close(theOne.fd);
-    close(server.getServerFd());
+    request.ft_http_code();
+    request.ft_mime_type();
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
-    CGI cgi;
-    std::string str = "script.pl";
-    cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
-
-    // for(int j = 0;server.getBuffer()[j];j++)
-    // {
-    //     std::cout<<server.getBuffer()[j];
-    // }
-    // std::cout<<std::endl;
-    request.is_body_size_good(server.getBuffer());
-    cgi.handle_cgi_request(request,env);
-    // request.is_location_has_cgi();
     return (0);
 }

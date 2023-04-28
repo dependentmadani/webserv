@@ -20,6 +20,7 @@ CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 SRC = main.cpp\
 	Server/Server.cpp \
 	Request/Request.cpp \
+	CGI/cgi.cpp \
 	utils/ft_split.cpp \
 	utils/utils_functions.cpp \
 	parse/parsing.cpp \
@@ -28,6 +29,7 @@ SRC = main.cpp\
 
 HEADERS = Server/Server.hpp \
 	Request/Request.hpp \
+	CGI/cgi.hpp \
 	utils/utils.hpp \
 	parse/parsing.hpp \
 	cgi-bin/cgi.hpp\

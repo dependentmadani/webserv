@@ -134,6 +134,11 @@ void    Server::setParse(s_parsing * parsed)
     this->_parse = parsed;
 }
 
+int Server::getSocket_fd() const
+{
+    return _socket_fd;
+}
+
 // struct sockaddr_in {
 //    sa_family_t    sin_family; /* address family: AF_INET */
 //    in_port_t      sin_port;   /* port in network byte order */

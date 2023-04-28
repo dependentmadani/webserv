@@ -13,6 +13,10 @@ get_matched_location_for_request_uri() function. -->
 
 * build an autoindex page in response.
 
+* in autoindex page, make sure that when clicking on a file, to add it into the path of address
+
+
+
 _metaVars["SERVER_PROTOCOL"] = clientInfo->getHeader().getProtocol();
         _metaVars["SERVER_PORT"] = clientInfo->getServerConf().getService();
         _metaVars["REQUEST_METHOD"] = clientInfo->getHeader().getRequestType();
