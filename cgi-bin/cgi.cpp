@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/16 17:43:35 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 09:40:57 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
    _cgi_script = const_cast<char*> (serv->loc[0]->cgi_pass[1].c_str());
     
 }
-void CGI::handle_cgi_request(Request& req,char **env)
+void CGI::handle_cgi_request(Request& req)
 {
     char **ptr =  new char *;
     std::string hh = "script.sh";
@@ -149,7 +149,7 @@ void CGI::handle_cgi_request(Request& req,char **env)
     else if (pid == 0)
     {
         dup2(fd, STDIN_FILENO);
-        execve(ptr[0], ptr, env);
+        execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
     }

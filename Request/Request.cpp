@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/29 09:15:25 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 09:51:34 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,11 +249,6 @@ int    Request::Is_file()
 int Request::get_resource_type()
 {
     return _file_directory_check;
-}
-
-int Request::POST_method()
-{
-    return 0;
 }
 
 int Request::DELETE_method()
@@ -993,7 +988,7 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    std::string value = _header.at("Content-Type");
+    std::string value = _response.at("Content-Type");
     size_t find = value.find("multipart/form-data");
     if (find != std::string::npos)
         return true;
