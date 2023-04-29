@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/28 18:48:48 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 09:15:25 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -993,9 +993,13 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    return true;
+    std::string value = _header.at("Content-Type");
+    size_t find = value.find("multipart/form-data");
+    if (find != std::string::npos)
+        return true;
     return false;
 }
+
 int Request::If_is_file()
 {
     if (is_location_has_cgi())
@@ -1046,10 +1050,12 @@ bool Request::is_location_has_cgi()
 }
 int     Request::request_post_run_cgi()
 {
-
-    
-    // CGI cgi;
-    // cgi.fill_cgi(this->_parse->serv[0]->loc[0]);
+    Server server;
+    CGI cgi;
+    // std::cerr << "|****************|" << std::endl;
+    is_body_size_good(server.getBuffer());
+    cgi.fill_cgi(server.getBuffer(), _parse->serv[0]);
+    cgi.handle_cgi_request(*this);
     
     return (0);
 }
