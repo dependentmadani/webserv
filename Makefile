@@ -6,7 +6,7 @@
 #    By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/19 15:27:10 by mbadaoui          #+#    #+#              #
-#    Updated: 2023/03/23 15:51:12 by sriyani          ###   ########.fr        #
+#    Updated: 2023/04/29 16:19:25 by sriyani          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,14 +20,14 @@ CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 SRC = main.cpp\
 	Server/Server.cpp \
 	Request/Request.cpp \
-	CGI/cgi.cpp \
+	cgi-bin/cgi.cpp\
 	utils/ft_split.cpp \
 	utils/utils_functions.cpp \
 	parse/parsing.cpp \
 
 HEADERS = Server/Server.hpp \
 	Request/Request.hpp \
-	CGI/cgi.hpp \
+	cgi-bin/cgi.hpp \
 	utils/utils.hpp \
 	parse/parsing.hpp \
 

@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/27 12:16:45 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/04/29 16:17:54 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-
+#include "../cgi-bin/cgi.hpp"
 Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_response(), http_code(), allowed_methods()
 {
     _location_index = 0;
@@ -249,11 +249,6 @@ int Request::get_resource_type()
     return _file_directory_check;
 }
 
-int Request::POST_method()
-{
-    //this part is for sriyani to do.
-    return 0;
-}
 
 int Request::DELETE_method()
 {
@@ -953,4 +948,99 @@ void    Request::build_autoindex_page(){
     }
     closedir(dir);
     _response_body_as_string.append("</body></html>");
+}
+
+int Request::POST_method()
+{
+    if (location_support_upload())
+        upload_post_request();
+    else
+    {
+        if (get_request_resource())
+        {
+            if (this->get_resource_type() == DIRECTORY)
+                return this->If_is_directory();
+            else if (this->get_resource_type() == FILE)
+                return this->If_is_file();
+        }
+        else
+        {
+            _http_status = 404;
+            return ft_http_status(getHttpStatus());
+        }  
+    }
+    return 0;
+}
+int Request::upload_post_request()
+{
+    _http_status = 201;
+    return ft_http_status(getHttpStatus());
+}
+
+bool Request::location_support_upload()
+{
+    std::string value = _response.at("Content-Type");
+    size_t find = value.find("multipart/form-data");
+    if (find != std::string::npos)
+        return true;
+    return false;
+}
+int Request::If_is_file()
+{
+    if (is_location_has_cgi())
+        request_post_run_cgi();
+    else
+    {
+        _http_status = 403;
+        return ft_http_status(getHttpStatus()); 
+    }
+    return (0);
+}
+
+
+int    Request::If_is_directory()
+{
+    if (is_uri_has_backslash_in_end())
+    {
+        if ( is_dir_has_index_files() )
+        {
+            if (is_location_has_cgi())
+                request_post_run_cgi();
+            else
+            {
+                _http_status = 403;
+                return ft_http_status(getHttpStatus()); 
+            }
+        }
+        else
+        {
+            _http_status = 404;
+            return ft_http_status(getHttpStatus());     
+        }
+    }
+    else
+    {
+        _http_status = 301;
+        return ft_http_status(getHttpStatus());
+    }
+    return 0;
+}
+bool Request::is_location_has_cgi()
+{
+    if (this->_parse->serv[0]->loc[0]->cgi_pass.size())
+    {
+        return true;
+    }
+    return false;
+}
+int     Request::request_post_run_cgi()
+{
+    Server server;
+    CGI cgi;
+    // std::cerr << "|****************|" << std::endl;
+    is_body_size_good(server.getBuffer());
+    cgi.fill_cgi(server.getBuffer(), _parse->serv[0]);
+    cgi.handle_cgi_request(*this);
+    
+    return (0);
 }

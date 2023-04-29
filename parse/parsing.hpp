@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/08 15:36:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 14:52:24 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cstring>
-#include <stdlib.h>
-#include <algorithm>
+#include <cstring> 
 
 
 #ifndef PARSING_HPP
@@ -33,6 +31,7 @@ typedef struct s_location
     std::string return_url;
     int num_return;
     bool auto_index;
+    int flag_auto;
     int location_flag;
     
 } location;
@@ -44,6 +43,7 @@ typedef struct s_server
     int num_location;
     int ind_port;
     unsigned long max_client;
+    int flag_max_client;
     std::vector<std::string> server;
     std::string server_name;
     std::string host;
@@ -52,6 +52,8 @@ typedef struct s_server
     std::vector<int>  lent_server;
     location **loc;
     int server_flag;
+    int location_falg;
+    int error_flag;
 } t_server;
 
 

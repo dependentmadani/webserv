@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/03/23 15:53:51 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 16:16:33 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,14 @@ int main(int ac, char **av)
         else
         {
           std::cout << " File doesn't exist"<<std::endl;       
-            // return (1);
+            return (1);
         }
     }
     else
+    {
         std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
+        exit(1);
+    }
     Server  server(pars->serv[0]->ind_port);
     struct pollfd theOne;
     memset(&theOne, 0, sizeof(theOne));
