@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/15 12:03:46 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 10:07:01 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,11 +132,6 @@ std::vector<int>    Server::getSocket_client() const
 void    Server::setParse(s_parsing * parsed)
 {
     this->_parse = parsed;
-}
-
-int Server::getSocket_fd() const
-{
-    return _socket_fd;
 }
 
 // struct sockaddr_in {

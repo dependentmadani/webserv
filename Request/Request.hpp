@@ -6,7 +6,11 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/04/15 14:15:23 by sriyani          ###   ########.fr       */
+=======
+/*   Updated: 2023/04/28 17:34:18 by sriyani          ###   ########.fr       */
+>>>>>>> khalid
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +22,7 @@
 # include "../parse/parsing.hpp"
 # include <iostream>
 # include <map>
-# include <string>
-# include <sstream>
 # include <sys/stat.h>
-# include <sys/types.h>
-# include <sys/dir.h>
-# include <unistd.h>
 
 # define DIRECTORY  5
 # define FILE       4
@@ -37,21 +36,13 @@ class Request {
         s_parsing                          *_parse;
         int                                 _http_status;
         int                                 _file_directory_check;
-        int                                 _location_index;
-        int                                 _content_length;
         std::vector<std::string>            _file_name_path;
-        std::string                         _available_file_path;
-        std::string                         _directory_path;
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
         std::string                         _protocol;
         std::string                         _body;
-        std::map<std::string, std::string>  _response;
-        std::map<std::string, std::string>  _response_final;
-        // std::map<std::string, std::string>  _response_body;
-        std::string                         _response_body_as_string;
-
+        std::map<std::string, std::string>  _header;
     public:
         Request();
         ~Request();
@@ -77,14 +68,9 @@ class Request {
         int     DELETE_method();
 
         int     Is_directory();
-        void    build_autoindex_page();
-        int     Is_directory_for_DELETE();
-        int     Is_file_for_DELETE();
         int     is_uri_has_backslash_in_end();
         int     is_dir_has_index_files();
         bool    get_auto_index();
-        int     delete_all_folder_content(std::string, int);
-        int     has_write_access_on_folder();
 
         int     Is_file();
 
@@ -96,10 +82,6 @@ class Request {
         std::string remove_space(std::string tmp);
         //get the file_name_path value
         void    reform_requestPath_locationPath();
-        std::string read_file(std::string);
-
-        /*Response functions*/
-        void    build_response();
 
         /* POST */
         int     upload_post_request();
@@ -110,18 +92,17 @@ class Request {
         int     If_is_file();
 
 
+
         
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
-        std::string                         Response;
 
         std::string getBody() const;
         std::string getMethod() const;
         std::string getPath() const;
         std::string getProtocol() const;
         std::string getHeader() const;
-        std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
 };

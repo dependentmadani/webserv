@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/29 09:51:34 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 18:48:48 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,6 +249,11 @@ int    Request::Is_file()
 int Request::get_resource_type()
 {
     return _file_directory_check;
+}
+
+int Request::POST_method()
+{
+    return 0;
 }
 
 int Request::DELETE_method()
@@ -988,13 +993,9 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    std::string value = _response.at("Content-Type");
-    size_t find = value.find("multipart/form-data");
-    if (find != std::string::npos)
-        return true;
+    return true;
     return false;
 }
-
 int Request::If_is_file()
 {
     if (is_location_has_cgi())
@@ -1045,12 +1046,10 @@ bool Request::is_location_has_cgi()
 }
 int     Request::request_post_run_cgi()
 {
-    Server server;
-    CGI cgi;
-    // std::cerr << "|****************|" << std::endl;
-    is_body_size_good(server.getBuffer());
-    cgi.fill_cgi(server.getBuffer(), _parse->serv[0]);
-    cgi.handle_cgi_request(*this);
+
+    
+    // CGI cgi;
+    // cgi.fill_cgi(this->_parse->serv[0]->loc[0]);
     
     return (0);
 }

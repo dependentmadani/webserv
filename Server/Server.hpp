@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:12 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/25 12:09:13 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/04/28 17:37:20 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ class Server {
         int                 getServerFd() const;
         char               *getBuffer();
         std::vector<int>    getSocket_client() const;
-        int                 getSocket_fd() const;
         void                setParse(s_parsing* );
 
     private:

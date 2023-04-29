@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/29 09:48:03 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/29 10:06:28 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ int main(int ac, char **av)
     Request request;
     parsing vars;
     parsing *pars = new parsing();
-    
     if (ac == 2)
     {
         file.open(av[1]);
@@ -54,10 +53,16 @@ int main(int ac, char **av)
     theOne.fd = (server.getSocket_client())[0];
     theOne.events = POLLIN;
     server.recv_data(&theOne);
-    request.ft_http_code();
-    request.ft_mime_type();
+    close(theOne.fd);
+    close(server.getServerFd());
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
+    //  request.is_body_size_good(server.getBuffer());
+    // // CGI cgi;
+    // // request.is_body_size_good(server.getBuffer());
+    // // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
+    // // cgi.handle_cgi_request(request,env);
+    // // request.is_location_has_cgi();
     return (0);
 }
