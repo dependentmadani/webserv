@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/29 10:06:28 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/28 15:32:53 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "Request/Request.hpp"
 #include "parse/parsing.hpp"
 #include "./cgi-bin/cgi.hpp"
-
 int main(int ac, char **av)
 {
     std::ifstream file;
@@ -35,7 +34,7 @@ int main(int ac, char **av)
         else
         {
           std::cout << " File doesn't exist"<<std::endl;       
-            return (1);
+            // return (1);
         }
     }
     else
@@ -58,11 +57,11 @@ int main(int ac, char **av)
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
-    //  request.is_body_size_good(server.getBuffer());
-    // // CGI cgi;
-    // // request.is_body_size_good(server.getBuffer());
-    // // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
-    // // cgi.handle_cgi_request(request,env);
-    // // request.is_location_has_cgi();
+    request.is_body_size_good(server.getBuffer());
+    // CGI cgi;
+    // request.is_body_size_good(server.getBuffer());
+    // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
+    // cgi.handle_cgi_request(request,env);
+    // request.is_location_has_cgi();
     return (0);
 }

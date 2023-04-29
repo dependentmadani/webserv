@@ -6,11 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2023/04/15 14:15:23 by sriyani          ###   ########.fr       */
-=======
-/*   Updated: 2023/04/28 17:34:18 by sriyani          ###   ########.fr       */
->>>>>>> khalid
+/*   Updated: 2023/04/28 09:06:04 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +86,6 @@ class Request {
         bool    is_location_has_cgi();
         int     request_post_run_cgi();
         int     If_is_file();
-
 
 
         

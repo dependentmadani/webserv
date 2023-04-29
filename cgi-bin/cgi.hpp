@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/29 10:01:30 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/04/17 14:32:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ private:
    // // std::string _cgi_name;
    // std::string _server_name;
    // std::string _http_host;
+   char *_pwd;
    std::vector<std::string> hold;
    std::vector<std::string> _envcgi;
    char** _env;
