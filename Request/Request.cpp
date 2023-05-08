@@ -137,6 +137,7 @@ int     Request::if_location_has_cgi()
 {
     if (_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
     {
+        this->Is_file();
         _http_status = 200;
         ft_http_status(getHttpStatus());
         return 0;
@@ -688,67 +689,67 @@ std::string Request::read_file(std::string file)
 void    Request::ft_mime_type()
 {
     //text
-    mime_type["php"]  = "text/html";
-    mime_type["html"]  = "text/html";
-    mime_type["htm"]   = "text/html";
-    mime_type["shtml"] = "text/html";
-    mime_type["css"]   = "text/css";
-    mime_type["xml"]   = "text/xml";
-    //image
-    mime_type["gif"]   = "image/gif";
-    mime_type["jpeg"]  = "image/jpeg";
-    mime_type["jpg"]   = "image/jpeg";
-    //application
-    mime_type["js"]    = "application/javascript";
-    mime_type["atom"]  = "application/atom+xml";
-    mime_type["rss"]   = "application/rss+xml";
-    //text
-    mime_type["mml"]   = "text/mathml";
-    mime_type["txt"]   = "text/plain";
-    mime_type["jad"]   = "text/vnd.sun.j2me.app-descriptor";
-    mime_type["wml"]   = "text/vnd.wap.wml";
-    mime_type["htc"]   = "text/x-component";
-    //image
-    mime_type["avif"]  = "image/avif";
-    mime_type["png"]   = "image/png";
-    mime_type["svg"]   = "image/svg+xml";
-    mime_type["svgz"]  = "image/svg+xml";
-    mime_type["tif"]   = "image/tiff";
-    mime_type["tiff"]  = "image/tiff";
-    mime_type["wbmp"]  = "image/vnd.wap.wbmp";
-    mime_type["webp"]  = "image/webp";
-    mime_type["ico"]   = "image/x-icon";
-    mime_type["jng"]   = "image/x-jng";
-    mime_type["bmp"]   = "image/x-ms-bmp";
-    //font
-    mime_type["woff"]  = "font/woff";
-    mime_type["woff2"] = "font/woff2";
-    //application
-    mime_type["jar"]   = "application/java-archive";
-    mime_type["war"]   = "application/java-archive";
-    mime_type["ear"]   = "application/java-archive";
-    mime_type["json"]  = "application/json";
-    mime_type["hqx"]   = "application/mac-binhex40";
-    mime_type["doc"]   = "application/msword";
-    mime_type["pdf"]   = "application/pdf";
-    mime_type["ps"]    = "application/postscript";
-    mime_type["eps"]   = "application/postscript";
-    mime_type["ai"]    = "application/postscript";
-    mime_type["rtf"]   = "application/rtf";
-    mime_type["m3u8"]  = "application/vnd.apple.mpegurl";
-    mime_type["kml"]   = "application/vnd.google-earth.kml+xml";
-    mime_type["kmz"]   = "application/vnd.google-earth.kmz";
-    mime_type["xls"]   = "application/vnd.ms-excel";
-    mime_type["eot"]   = "application/vnd.ms-fontobject";
-    mime_type["ppt"]   = "application/vnd.ms-powerpoint";
-    mime_type["odg"]   = "application/vnd.oasis.opendocument.graphics";
-    mime_type["odp"]   = "application/vnd.oasis.opendocument.presentation";
-    mime_type["ods"]   = "application/vnd.oasis.opendocument.spreadsheet";
-    mime_type["odt"]   = "application/vnd.oasis.opendocument.text";
-    mime_type["pptx"]  = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-    mime_type["xlsx"]  = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    mime_type["docx"]  = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    mime_type["wmlc"]  = "application/vnd.wap.wmlc";
+    mime_type["php"]    = "text/html";
+    mime_type["html"]   = "text/html";
+    mime_type["htm"]    = "text/html";
+    mime_type["shtml"]  = "text/html";
+    mime_type["css"]    = "text/css";
+    mime_type["xml"]    = "text/xml";
+    //image 
+    mime_type["gif"]    = "image/gif";
+    mime_type["jpeg"]   = "image/jpeg";
+    mime_type["jpg"]    = "image/jpeg";
+    //application 
+    mime_type["js"]     = "application/javascript";
+    mime_type["atom"]   = "application/atom+xml";
+    mime_type["rss"]    = "application/rss+xml";
+    //text 
+    mime_type["mml"]    = "text/mathml";
+    mime_type["txt"]    = "text/plain";
+    mime_type["jad"]    = "text/vnd.sun.j2me.app-descriptor";
+    mime_type["wml"]    = "text/vnd.wap.wml";
+    mime_type["htc"]    = "text/x-component";
+    //image 
+    mime_type["avif"]   = "image/avif";
+    mime_type["png"]    = "image/png";
+    mime_type["svg"]    = "image/svg+xml";
+    mime_type["svgz"]   = "image/svg+xml";
+    mime_type["tif"]    = "image/tiff";
+    mime_type["tiff"]   = "image/tiff";
+    mime_type["wbmp"]   = "image/vnd.wap.wbmp";
+    mime_type["webp"]   = "image/webp";
+    mime_type["ico"]    = "image/x-icon";
+    mime_type["jng"]    = "image/x-jng";
+    mime_type["bmp"]    = "image/x-ms-bmp";
+    //font 
+    mime_type["woff"]   = "font/woff";
+    mime_type["woff2"]  = "font/woff2";
+    //application 
+    mime_type["jar"]    = "application/java-archive";
+    mime_type["war"]    = "application/java-archive";
+    mime_type["ear"]    = "application/java-archive";
+    mime_type["json"]   = "application/json";
+    mime_type["hqx"]    = "application/mac-binhex40";
+    mime_type["doc"]    = "application/msword";
+    mime_type["pdf"]    = "application/pdf";
+    mime_type["ps"]     = "application/postscript";
+    mime_type["eps"]    = "application/postscript";
+    mime_type["ai"]     = "application/postscript";
+    mime_type["rtf"]    = "application/rtf";
+    mime_type["m3u8"]   = "application/vnd.apple.mpegurl";
+    mime_type["kml"]    = "application/vnd.google-earth.kml+xml";
+    mime_type["kmz"]    = "application/vnd.google-earth.kmz";
+    mime_type["xls"]    = "application/vnd.ms-excel";
+    mime_type["eot"]    = "application/vnd.ms-fontobject";
+    mime_type["ppt"]    = "application/vnd.ms-powerpoint";
+    mime_type["odg"]    = "application/vnd.oasis.opendocument.graphics";
+    mime_type["odp"]    = "application/vnd.oasis.opendocument.presentation";
+    mime_type["ods"]    = "application/vnd.oasis.opendocument.spreadsheet";
+    mime_type["odt"]    = "application/vnd.oasis.opendocument.text";
+    mime_type["pptx"]   = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    mime_type["xlsx"]   = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    mime_type["docx"]   = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    mime_type["wmlc"]   = "application/vnd.wap.wmlc";
     mime_type["wasm"]   = "application/wasm";
     mime_type["7z"]     = "application/x-7z-compressed";
     mime_type["cco"]    = "application/x-cocoa";
@@ -952,7 +953,7 @@ void    Request::build_autoindex_page(){
 
 int Request::POST_method()
 {
-    if (location_support_upload())
+    if (location_support_upload()) 
         upload_post_request();
     else
     {
@@ -979,7 +980,7 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    std::string value = _response.at("Content-Type");
+    std::string value = _response["Content-Type"];
     size_t find = value.find("multipart/form-data");
     if (find != std::string::npos)
         return true;
