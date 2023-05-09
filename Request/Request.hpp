@@ -97,6 +97,8 @@ class Request {
         //get the file_name_path value
         void    reform_requestPath_locationPath();
         std::string read_file(std::string);
+        void        build_date();
+        void        add_zero(int timer);
 
         /*Response functions*/
         void    build_response();

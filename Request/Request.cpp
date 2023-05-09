@@ -89,16 +89,57 @@ void    Request::build_response()
     -The content-length describes the length of the response
     -The content-type describes the media type of the resource returned.
     */
-   Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
-   Response.append("Server: webserv/1.0\r\n");
-   std::map<std::string, std::string>::iterator b = _response_final.begin();
-   for (; b != _response_final.end(); ++b)
-   {
-        std::string add_line = b->first + ": " + b->second + "\r\n";
-        Response.append(add_line);
-   }
-   Response.append("\r\n");
-   Response.append(_response_body_as_string);
+//    Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
+    this->build_date();
+    Response.append("Server: webserv/1.0\r\n");
+    std::map<std::string, std::string>::iterator b = _response_final.begin();
+    for (; b != _response_final.end(); ++b)
+    {
+         std::string add_line = b->first + ": " + b->second + "\r\n";
+         Response.append(add_line);
+    }
+    Response.append("\r\n");
+    Response.append(_response_body_as_string);
+}
+
+void Request::add_zero(int timer) {
+    if (timer >= 0 && timer < 10) {
+        Response.append("0");
+    }
+}
+
+void Request::build_date() {
+    time_t now = time(0);
+    std::string days_of_week[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    std::string months[13] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    std::ostringstream convert;
+
+    tm *time = localtime(&now);
+    convert << time->tm_mday;
+    Response.append("Date: ").append(days_of_week[time->tm_wday]).append(", ");
+    this->add_zero(time->tm_mday);
+    Response.append(convert.str()).append(" ");
+    convert.str("");
+    convert.clear();
+    convert << (time->tm_year + 1900);
+    Response.append(months[time->tm_mon]).append(" ").append(convert.str()).append(" ");
+    convert.str("");
+    convert.clear();
+    this->add_zero(time->tm_hour);
+    convert << time->tm_hour;
+    Response.append(convert.str()).append(":");
+    convert.str("");
+    convert.clear();
+    this->add_zero(time->tm_min);
+    convert << time->tm_min;
+    Response.append(convert.str()).append(":");
+    convert.str("");
+    convert.clear();
+    this->add_zero(time->tm_sec);
+    convert << time->tm_sec;
+    Response.append(convert.str()).append(" GMT").append("\r\n");
+    convert.str("");
+    convert.clear();
 }
 
 int Request::GET_method()
