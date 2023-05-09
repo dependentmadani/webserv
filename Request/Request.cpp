@@ -547,9 +547,7 @@ int Request::get_matched_location_for_request_uri()
     {
         int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
         if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
-        {
             check_availability = true;
-        }
     }
     if (!check_availability)
     {
@@ -670,15 +668,15 @@ int Request::check_method_protocol()
     if (_method == "OPTIONS" || _method == "HEAD" || _method == "PUT" || _method == "TRACE" || _method == "CONNECT")
     {
         _http_status = 501;
-        return -1;
+        return ft_http_status(this->getHttpStatus());
     }
     if (_protocol != "HTTP/1.1")
     {
         _http_status = 403; //to check the http status code after...!!
-        return -1;
+        return ft_http_status(this->getHttpStatus());
     }
     _http_status = 501;
-    return -1;
+    return ft_http_status(this->getHttpStatus());
 }
 
 //this function will be able to use response, where it will build a http message

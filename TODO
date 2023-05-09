@@ -11,7 +11,7 @@ get_matched_location_for_request_uri() function. -->
 
 * work with CGI in get method
 
-* build an autoindex page in response.
+<!-- * build an autoindex page in response. -->
 
 * in autoindex page, make sure that when clicking on a file, to add it into the path of address
 
