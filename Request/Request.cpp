@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/29 16:17:54 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/10 14:52:22 by mbadaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ int     Request::ParseRequest(char *request_message)
 
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
+    this->get_location_index();
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
     this->is_request_well_formed(request_message);
@@ -43,7 +44,16 @@ int     Request::ParseRequest(char *request_message)
     return 0;
 }
 
-int Request::UseMethod()
+void    Request::get_location_index() {
+    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    {
+        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+            _location_index = i;
+    }
+}
+
+int     Request::UseMethod()
 {
     if (_method == "GET")
         this->GET_method();
@@ -112,34 +122,18 @@ void Request::build_date() {
     time_t now = time(0);
     std::string days_of_week[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     std::string months[13] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    std::ostringstream convert;
 
     tm *time = localtime(&now);
-    convert << time->tm_mday;
     Response.append("Date: ").append(days_of_week[time->tm_wday]).append(", ");
     this->add_zero(time->tm_mday);
-    Response.append(convert.str()).append(" ");
-    convert.str("");
-    convert.clear();
-    convert << (time->tm_year + 1900);
-    Response.append(months[time->tm_mon]).append(" ").append(convert.str()).append(" ");
-    convert.str("");
-    convert.clear();
+    Response.append(std::to_string(time->tm_mday)).append(" ");
+    Response.append(months[time->tm_mon]).append(" ").append(std::to_string(time->tm_year + 1900)).append(" ");
     this->add_zero(time->tm_hour);
-    convert << time->tm_hour;
-    Response.append(convert.str()).append(":");
-    convert.str("");
-    convert.clear();
+    Response.append(std::to_string(time->tm_hour)).append(":");
     this->add_zero(time->tm_min);
-    convert << time->tm_min;
-    Response.append(convert.str()).append(":");
-    convert.str("");
-    convert.clear();
+    Response.append(std::to_string(time->tm_min)).append(":");
     this->add_zero(time->tm_sec);
-    convert << time->tm_sec;
-    Response.append(convert.str()).append(" GMT").append("\r\n");
-    convert.str("");
-    convert.clear();
+    Response.append(std::to_string(time->tm_sec)).append(" GMT").append("\r\n");
 }
 
 int Request::GET_method()
@@ -204,10 +198,7 @@ int    Request::Is_directory()
             else
             {
                 //build an autoindex page in response.
-                // if (_parse->serv[0]->loc[_parse->serv[0]->num_location]->index.empty())
                 this->build_autoindex_page();
-                // else
-                //     this->Is_file();
                 _http_status = 200;
                 return ft_http_status(getHttpStatus());
             }
@@ -512,12 +503,12 @@ int    Request::HeaderRequest(char *request_message)
 
 int Request::is_request_well_formed(char *request_message)
 {
-    if (_method == "POST" && !is_available(std::string("TRANSFER-ENCODING"), std::string("chunked")))
+    if (_method == "POST" && is_available(std::string("Transfer-Encoding"), std::string("chunked")))
     {
         _http_status = 501;
         return ft_http_status(getHttpStatus());
     }
-    if (_method == "POST" && !is_available(std::string("TRANSFER-ENCODING"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
+    if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
     {
         _http_status = 400;
         return ft_http_status(getHttpStatus());
@@ -584,13 +575,13 @@ int Request::get_matched_location_for_request_uri()
 
 int Request::is_location_have_redirection()
 {
-    for (size_t i = 0; i < _parse->serv[0]->loc[1]->location.size(); ++i)
+    for (size_t i = 0; i < _parse->serv[0]->loc[_location_index]->location.size(); ++i)
     {
-        if (_parse->serv[0]->loc[1]->location[i].find("return 301") != std::string::npos)
+        if (_parse->serv[0]->loc[_location_index]->location[i].find("return 301") != std::string::npos)
         {
-            size_t position_of_return = _parse->serv[0]->loc[1]->location[i].find("return 301") + 10;
+            size_t position_of_return = _parse->serv[0]->loc[_location_index]->location[i].find("return 301") + 10;
             _http_status = 301;
-            _path = _parse->serv[0]->loc[1]->location[i].substr(position_of_return, _parse->serv[0]->loc[1]->location[i].size());
+            _path = _parse->serv[0]->loc[_location_index]->location[i].substr(position_of_return, _parse->serv[0]->loc[_location_index]->location[i].size());
             _path = remove_space(_path);
             return ft_http_status(getHttpStatus());
         }
@@ -600,16 +591,13 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-    for (int k = 0; k < _parse->serv[0]->num_location; ++k)
+    int size_for_path = _parse->serv[0]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[_location_index]->url_location)
     {
-        int size_for_path = _parse->serv[0]->loc[k]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[k]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[k]->url_location)
+        for (size_t i = 0; i < _parse->serv[0]->loc[_location_index]->methods.size(); ++i)
         {
-            for (size_t i = 0; i < _parse->serv[0]->loc[k]->methods.size(); ++i)
-            {
-                if (this->getMethod() == _parse->serv[0]->loc[1]->methods[i])
-                    return 0;
-            }
+            if (this->getMethod() == _parse->serv[0]->loc[_location_index]->methods[i])
+                return 0;
         }
     }
     return 1;
@@ -619,55 +607,48 @@ void    Request::reform_requestPath_locationPath()
 {
     std::string get_root;
     struct stat stat_buff;
+    int     i = 0;
 
-    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    i = _location_index;
+    if (this->getPath()[_parse->serv[0]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
+        get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size() + 1, this->getPath().size());
+    else if (this->getPath().size() == 1)
+        get_root = this->getPath();
+    else
+        get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size(), this->getPath().size());
+    while (get_root[get_root.size() - 1] == '/' && this->getPath().size() != 1)
     {
-        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
-        // std::cout << "size of url_location: " << _parse->serv[0]->loc[i]->url_location.size() << ", size of request path: " << getPath().size() << " " << getPath() << std::endl;
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        get_root.resize(get_root.size() - 1);
+    }
+    std::string complete_path = _parse->serv[0]->loc[i]->root_location + "/" + get_root;
+    while (complete_path[complete_path.size() - 1] == '/')
+    {
+        complete_path.resize(complete_path.size() - 1);
+    }
+    stat(complete_path.c_str(), &stat_buff);
+    // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
+    if (S_ISDIR(stat_buff.st_mode))
+    {
+        std::cout << "complete path: " << complete_path << std::endl;
+        _directory_path = complete_path;
+        _file_directory_check = DIRECTORY;
+        if (!_parse->serv[0]->loc[i]->index.empty())
         {
-            _location_index = i;
-            if (this->getPath()[_parse->serv[0]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
-                get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size() + 1, this->getPath().size());
-            else if (this->getPath().size() == 1)
-                get_root = this->getPath();
-            else
-                get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size(), this->getPath().size());
-            while (get_root[get_root.size() - 1] == '/' && this->getPath().size() != 1)
+            for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i]->index.size(); ++index_indexes)
             {
-                get_root.resize(get_root.size() - 1);
-            }
-            std::string complete_path = _parse->serv[0]->loc[i]->root_location + "/" + get_root;
-            while (complete_path[complete_path.size() - 1] == '/')
-            {
-                complete_path.resize(complete_path.size() - 1);
-            }
-            stat(complete_path.c_str(), &stat_buff);
-            // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
-            if (S_ISDIR(stat_buff.st_mode))
-            {
-                std::cout << "complete path: " << complete_path << std::endl;
-                _directory_path = complete_path;
-                _file_directory_check = DIRECTORY;
-                if (!_parse->serv[0]->loc[i]->index.empty())
-                {
-                    for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i]->index.size(); ++index_indexes)
-                    {
-                        _file_name_path.push_back(complete_path + "/" + _parse->serv[0]->loc[i]->index[index_indexes]);
-                    }
-                }
-            }
-            else if (S_ISREG(stat_buff.st_mode))
-            {
-                _file_directory_check = FILE;
-                _content_length = stat_buff.st_size;
-                _file_name_path.push_back(complete_path);
-            }
-            else
-            {
-                _file_directory_check = ERROR;
+                _file_name_path.push_back(complete_path + "/" + _parse->serv[0]->loc[i]->index[index_indexes]);
             }
         }
+    }
+    else if (S_ISREG(stat_buff.st_mode))
+    {
+        _file_directory_check = FILE;
+        _content_length = stat_buff.st_size;
+        _file_name_path.push_back(complete_path);
+    }
+    else
+    {
+        _file_directory_check = ERROR;
     }
     // std::cout << "the location is: " << _location_index << std::endl;
 }
@@ -991,7 +972,7 @@ void    Request::print_parse_vector()
     std::cout << _parse->serv[0]->loc[_location_index]->url_location << std::endl;
 }
 
-void    Request::build_autoindex_page(){
+void    Request::build_autoindex_page() {
     DIR *dir;
     struct dirent *files;
 
@@ -1093,7 +1074,7 @@ int    Request::If_is_directory()
 }
 bool Request::is_location_has_cgi()
 {
-    if (this->_parse->serv[0]->loc[0]->cgi_pass.size())
+    if (this->_parse->serv[0]->loc[_location_index]->cgi_pass.size())
     {
         return true;
     }

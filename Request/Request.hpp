@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/29 16:17:23 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/10 14:52:28 by mbadaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ class Request {
 
         int     Is_file();
 
+        //get which location
+        void    get_location_index();
         //function to check in the header
         int     is_available(std::string, std::string);
         //function to check url for a character not allowed
