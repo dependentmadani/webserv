@@ -10,16 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include "cgi.hpp"
-#include <stdlib.h>
-#include <sstream>
-#include <fstream>
-#include <cstdio>
-#include <fcntl.h>
+
 
 CGI::CGI(/* args */)
 {

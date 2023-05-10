@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() : _directory_path(), _method(), _path(), _protocol() ,_response(), http_code(), allowed_methods()
+Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() ,_response(), http_code(), allowed_methods()
 {
     _location_index = 0;
     _http_status = 200;
@@ -184,6 +184,7 @@ int     Request::if_location_has_cgi()
         return 0;
     }
     //call the constructor of cgi, than get the data from cgi. All of that as an else condition
+    CGI();
     _http_status = 200; //to check depends on cgi
     ft_http_status(getHttpStatus());
     return 1;
@@ -435,10 +436,34 @@ int    Request::FirstLinerRequest(char *request_message)
     _method = std::string(split_first_liner[0]);
     if (!split_first_liner[1])
         return -1;
-    _path = std::string(split_first_liner[1]);
+    this->check_for_arguments_in_path(std::string(split_first_liner[1]));
     if (!split_first_liner[2])
         return -1;
     _protocol = std::string(split_first_liner[2]);
+    return 0;
+}
+
+int     Request::check_for_arguments_in_path(std::string path) {
+    size_t position = path.find("?");
+    if (position != std::string::npos) {
+        char *catcher = strtok((char *)path.c_str(), "?");
+        _path = std::string(catcher);
+        if ((position + 1) == path.size())
+            return 1;
+        catcher = strtok(NULL, "?");
+        std::string args = std::string(catcher);
+        char** splited_args = ft_split(args.c_str(), '&');
+        int i = 0;
+        while (splited_args[i]) {
+            std::string tmp = splited_args[i];
+            size_t pos = tmp.find("=");
+            _arguments[tmp.substr(0, pos)] = tmp.substr(pos + 1, tmp.size());
+            i++;
+        }
+    }
+    else {
+        _path = path;
+    }
     return 0;
 }
 
@@ -1013,6 +1038,7 @@ int Request::POST_method()
 }
 int Request::upload_post_request()
 {
+
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
@@ -1054,7 +1080,7 @@ int    Request::If_is_directory()
         }
         else
         {
-            _http_status = 404;
+            _http_status = 404; //to check after ???????????
             return ft_http_status(getHttpStatus());     
         }
     }

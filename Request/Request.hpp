@@ -16,6 +16,7 @@
 # include "../Server/Server.hpp"
 # include "../utils/utils.hpp"
 # include "../parse/parsing.hpp"
+# include "../cgi-bin/cgi.hpp"
 # include <iostream>
 # include <map>
 # include <string>
@@ -45,6 +46,7 @@ class Request {
         std::string                         _first_liner_header;
         std::string                         _method;
         std::string                         _path;
+        std::map<std::string, std::string>  _arguments;
         std::string                         _protocol;
         std::string                         _body;
         std::map<std::string, std::string>  _response;
@@ -97,8 +99,9 @@ class Request {
         //get the file_name_path value
         void    reform_requestPath_locationPath();
         std::string read_file(std::string);
-        void        build_date();
-        void        add_zero(int timer);
+        void    build_date();
+        void    add_zero(int timer);
+        int     check_for_arguments_in_path(std::string path);
 
         /*Response functions*/
         void    build_response();

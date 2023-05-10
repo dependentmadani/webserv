@@ -11,10 +11,22 @@
 /* ************************************************************************** */
 
 #ifndef CGI_HPP
-#include <iostream>
-#include <map>
-#include "../parse/parsing.hpp"
-#include "../Request/Request.hpp"
+# define CGI_HPP
+
+# include "../parse/parsing.hpp"
+# include <iostream>
+# include <map>
+# include <stdlib.h>
+# include <sstream>
+# include <fstream>
+# include <cstdio>
+# include <fcntl.h>
+# include <string.h>
+# include <unistd.h>
+# include <stdlib.h>
+
+class Request;
+
 class CGI
 {
 private:
@@ -39,6 +51,8 @@ public:
  void fill_cgi(char *buffer, t_server *serv);
  void handle_cgi_request(Request& req);
 };
+
+# include "../Request/Request.hpp"
 
 #endif
 
