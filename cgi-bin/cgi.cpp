@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/10 18:47:27 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/11 10:54:46 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
 {
     std::stringstream ss(buffer);
     std::string token;
+
     while (getline(ss, token, '\n'))
     {
         if (token != "\0")
@@ -116,6 +117,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
         _env[i]  = const_cast<char*> (strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
    _cgi_script =  serv->loc[0]->cgi_pass[1].c_str();
+
     
 }
 void CGI::handle_cgi_request(Request& req)
@@ -131,6 +133,7 @@ void CGI::handle_cgi_request(Request& req)
     tmp += "/";
     tmp += _cgi_script.c_str() + 2;
     ptr[0] = const_cast<char*> (tmp.c_str());
+
     ptr[1] = NULL;
     
     std::stringstream ss;
@@ -138,6 +141,7 @@ void CGI::handle_cgi_request(Request& req)
 
     int fd = open("file.txt", O_CREAT| O_RDWR, 644);
     write(fd, req.getBody().c_str(),req.getBody().length());
+
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -172,3 +176,4 @@ void CGI::handle_cgi_request(Request& req)
     // close(fd);
     close(pipe_fd[0]);
 }
+

@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/10 18:50:37 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/11 10:57:54 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -975,7 +975,7 @@ int Request::POST_method()
 }
 int Request::upload_post_request()
 {
-    
+
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
@@ -1053,4 +1053,5 @@ int     Request::request_post_run_cgi()
 std::string const& Request::getBody() const
 {
     return _body;
+
 }
