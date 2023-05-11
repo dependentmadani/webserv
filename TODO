@@ -13,17 +13,6 @@ get_matched_location_for_request_uri() function. -->
 
 * build an autoindex page in response.
 
-_metaVars["SERVER_PROTOCOL"] = clientInfo->getHeader().getProtocol();
-        _metaVars["SERVER_PORT"] = clientInfo->getServerConf().getService();
-        _metaVars["REQUEST_METHOD"] = clientInfo->getHeader().getRequestType();
-        _metaVars["PATH_INFO"] = clientInfo->getRequestedPath();
-        _metaVars["SCRIPT_FILENAME"] = clientInfo->geReqFileFullPath();
-        _metaVars["SCRIPT_NAME"] = clientInfo->getCGIPath();
-        _metaVars["QUERY_STRING"] = clientInfo->getHeader().getPath().getParams();
-        _metaVars["REMOTE_ADDR"] = clientInfo->getIpAddress();
-        _metaVars["REMOTE_PORT"] = clientInfo->getService();
-        _metaVars["REDIRECT_STATUS"] = "200";
-        if (clientInfo->getHeader().has("Content-type"))
-            _metaVars["CONTENT_TYPE"] = clientInfo->getHeader().valueOf("Content-type");
-        if (clientInfo->getHeader().has("Content-length"))
-            _metaVars["CONTENT_LENGTH"] = std::to_string(clientInfo->getContentLength());
+* in autoindex page, make sure that when clicking on a file, to add it into the path of address
+
+

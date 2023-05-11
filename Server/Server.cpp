@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/04/17 17:22:36 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/25 12:09:05 by mbadaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,8 @@ int    Server::recv_data(struct pollfd *poll)
 	std::cout << "\n\n" << "===============   "  << data << " BYTES  RECEIVED   ===============\n";
 	std::cout << _buffer;
 	std::cout << "\n======================================================" << std::endl;
-    return (data);
+
+	return (data);
 }
 
 int Server::getServerFd() const
@@ -132,6 +133,11 @@ std::vector<int>    Server::getSocket_client() const
 void    Server::setParse(s_parsing * parsed)
 {
     this->_parse = parsed;
+}
+
+int Server::getSocket_fd() const
+{
+    return _socket_fd;
 }
 
 // struct sockaddr_in {
