@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() ,_response(), http_code(), allowed_methods()
+Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_response(), http_code(), allowed_methods()
 {
     _location_index = 0;
     _http_status = 200;
@@ -488,7 +488,6 @@ int    Request::HeaderRequest(char *request_message)
     // char *tmp_request = request_message;
     // char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
 
-    // splited_header = strtok_r(NULL, "\r\n", &tmp);
     int i = 1;
     while (splited_header[i] != NULL)
     {
@@ -500,6 +499,11 @@ int    Request::HeaderRequest(char *request_message)
         }
         else
             break ;
+    }
+    std::string tmp(request_message);
+    size_t position_empty_line = tmp.find("\r\n\r\n");
+    if (position_empty_line != std::string::npos && position_empty_line != tmp.size()) {
+        _body = tmp.substr(position_empty_line + 3, tmp.size());
     }
     return 0;
 }
@@ -912,10 +916,6 @@ int Request::url_characters_checker()
 
 int Request::is_body_size_good(char *request_message)
 {
-    // char *tmp_request_body = strstr(request_message, "\r\n\r\n");
-    // tmp_request_body[0] = '\0';
-    // _body = std::string(tmp_request_body + 4);
-    // std::cerr << _body << std::endl;
     (void)request_message;
     if (_body.size() > (size_t)_parse->serv[0]->max_client)
         return 1;
