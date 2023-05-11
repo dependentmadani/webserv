@@ -40,7 +40,7 @@ int     Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     }
     this->reform_requestPath_locationPath();
-    // print_parse_vector();
+    print_parse_vector();
     return 0;
 }
 
@@ -405,7 +405,7 @@ int Request::delete_all_folder_content(std::string folder_file, int type)
             std::cout << "something wrong in file" << std::endl;
             return 0;
         }
-    }
+     }
     return 1;
 }
 
@@ -556,11 +556,12 @@ int Request::get_matched_location_for_request_uri()
         }
         url.erase(0, pos + 1);
     }
-    //need to check if its available
+    // need to check if its available
     size_t number_of_location = 2;
     bool check_availability = false;
     for (size_t i = 0; i < number_of_location; ++i)
     {
+        // std::cout<<"|**************|"<<_parse->serv[0]->loc[0]->url_location.size()<<std::endl;
         int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
         if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
             check_availability = true;
@@ -1019,17 +1020,19 @@ int Request::POST_method()
 }
 int Request::upload_post_request()
 {
-    
+
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
 
 bool Request::location_support_upload()
 {
-    std::string value = _response["Content-Type"];
-    size_t find = value.find("multipart/form-data");
-    if (find != std::string::npos)
-        return true;
+   if (_response.find("Content-Type") != _response.end())
+    {
+        size_t find = _response["Content-Type"].find("multipart/form-data");
+        if (find != std::string::npos)
+            return true;
+    }
     return false;
 }
 int Request::If_is_file()
@@ -1090,4 +1093,10 @@ int     Request::request_post_run_cgi()
     cgi.handle_cgi_request(*this);
     
     return (0);
+}
+
+std::string const& Request::getBody() const
+{
+    return _body;
+
 }

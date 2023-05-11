@@ -128,6 +128,7 @@ class Request {
         std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
+        std::string const& getBody() const;
 };
 
 #endif

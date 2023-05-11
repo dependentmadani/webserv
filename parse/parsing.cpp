@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/04/28 15:04:56 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/11 10:56:35 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -367,8 +367,8 @@ void parsing::check_location(location *loc)
         std::cout<< "ERROR FROM LOCATION "<<std::endl;
         exit(0);
     }
-    // if (loc->root_location.empty() || loc->methods.empty() ||  loc->index.empty()) // ||  loc->cgi_pass.empty()|| !loc->flag_auto)
-    //     print_error();
+    if (loc->root_location.empty() || loc->methods.empty() ||  loc->index.empty())// ||  loc->cgi_pass.empty()|| !loc->flag_auto)
+        print_error();
 }
 
 void parsing::check_server(s_parsing *pars, size_t len)
