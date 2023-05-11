@@ -42,7 +42,8 @@ public:
       ~CGI();
       void fill_cgi(char *buffer, t_server *serv);
       void handle_cgi_request(Request& req);
-      std::string const& getHoldbuffer()const;
+      std::string const& getHoldbuffer() const;
+      std::string const& getRespBuffer() const;
 };
 
 # include "../Request/Request.hpp"

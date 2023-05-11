@@ -10,8 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include "cgi.hpp"
-
+#include <stdlib.h>
+#include <sstream>
+#include <fstream>
+#include <cstdio>
+#include <fcntl.h>
 
 CGI::CGI(/* args */)
 {
@@ -20,11 +28,13 @@ CGI::CGI(/* args */)
 CGI::~CGI()
 {
 }
+
 void CGI::fill_cgi(char *buffer, t_server *serv)
 {
     std::stringstream ss(buffer);
     std::string token;
 
+    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     while (getline(ss, token, '\n'))
     {
         if (token != "\0")
@@ -42,7 +52,6 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
     _envcgi.push_back("REDIRECT_STATUS=200");
     for(size_t j = 0;j < hold.size();j++)
     {
-        
         size_t found = hold[j].find("HTTP/");
         if (found != std::string::npos)
         {
@@ -108,10 +117,9 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
     for (size_t i = 0; i < _envcgi.size(); i++)
         _env[i]  = const_cast<char*> (strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
-   _cgi_script =  serv->loc[0]->cgi_pass[1].c_str();
-
-    
+   _cgi_script =  serv->loc[0]->cgi_pass[1].c_str();    
 }
+
 void CGI::handle_cgi_request(Request& req)
 {
     int pipe_fd[2];
@@ -169,3 +177,6 @@ void CGI::handle_cgi_request(Request& req)
     close(pipe_fd[0]);
 }
 
+std::string const& CGI::getRespBuffer() const {
+    return resp_buffer;
+}

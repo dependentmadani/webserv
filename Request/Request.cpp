@@ -40,7 +40,6 @@ int     Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     }
     this->reform_requestPath_locationPath();
-    print_parse_vector();
     return 0;
 }
 
@@ -143,7 +142,7 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
-    if (this->get_resource_type() == DIRECTORY)
+    if (this->get_resource_type() == DIRECTORY) 
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
         return this->Is_file();
@@ -178,7 +177,7 @@ int     Request::if_location_has_cgi()
         return 0;
     }
     //call the constructor of cgi, than get the data from cgi. All of that as an else condition
-    CGI();
+    this->request_run_cgi();
     _http_status = 200; //to check depends on cgi
     ft_http_status(getHttpStatus());
     return 1;
@@ -309,6 +308,8 @@ int    Request::Is_directory_for_DELETE()
                 //run cgi on requested file with DELETE REQUEST METHOD
                 //and check if this directory has an index file and cgi
                 //then return code depend on cgi
+                _http_status = this->request_run_cgi();
+                return ft_http_status(getHttpStatus());
             }
             else
             {
@@ -358,6 +359,8 @@ int Request::Is_file_for_DELETE()
         std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
         //nothing to do here for the moment. waiting for cgi to be done.
         //return code depend on cgi
+        _http_status = 200;
+        return ft_http_status(getHttpStatus());
     }
     else
     {
@@ -909,9 +912,11 @@ int Request::url_characters_checker()
 
 int Request::is_body_size_good(char *request_message)
 {
-    char *tmp_request_body = strstr(request_message, "\r\n\r\n");
-    tmp_request_body[0] = '\0';
-    _body = std::string(tmp_request_body + 4);
+    // char *tmp_request_body = strstr(request_message, "\r\n\r\n");
+    // tmp_request_body[0] = '\0';
+    // _body = std::string(tmp_request_body + 4);
+    // std::cerr << _body << std::endl;
+    (void)request_message;
     if (_body.size() > (size_t)_parse->serv[0]->max_client)
         return 1;
     return 0;
@@ -1038,7 +1043,7 @@ bool Request::location_support_upload()
 int Request::If_is_file()
 {
     if (is_location_has_cgi())
-        request_post_run_cgi();
+        request_run_cgi();
     else
     {
         _http_status = 403;
@@ -1047,7 +1052,6 @@ int Request::If_is_file()
     return (0);
 }
 
-
 int    Request::If_is_directory()
 {
     if (is_uri_has_backslash_in_end())
@@ -1055,7 +1059,7 @@ int    Request::If_is_directory()
         if ( is_dir_has_index_files() )
         {
             if (is_location_has_cgi())
-                request_post_run_cgi();
+                request_run_cgi();
             else
             {
                 _http_status = 403;
@@ -1075,6 +1079,7 @@ int    Request::If_is_directory()
     }
     return 0;
 }
+
 bool Request::is_location_has_cgi()
 {
     if (this->_parse->serv[0]->loc[_location_index]->cgi_pass.size())
@@ -1083,20 +1088,24 @@ bool Request::is_location_has_cgi()
     }
     return false;
 }
-int     Request::request_post_run_cgi()
+
+int     Request::request_run_cgi()
 {
-    Server server;
+    // Server server;
     CGI cgi;
-    // std::cerr << "|****************|" << std::endl;
-    is_body_size_good(server.getBuffer());
-    cgi.fill_cgi(server.getBuffer(), _parse->serv[0]);
+
+    if (is_body_size_good(_server.getBuffer()))
+    {
+        _http_status = 413;
+        return ft_http_status(getHttpStatus());
+    }
+    cgi.fill_cgi(_server.getBuffer(), _parse->serv[0]);
     cgi.handle_cgi_request(*this);
-    
-    return (0);
+    _response_body_as_string = cgi.getRespBuffer();
+    return (200);
 }
 
 std::string const& Request::getBody() const
 {
     return _body;
-
 }

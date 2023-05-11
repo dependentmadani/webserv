@@ -113,7 +113,7 @@ class Request {
         bool    location_support_upload();
         int     If_is_directory();
         bool    is_location_has_cgi();
-        int     request_post_run_cgi();
+        int     request_run_cgi();
         int     If_is_file();
 
         std::map<int, std::string>          http_code;
