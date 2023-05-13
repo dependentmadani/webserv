@@ -22,7 +22,9 @@
 # include <errno.h>
 # include <unistd.h>
 # include <vector>
+# include <fcntl.h>
 # include <errno.h>
+# include <netdb.h>
 # include "../parse/parsing.hpp"
 
 # define BUFFER_SIZE 8192
@@ -33,14 +35,17 @@ class Server {
         Server(int port);
         ~Server();
         
-        int     initiat_server();
-        void    accept_connections();
-        int     recv_data(struct pollfd *poll);
+        int     initiate_socket(int num_serv);
+        void    accept_connections(int position);
+        int     recv_data();
 
         int                 getServerFd() const;
-        char               *getBuffer();
+        std::string         getBufferString() const;
+        char*               getBuffer();
         std::vector<int>    getSocket_client() const;
         int                 getSocket_fd() const;
+        int                 getSocket_to_accept() const;
+        void                setPort(int);
         void                setParse(s_parsing* );
 
     private:
@@ -50,7 +55,9 @@ class Server {
         int                 _port;
         std::vector<int>    _socket_client;
         char                _buffer[BUFFER_SIZE + 1];
+        std::string         _buffer_complete;
         bool                _connexion_status;
+        fd_set              _readfds;
         s_parsing           *_parse;
 };
 

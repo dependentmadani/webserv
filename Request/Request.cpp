@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_response(), http_code(), allowed_methods()
+Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _location_index = 0;
     _http_status = 200;
@@ -494,12 +494,13 @@ int    Request::HeaderRequest(char *request_message)
         if (std::string(splited_header[i]).find(":") != std::string::npos)
         {
             char **split_each_line = ft_split(splited_header[i], ':');
-            _response[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+            _header[std::string(split_each_line[0])] = std::string(split_each_line[1]).erase(0, 1);
             i++;
         }
         else
             break ;
     }
+    std::cerr << "the transfer encoding: " << _header["Content-Type"] << "|" << std::endl;
     std::string tmp(request_message);
     size_t position_empty_line = tmp.find("\r\n\r\n");
     if (position_empty_line != std::string::npos && position_empty_line != tmp.size()) {
@@ -897,9 +898,9 @@ void    Request::ft_http_code()
 
 int Request::is_available(std::string key, std::string value)
 {
-    int val = _response.count(key);
+    int val = _header.count(key);
 
-    if (val && !value.empty() && _response[key] != value)
+    if (val && !value.empty() && _header[key] != value)
         return 0;
     if (!val)
         return 0;
@@ -925,6 +926,10 @@ int Request::is_body_size_good(char *request_message)
 std::string Request::getPath() const
 {
     return _path;
+}
+
+std::map<std::string, std::string> Request::getHeader() const {
+    return _header;
 }
 
 int     Request::getHttpStatus() const
@@ -1023,6 +1028,7 @@ int Request::POST_method()
     }
     return 0;
 }
+
 int Request::upload_post_request()
 {
 
@@ -1032,9 +1038,9 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-   if (_response.find("Content-Type") != _response.end())
+   if (_header.find("Content-Type") != _header.end())
     {
-        size_t find = _response["Content-Type"].find("multipart/form-data");
+        size_t find = _header["Content-Type"].find("multipart/form-data");
         if (find != std::string::npos)
             return true;
     }

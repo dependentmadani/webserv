@@ -49,7 +49,7 @@ class Request {
         std::map<std::string, std::string>  _arguments;
         std::string                         _protocol;
         std::string                         _body;
-        std::map<std::string, std::string>  _response;
+        std::map<std::string, std::string>  _header;
         std::map<std::string, std::string>  _response_final;
         // std::map<std::string, std::string>  _response_body;
         std::string                         _response_body_as_string;
@@ -88,6 +88,8 @@ class Request {
         int     delete_all_folder_content(std::string, int);
         int     has_write_access_on_folder();
 
+        void    create_form_for_post();
+
         int     Is_file();
 
         //get which location
@@ -124,7 +126,7 @@ class Request {
         std::string getMethod() const;
         std::string getPath() const;
         std::string getProtocol() const;
-        std::string getHeader() const;
+        std::map<std::string, std::string> getHeader() const;
         std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);

@@ -48,34 +48,68 @@ int main(int ac, char **av)
         exit(1);
     }
     Server  server(pars->serv[0]->ind_port);
-    struct pollfd theOne;
-    memset(&theOne, 0, sizeof(theOne));
+    // struct pollfd theOne;
+    // memset(&theOne, 0, sizeof(theOne));
     server.setParse(pars);
-    if (server.initiat_server() < 0)
+    request.ft_http_code();
+    request.ft_mime_type();
+    request.setParse(pars);
+    fd_set  rds, rds_ready;
+    FD_ZERO(&rds);
+    for (int i = 0; i < pars->num_serv; ++i) {
+    server.setPort(pars->serv[i]->ind_port);
+    if (server.initiate_socket(i) < 0)
         return (1);
-    server.accept_connections();
-    theOne.fd = (server.getSocket_client())[0];
-    theOne.events = POLLIN;
-    server.recv_data(&theOne);
+    FD_SET(server.getSocket_fd(), &rds);
+    std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
+    }
+    while (1) {
+    rds_ready = rds;
+    if (select(FD_SETSIZE, &rds_ready, NULL, NULL, NULL) < 0) {
+        perror("select: ");
+        exit(0);
+    }
+    for (int i = 1; i < FD_SETSIZE; ++i) {
+        if (FD_ISSET(i, & rds)) {
+            if (std::find(server.getSocket_client().begin(), server.getSocket_client().end(), i) != server.getSocket_client().end()) {
+                std::cerr << "accept a connection" << i <<std::endl;
+                server.accept_connections(i);
+                server.recv_data();
+                FD_SET(server.getSocket_to_accept(), &rds);
+            }
+            else {
+                std::cerr << "it diiiid reaaach heree" << std::endl;
+                request.ParseRequest(server.getBuffer());
+                request.UseMethod();
+                request.build_response();
+                send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                std::cerr << "*********************************************" << std::endl;
+                std::cout << request.Response << std::endl;
+                FD_CLR(i , &rds);
+            }
+        }
+    }
+    // server.accept_connections();
+    // theOne.fd = (server.getSocket_client())[0];
+    // theOne.events = POLLIN;
+    // int n = server.recv_data(&theOne);
     request.ft_http_code();
     request.ft_mime_type();
     request.setParse(pars);
     request.ParseRequest(server.getBuffer());
     request.UseMethod();
     request.build_response();
-    int e = send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-    (void)e;
-    // std::cout << "|****************************************|" << std::endl;
-    // cgi.fill_cgi(server.getBuffer(), pars->serv[0]);
-    // cgi.handle_cgi_request(request);
-    //  std::cout << "|****************************************|" << std::endl;
-    // std::cout << "all good at this place :): " << theOne.fd << std::endl;
-    // std::cout << "return of send ft: " << e <<  ", len of the string: " << strlen(request.getResponse().c_str()) << std::endl;
+    send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+    std::cerr << "*********************************************" << std::endl;
+    // for (int i = 0; i < n; ++i) {
+    //     std::cerr << request.getBody()[i];
+    // }
     std::cout << "----------------------------------" << std::endl;
     std::cout << request.Response << std::endl;
-    close(theOne.fd);
+    // close(theOne.fd);
     close(server.getServerFd());
     close(server.getSocket_client()[0]); 
+    }
     return (0);
 }
 
