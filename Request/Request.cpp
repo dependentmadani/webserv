@@ -14,6 +14,7 @@
 #include "../cgi-bin/cgi.hpp"
 Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
+    _server_index = 0;
     _location_index = 0;
     _http_status = 200;
     _content_length = 0;
@@ -22,10 +23,41 @@ Request::Request() : _directory_path(), _method(), _path(), _arguments(), _proto
 Request::~Request()
 { }
 
+void    Request::clear_request_class() {
+    _http_status = 0;
+    _file_directory_check = 0;
+    _server_index = 0;
+    _location_index = 0;
+    _content_length = 0;
+    _file_name_path.clear();
+    _arguments.clear();
+    _header.clear();
+    _response_final.clear();
+    Response.clear();
+    Response = "";
+    _available_file_path.clear();
+    _available_file_path = "";
+    _directory_path.clear();
+    _directory_path = "";
+    _first_liner_header.clear();
+    _first_liner_header = "";
+    _method.clear();
+    _method = "";
+    _path.clear();
+    _path = "";
+    _protocol.clear();
+    _protocol = "";
+    _body.clear();
+    _body = "";
+    _response_body_as_string.clear();
+    _response_body_as_string = "";
+}
+
 int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
 
+    this->clear_request_class();
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
     this->get_location_index();
@@ -44,10 +76,10 @@ int     Request::ParseRequest(char *request_message)
 }
 
 void    Request::get_location_index() {
-    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
     {
-        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
             _location_index = i;
     }
 }
@@ -72,7 +104,7 @@ void    Request::build_response()
     // _response["return_code"] = converted.str();
     // _response["status"] = http_code[this->getHttpStatus()];
     Response = "HTTP/1.1 " + converted.str() + " " + http_code[this->getHttpStatus()] + "\r\n";
-    // _response_final["Location"] = "http://" + _parse->serv[0]->server_name +_path; // to make a variable to contruct the full location
+    // _response_final["Location"] = "http://" + _parse->serv[_server_index]->server_name +_path; // to make a variable to contruct the full location
     std::string file_type;
 
     int position_extension = _available_file_path.find_last_of(".");
@@ -137,12 +169,12 @@ void Request::build_date() {
 
 int Request::GET_method()
 {
-    if (this->get_request_resource() && !_parse->serv[0]->loc[_location_index]->auto_index)
+    if (this->get_request_resource() && !_parse->serv[_server_index]->loc[_location_index]->auto_index)
     {
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
-    if (this->get_resource_type() == DIRECTORY) 
+    if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
         return this->Is_file();
@@ -156,6 +188,7 @@ int Request::get_request_resource()
     for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end() ; ++b)
     {
         int stat_return = stat((*b).c_str(), &stat_buff);
+        std::cerr << "value would be: " << stat_return << std::endl;
         if (stat_return != -1)
         {
             _available_file_path = *b;
@@ -169,7 +202,7 @@ int Request::get_request_resource()
 
 int     Request::if_location_has_cgi()
 {
-    if (_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
+    if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
         this->Is_file();
         _http_status = 200;
@@ -210,13 +243,13 @@ int    Request::Is_directory()
     }
     else
     {
-        if ( !get_auto_index() )
-        {
-            _http_status = 403;
-            return ft_http_status(getHttpStatus());
-        }
+        // if ( !get_auto_index() )
+        // {
+        //     _http_status = 403;
+        //     return ft_http_status(getHttpStatus());
+        // }
         //redirect the request by adding "/" to the request path.
-        this->build_autoindex_page();
+        // this->build_autoindex_page();
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
@@ -232,26 +265,23 @@ int     Request::is_uri_has_backslash_in_end()
 
 int     Request::is_dir_has_index_files()
 {
-    for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     {
-        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
-        {
-            if (!_parse->serv[0]->loc[i]->index.empty())
-                return 1;
-        }
+        if (!_parse->serv[_server_index]->loc[_location_index]->index.empty())
+            return 1;
     }
     return 0;
 }
 
 bool Request::get_auto_index()
 {
-    // for (int i = 0; i < _parse->serv[0]->num_location; ++i)
+    // for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
     // {
-        int size_for_path = _parse->serv[0]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[_location_index]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[_location_index]->url_location)
+        int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
         {
-            return _parse->serv[0]->loc[_location_index]->auto_index;
+            return _parse->serv[_server_index]->loc[_location_index]->auto_index;
         }
     // }
     return false;
@@ -263,7 +293,7 @@ int    Request::Is_file()
     std::string     line;
 
     file.open(_available_file_path.c_str());
-    if (!_parse->serv[0]->loc[_location_index]->cgi_pass.empty())
+    if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
         return this->if_location_has_cgi();
     if (file.is_open())
     {
@@ -569,9 +599,9 @@ int Request::get_matched_location_for_request_uri()
     bool check_availability = false;
     for (size_t i = 0; i < number_of_location; ++i)
     {
-        // std::cout<<"|**************|"<<_parse->serv[0]->loc[0]->url_location.size()<<std::endl;
-        int size_for_path = _parse->serv[0]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[i]->url_location)
+        // std::cout<<"|**************|"<<_parse->serv[_server_index]->loc[0]->url_location.size()<<std::endl;
+        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
+        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
             check_availability = true;
     }
     if (!check_availability)
@@ -584,13 +614,13 @@ int Request::get_matched_location_for_request_uri()
 
 int Request::is_location_have_redirection()
 {
-    for (size_t i = 0; i < _parse->serv[0]->loc[_location_index]->location.size(); ++i)
+    for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->location.size(); ++i)
     {
-        if (_parse->serv[0]->loc[_location_index]->location[i].find("return 301") != std::string::npos)
+        if (_parse->serv[_server_index]->loc[_location_index]->location[i].find("return 301") != std::string::npos)
         {
-            size_t position_of_return = _parse->serv[0]->loc[_location_index]->location[i].find("return 301") + 10;
+            size_t position_of_return = _parse->serv[_server_index]->loc[_location_index]->location[i].find("return 301") + 10;
             _http_status = 301;
-            _path = _parse->serv[0]->loc[_location_index]->location[i].substr(position_of_return, _parse->serv[0]->loc[_location_index]->location[i].size());
+            _path = _parse->serv[_server_index]->loc[_location_index]->location[i].substr(position_of_return, _parse->serv[_server_index]->loc[_location_index]->location[i].size());
             _path = remove_space(_path);
             return ft_http_status(getHttpStatus());
         }
@@ -600,12 +630,12 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-    int size_for_path = _parse->serv[0]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[0]->loc[_location_index]->url_location.size();
-    if (this->getPath().substr(0, size_for_path) == _parse->serv[0]->loc[_location_index]->url_location)
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     {
-        for (size_t i = 0; i < _parse->serv[0]->loc[_location_index]->methods.size(); ++i)
+        for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->methods.size(); ++i)
         {
-            if (this->getMethod() == _parse->serv[0]->loc[_location_index]->methods[i])
+            if (this->getMethod() == _parse->serv[_server_index]->loc[_location_index]->methods[i])
                 return 0;
         }
     }
@@ -619,17 +649,17 @@ void    Request::reform_requestPath_locationPath()
     int     i = 0;
 
     i = _location_index;
-    if (this->getPath()[_parse->serv[0]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
-        get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size() + 1, this->getPath().size());
+    if (this->getPath()[_parse->serv[_server_index]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
+        get_root = this->getPath().substr(_parse->serv[_server_index]->loc[i]->url_location.size() + 1, this->getPath().size());
     else if (this->getPath().size() == 1)
         get_root = this->getPath();
     else
-        get_root = this->getPath().substr(_parse->serv[0]->loc[i]->url_location.size(), this->getPath().size());
+        get_root = this->getPath().substr(_parse->serv[_server_index]->loc[i]->url_location.size(), this->getPath().size());
     while (get_root[get_root.size() - 1] == '/' && this->getPath().size() != 1)
     {
         get_root.resize(get_root.size() - 1);
     }
-    std::string complete_path = _parse->serv[0]->loc[i]->root_location + "/" + get_root;
+    std::string complete_path = _parse->serv[_server_index]->loc[i]->root_location + "/" + get_root;
     while (complete_path[complete_path.size() - 1] == '/')
     {
         complete_path.resize(complete_path.size() - 1);
@@ -641,11 +671,11 @@ void    Request::reform_requestPath_locationPath()
         std::cout << "complete path: " << complete_path << std::endl;
         _directory_path = complete_path;
         _file_directory_check = DIRECTORY;
-        if (!_parse->serv[0]->loc[i]->index.empty())
+        if (!_parse->serv[_server_index]->loc[i]->index.empty())
         {
-            for (size_t index_indexes = 0; index_indexes < _parse->serv[0]->loc[i]->index.size(); ++index_indexes)
+            for (size_t index_indexes = 0; index_indexes < _parse->serv[_server_index]->loc[i]->index.size(); ++index_indexes)
             {
-                _file_name_path.push_back(complete_path + "/" + _parse->serv[0]->loc[i]->index[index_indexes]);
+                _file_name_path.push_back(complete_path + "/" + _parse->serv[_server_index]->loc[i]->index[index_indexes]);
             }
         }
     }
@@ -699,12 +729,12 @@ int Request::ft_http_status(int value)
 {
     if (value < 300 || value == 301)
         return 1;
-    if (!_parse->serv[0]->error_num.empty()) {
-    for (size_t i = 0; i < _parse->serv[0]->error_num.size(); ++i) {
+    if (!_parse->serv[_server_index]->error_num.empty()) {
+    for (size_t i = 0; i < _parse->serv[_server_index]->error_num.size(); ++i) {
         
-        if (_parse->serv[0]->error_num[i] == value)
+        if (_parse->serv[_server_index]->error_num[i] == value)
         {
-            _response_body_as_string = read_file(_parse->serv[0]->error_page[i]);
+            _response_body_as_string = read_file(_parse->serv[_server_index]->error_page[i]);
             return value;
         }
     }
@@ -918,7 +948,7 @@ int Request::url_characters_checker()
 int Request::is_body_size_good(char *request_message)
 {
     (void)request_message;
-    if (_body.size() > (size_t)_parse->serv[0]->max_client)
+    if (_body.size() > (size_t)_parse->serv[_server_index]->max_client)
         return 1;
     return 0;
 }
@@ -957,6 +987,10 @@ void    Request::setParse(s_parsing* parsed)
     this->_parse = parsed;
 }
 
+void    Request::setServer_index(int index) {
+    this->_server_index = index;
+}
+
 std::string Request::remove_space(std::string tmp)
 {
     std::string finale = "";
@@ -971,16 +1005,16 @@ std::string Request::remove_space(std::string tmp)
 
 void    Request::print_parse_vector()
 {
-    std::vector<std::string>::iterator vec_b = _parse->serv[0]->server.begin();
-    std::vector<std::string>::iterator vec_e = _parse->serv[0]->server.end();
+    std::vector<std::string>::iterator vec_b = _parse->serv[_server_index]->server.begin();
+    std::vector<std::string>::iterator vec_e = _parse->serv[_server_index]->server.end();
 
     for (; vec_b != vec_e; ++vec_b)
     {
         std::cout << "value: " << *vec_b << std::endl;
     }
-    std::cout << _parse->serv[0]->server_name << std::endl;
-    std::cout << _parse->serv[0]->max_client << std::endl;
-    std::cout << _parse->serv[0]->loc[_location_index]->url_location << std::endl;
+    std::cout << _parse->serv[_server_index]->server_name << std::endl;
+    std::cout << _parse->serv[_server_index]->max_client << std::endl;
+    std::cout << _parse->serv[_server_index]->loc[_location_index]->url_location << std::endl;
 }
 
 void    Request::build_autoindex_page() {
@@ -1088,7 +1122,7 @@ int    Request::If_is_directory()
 
 bool Request::is_location_has_cgi()
 {
-    if (this->_parse->serv[0]->loc[_location_index]->cgi_pass.size())
+    if (this->_parse->serv[_server_index]->loc[_location_index]->cgi_pass.size())
     {
         return true;
     }
@@ -1105,7 +1139,7 @@ int     Request::request_run_cgi()
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    cgi.fill_cgi(_server.getBuffer(), _parse->serv[0]);
+    cgi.fill_cgi(_server.getBuffer(), _parse->serv[_server_index]);
     cgi.handle_cgi_request(*this);
     _response_body_as_string = cgi.getRespBuffer();
     return (200);

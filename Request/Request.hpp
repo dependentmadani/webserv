@@ -38,6 +38,7 @@ class Request {
         s_parsing                          *_parse;
         int                                 _http_status;
         int                                 _file_directory_check;
+        int                                 _server_index;
         int                                 _location_index;
         int                                 _content_length;
         std::vector<std::string>            _file_name_path;
@@ -58,6 +59,7 @@ class Request {
         Request();
         ~Request();
 
+        void    clear_request_class();
         int     ParseRequest(char* request_message);
         int     UseMethod();
         int     FirstLinerRequest(char *request_message);
@@ -130,6 +132,7 @@ class Request {
         std::string getResponse();
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
+        void        setServer_index(int index);
         std::string const& getBody() const;
 };
 

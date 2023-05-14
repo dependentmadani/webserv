@@ -112,6 +112,7 @@ int    Server::recv_data(int position)
     std::fstream file;
     file.open("jamal.txt");
     int data = 1;
+    memset(_buffer, 0, BUFFER_SIZE);
 
     // while (data > 0) {
     data = read(position, _buffer, BUFFER_SIZE);
