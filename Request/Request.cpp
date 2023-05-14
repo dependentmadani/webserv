@@ -1132,7 +1132,7 @@ bool Request::is_location_has_cgi()
 int     Request::request_run_cgi()
 {
     // Server server;
-    CGI cgi;
+    CGI cgi(_location_index, _server_index);
 
     if (is_body_size_good(_server.getBuffer()))
     {

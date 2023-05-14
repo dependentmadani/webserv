@@ -32,8 +32,6 @@ int main(int ac, char **av)
     Request request;
     parsing vars;
     parsing *pars = new parsing();
-    CGI cgi;
-
     
     if (ac == 2)
     {

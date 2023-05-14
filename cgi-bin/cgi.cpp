@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <fcntl.h>
 
-CGI::CGI(/* args */)
+CGI::CGI(int loc_index, int serv_index): _location_index(loc_index), _server_index(serv_index)
 {
 }
 
@@ -117,7 +117,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
     for (size_t i = 0; i < _envcgi.size(); i++)
         _env[i]  = const_cast<char*> (strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
-   _cgi_script =  serv->loc[0]->cgi_pass[1].c_str();    
+   _cgi_script =  serv->loc[_location_index]->cgi_pass[1].c_str();    
 }
 
 void CGI::handle_cgi_request(Request& req)
@@ -154,7 +154,8 @@ void CGI::handle_cgi_request(Request& req)
         close(fd);
         dup2(pipe_fd[1], STDOUT_FILENO);
         close(pipe_fd[1]);
-        execve(ptr[0], ptr, _env);
+        // if (access(ptr[0], X_OK ) == 0)
+            execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         // std::cerr << "Error executing CGI script: " << strerror(errno) << std::endl;
         exit(1);
@@ -163,7 +164,9 @@ void CGI::handle_cgi_request(Request& req)
     {
         close(pipe_fd[1]);
         int status;
-        waitpid(pid, &status, 0);
+        
+        if (waitpid(pid, &status, WNOHANG) == -1)
+              perror("wait() error");
     }
    
     size_t rd;
@@ -175,8 +178,13 @@ void CGI::handle_cgi_request(Request& req)
     }
     // close(fd);
     close(pipe_fd[0]);
+    // for(size_t i =0;i < resp_buffer.size(); i++)
+    // {
+        std::cout<< "|__________________|"<<resp_buffer<< "|__________________|"<< std::endl;
+    // }
 }
 
-std::string const& CGI::getRespBuffer() const {
+std::string const& CGI::getRespBuffer() const
+{
     return resp_buffer;
 }

@@ -31,6 +31,8 @@ class CGI
 {
 private:
    char *_pwd;
+   int  _location_index;
+   int  _server_index;
    std::vector<std::string> hold;
    std::vector<std::string> _envcgi;
    char** _env;
@@ -38,7 +40,7 @@ private:
    std::string  resp_buffer;
    
 public:
-      CGI();
+      CGI(int loc_index, int serv_index);
       ~CGI();
       void fill_cgi(char *buffer, t_server *serv);
       void handle_cgi_request(Request& req);
