@@ -107,14 +107,14 @@ void    Server::accept_connections(int position)
     // close(_socket_to_accept);
 }
 
-int    Server::recv_data()
+int    Server::recv_data(int position)
 {
     std::fstream file;
     file.open("jamal.txt");
     int data = 1;
 
     // while (data > 0) {
-    data = recv(_socket_to_accept, _buffer, BUFFER_SIZE, 0);
+    data = read(position, _buffer, BUFFER_SIZE);
     for (int i =0; i < data; ++i) {
         file << _buffer[i];
     }
