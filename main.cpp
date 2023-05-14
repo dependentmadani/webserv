@@ -78,25 +78,30 @@ int main(int ac, char **av)
         perror("select: ");
         exit(0);
     }
+    int accepted_connection = 0;
     for (int i = 1; i < FD_SETSIZE; ++i) {
         if (FD_ISSET(i, & rds_ready)) {
             if (is_available(server.getSocket_client(), i)) {
                 std::cerr << "accept a connection " << i <<std::endl;
                 server.accept_connections(i);
+                accepted_connection = i;
                 FD_SET(server.getSocket_to_accept(), &rds);
             }
             else {
                 server.recv_data(i);
-                std::cerr << "it diiiid reaaach heree" << std::endl;
+                // std::cerr << "it diiiid reaaach heree" << std::endl;
+                std::cerr << server.getBuffer() << std::endl;
                 request.ParseRequest(server.getBuffer());
                 request.UseMethod();
                 request.build_response();
                 send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                request.Response.clear();
+                request.Response = "";
                 std::cerr << "*********************************************" << std::endl;
                 std::cout << request.Response << std::endl;
                 FD_CLR(i , &rds);
+                std::cerr << "all should be good :)" << std::endl;
                 close(i);
-
             }
         }
     }
