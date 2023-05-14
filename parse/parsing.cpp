@@ -81,7 +81,7 @@ bool isWhitespace(std::string str)
 
 void   print_error()
 {
-    std::cout<<"Error missing roules"<<std::endl;
+    std::cout<<"Error missing rules"<<std::endl;
     exit(1);
 }
 

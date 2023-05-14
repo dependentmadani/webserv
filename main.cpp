@@ -21,9 +21,9 @@ int is_available(std::vector<int> tmp, int value) {
 
     for (size_t i =0 ; i < tmp.size(); ++i) {
         if (tmp[i] == value)
-            return 1;
+            return i;
     }
-    return 0;
+    return -1;
 }
 
 int main(int ac, char **av)
@@ -81,7 +81,9 @@ int main(int ac, char **av)
     int accepted_connection = 0;
     for (int i = 1; i < FD_SETSIZE; ++i) {
         if (FD_ISSET(i, & rds_ready)) {
-            if (is_available(server.getSocket_client(), i)) {
+            int server_id = 0;
+            if ((server_id = is_available(server.getSocket_client(), i)) != -1) {
+                request.setServer_index(server_id);
                 std::cerr << "accept a connection " << i <<std::endl;
                 server.accept_connections(i);
                 accepted_connection = i;
