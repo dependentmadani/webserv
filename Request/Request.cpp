@@ -22,10 +22,40 @@ Request::Request() : _directory_path(), _method(), _path(), _arguments(), _proto
 Request::~Request()
 { }
 
+void    Request::clear_request_class() {
+    _http_status = 0;
+    _file_directory_check = 0;
+    _location_index = 0;
+    _content_length = 0;
+    _file_name_path.clear();
+    _arguments.clear();
+    _header.clear();
+    _response_final.clear();
+    Response.clear();
+    Response = "";
+    _available_file_path.clear();
+    _available_file_path = "";
+    _directory_path.clear();
+    _directory_path = "";
+    _first_liner_header.clear();
+    _first_liner_header = "";
+    _method.clear();
+    _method = "";
+    _path.clear();
+    _path = "";
+    _protocol.clear();
+    _protocol = "";
+    _body.clear();
+    _body = "";
+    _response_body_as_string.clear();
+    _response_body_as_string = "";
+}
+
 int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
 
+    this->clear_request_class();
     this->FirstLinerRequest(splited_request[0]);
     this->HeaderRequest(request_message);
     this->get_location_index();

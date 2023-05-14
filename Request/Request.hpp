@@ -58,6 +58,7 @@ class Request {
         Request();
         ~Request();
 
+        void    clear_request_class();
         int     ParseRequest(char* request_message);
         int     UseMethod();
         int     FirstLinerRequest(char *request_message);
