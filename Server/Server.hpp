@@ -37,7 +37,7 @@ class Server {
         
         int     initiate_socket(int num_serv);
         void    accept_connections(int position);
-        int     recv_data();
+        int     recv_data(int position);
 
         int                 getServerFd() const;
         std::string         getBufferString() const;
