@@ -112,6 +112,9 @@ void    Request::build_response()
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
     if (!file_type.empty())
         _response_final["Content_Type"] = mime_type[file_type];
+    if (this->getHttpStatus() == 301) {
+        _response_final["Location"] = _arguments["Host"] + this->_path + "/";
+    }
     converted.str("");
     converted.clear();
     converted << _content_length;
