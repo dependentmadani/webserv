@@ -57,8 +57,10 @@ int     Request::ParseRequest(char *request_message)
     char **splited_request = ft_split(request_message, '\n');
 
     this->clear_request_class();
-    if (this->FirstLinerRequest(splited_request[0]))
+    if (this->FirstLinerRequest(splited_request[0]) == 1){
+        std::cerr << "jaaa lhnaa" << std::endl;
         return 1;
+    }
     if (this->HeaderRequest(request_message))
         return 1;
     this->get_location_index();
@@ -458,9 +460,10 @@ int Request::has_write_access_on_folder()
 
 int    Request::FirstLinerRequest(char *request_message)
 {
-    _first_liner_header = std::string(request_message);
-    if (_first_liner_header.empty())
+    if (!request_message)
         return 1;
+    _first_liner_header = std::string(request_message);
+
     // std::cout << "_first_liner value: " << _first_liner_header << std::endl;
     char **split_first_liner = ft_split(request_message, ' ');
     _method = std::string(split_first_liner[0]);
@@ -1028,8 +1031,8 @@ void    Request::build_autoindex_page() {
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     //for "." and ".." directories, need to be added
-    _response_body_as_string.append("<a href=\"" + _directory_path + "/.\">.</a><br>");
-    _response_body_as_string.append("<a href=\"" + _directory_path + "/..\">..</a><br>");
+    _response_body_as_string.append("<a href=\"/.\">.</a><br>");
+    _response_body_as_string.append("<a href=\"/..\">..</a><br>");
     //this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
