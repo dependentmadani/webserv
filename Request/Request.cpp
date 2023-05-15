@@ -76,6 +76,7 @@ int     Request::ParseRequest(char *request_message)
 }
 
 void    Request::get_location_index() {
+    
     for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
     {
         int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
@@ -1030,7 +1031,8 @@ void    Request::build_autoindex_page() {
     while ((files = readdir(dir)) != NULL)
     {
         if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
-        _response_body_as_string.append("<a href=\"" + _directory_path + "/");
+        // _response_body_as_string.append("<a href=\"" + _directory_path + "/");
+        _response_body_as_string.append("<a href=\"/");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("\">");
         _response_body_as_string.append(files->d_name);

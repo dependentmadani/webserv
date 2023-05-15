@@ -34,6 +34,7 @@
 class Request {
 
     private:
+        // std::map<std::string, std::string>  _response_body;
         Server                              _server;
         s_parsing                          *_parse;
         int                                 _http_status;
@@ -52,7 +53,6 @@ class Request {
         std::string                         _body;
         std::map<std::string, std::string>  _header;
         std::map<std::string, std::string>  _response_final;
-        // std::map<std::string, std::string>  _response_body;
         std::string                         _response_body_as_string;
 
     public:
