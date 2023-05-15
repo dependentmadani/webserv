@@ -58,7 +58,6 @@ int     Request::ParseRequest(char *request_message)
 
     this->clear_request_class();
     if (this->FirstLinerRequest(splited_request[0]) == 1){
-        std::cerr << "jaaa lhnaa" << std::endl;
         return 1;
     }
     if (this->HeaderRequest(request_message))
