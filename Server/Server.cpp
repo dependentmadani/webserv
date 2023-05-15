@@ -40,9 +40,9 @@ int Server::initiate_socket(int num_serv) {
     struct addrinfo*    bind_address;
     (void)_readfds;
     memset(&hints, 0, sizeof(hints));
-    _host_addr.sin_family = AF_INET;
-    _host_addr.sin_port = htons(_port);
-    _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    // _host_addr.sin_family = AF_INET;
+    // _host_addr.sin_port = htons(_port);
+    // _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 
     hints.ai_family = AF_INET;

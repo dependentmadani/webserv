@@ -367,7 +367,7 @@ void parsing::check_location(location *loc)
         std::cout<< "ERROR FROM LOCATION "<<std::endl;
         exit(0);
     }
-    if (loc->root_location.empty() || loc->methods.empty() ||  loc->index.empty())// ||  loc->cgi_pass.empty()|| !loc->flag_auto)
+    if (loc->root_location.empty() || loc->methods.empty())// ||  loc->cgi_pass.empty()|| !loc->flag_auto)
         print_error();
 }
 
