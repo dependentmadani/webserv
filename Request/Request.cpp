@@ -26,7 +26,6 @@ Request::~Request()
 void    Request::clear_request_class() {
     _http_status = 0;
     _file_directory_check = 0;
-    _server_index = 0;
     _location_index = 0;
     _content_length = 0;
     _file_name_path.clear();
@@ -58,8 +57,10 @@ int     Request::ParseRequest(char *request_message)
     char **splited_request = ft_split(request_message, '\n');
 
     this->clear_request_class();
-    this->FirstLinerRequest(splited_request[0]);
-    this->HeaderRequest(request_message);
+    if (this->FirstLinerRequest(splited_request[0]))
+        return 1;
+    if (this->HeaderRequest(request_message))
+        return 1;
     this->get_location_index();
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
@@ -192,7 +193,6 @@ int Request::get_request_resource()
     for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end() ; ++b)
     {
         int stat_return = stat((*b).c_str(), &stat_buff);
-        std::cerr << "value would be: " << stat_return << std::endl;
         if (stat_return != -1)
         {
             _available_file_path = *b;
@@ -459,6 +459,8 @@ int Request::has_write_access_on_folder()
 int    Request::FirstLinerRequest(char *request_message)
 {
     _first_liner_header = std::string(request_message);
+    if (_first_liner_header.empty())
+        return 1;
     // std::cout << "_first_liner value: " << _first_liner_header << std::endl;
     char **split_first_liner = ft_split(request_message, ' ');
     _method = std::string(split_first_liner[0]);
@@ -521,7 +523,8 @@ int    Request::HeaderRequest(char *request_message)
     // char *tmp = request_message;
     // char *tmp_request = request_message;
     // char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
-
+    if (!strlen(request_message))
+        return 1;
     int i = 1;
     while (splited_header[i] != NULL)
     {
@@ -599,15 +602,12 @@ int Request::get_matched_location_for_request_uri()
         url.erase(0, pos + 1);
     }
     // need to check if its available
-    size_t number_of_location = 2;
     bool check_availability = false;
-    for (size_t i = 0; i < number_of_location; ++i)
-    {
-        // std::cout<<"|**************|"<<_parse->serv[_server_index]->loc[0]->url_location.size()<<std::endl;
-        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
-            check_availability = true;
-    }
+
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
+        check_availability = true;
+
     if (!check_availability)
     {
         _http_status = 404;
