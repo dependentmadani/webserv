@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/11 10:57:24 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/15 18:25:55 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Server/Server.hpp"
 #include "Request/Request.hpp"
 #include "parse/parsing.hpp"
-#include "cgi-bin/cgi.hpp"
+#include "CGI/cgi.hpp"
 
 int is_available(std::vector<int> tmp, int value) {
 

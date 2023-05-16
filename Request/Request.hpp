@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/10 14:52:28 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/15 19:31:09 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "../Server/Server.hpp"
 # include "../utils/utils.hpp"
 # include "../parse/parsing.hpp"
-# include "../cgi-bin/cgi.hpp"
+# include "../CGI/cgi.hpp"
 # include <iostream>
 # include <map>
 # include <string>

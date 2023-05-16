@@ -6,12 +6,12 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/10 14:52:22 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/16 10:39:21 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include "../cgi-bin/cgi.hpp"
+#include "../CGI/cgi.hpp"
 Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _server_index = 0;
