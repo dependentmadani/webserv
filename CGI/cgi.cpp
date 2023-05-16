@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/16 11:12:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 11:28:40 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,11 +113,10 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
     for (size_t i = 0; i < _envcgi.size(); i++)
         _env[i]  = const_cast<char*> (strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
-    _script_name = "/Users/sriyani/Desktop/webserv/CGI/php_cgi.php";
    check_cgi(serv->loc[_location_index]->cgi_pass);
 }
 
-void CGI::handle_cgi_request(Request& req)
+void CGI::handle_cgi_request(Request& req, char *buffer, t_server *serv)
 {
     int pipe_fd[2];
     if (pipe(pipe_fd) == -1) 
@@ -125,6 +124,9 @@ void CGI::handle_cgi_request(Request& req)
         std::cerr << "Error creating pipe" << std::endl;
         exit(1);
     }
+    _script_name = req.getAvailableFilePath();
+    fill_cgi(buffer, serv);
+    std::cout<<"|_____________|"<<req.getAvailableFilePath()<<"|______________|"<<std::endl;
     char **ptr =  new char *[3];
     ptr[0] = const_cast<char*> (executable.c_str());
     ptr[1] = const_cast<char*>(_script_name.c_str());
@@ -162,10 +164,10 @@ void CGI::handle_cgi_request(Request& req)
     }
    
     size_t rd;
-    char buffer[2048] = " ";
-    while ((rd = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+    char bufffer[2048] = " ";
+    while ((rd = read(pipe_fd[0], bufffer, sizeof(buffer))) > 0)
     {
-        resp_buffer += buffer;
+        resp_buffer += bufffer;
     }
     close(pipe_fd[0]);
 }
