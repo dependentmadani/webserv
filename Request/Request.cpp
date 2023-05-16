@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() :_requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
+Request::Request() :_current_directory(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _server_index = 0;
     _location_index = 0;
@@ -36,6 +36,8 @@ void    Request::clear_request_class() {
     Response = "";
     _available_file_path.clear();
     _available_file_path = "";
+    _current_directory.clear();
+    _current_directory = "";
     _directory_path.clear();
     _directory_path = "";
     _first_liner_header.clear();
@@ -57,6 +59,9 @@ int     Request::ParseRequest(char *request_message)
     char **splited_request = ft_split(request_message, '\n');
 
     this->clear_request_class();
+    char buffer[100];
+    getcwd(buffer, 100);
+    _current_directory = std::string(buffer) + "/public";
     if (this->FirstLinerRequest(splited_request[0]) == 1){
         return 1;
     }
@@ -281,14 +286,12 @@ int     Request::is_dir_has_index_files()
 
 bool Request::get_auto_index()
 {
-    // for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
-    // {
-        int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
-        {
-            return _parse->serv[_server_index]->loc[_location_index]->auto_index;
-        }
-    // }
+
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
+    {
+        return _parse->serv[_server_index]->loc[_location_index]->auto_index;
+    }
     return false;
 }
 
@@ -591,11 +594,11 @@ int Request::get_matched_location_for_request_uri()
     while ( ( pos = url.find("/") ) != std::string::npos)
     {
         tmp = url.substr(0, pos);
-        // path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
-        if (tmp == "..")
-            --path_counter;
-        else
-            ++path_counter;
+        path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+        // if (tmp == "..")
+        //     --path_counter;
+        // else
+        //     ++path_counter;
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -636,6 +639,7 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
+
     int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     {
@@ -665,7 +669,13 @@ void    Request::reform_requestPath_locationPath()
     {
         get_root.resize(get_root.size() - 1);
     }
-    std::string complete_path = _parse->serv[_server_index]->loc[i]->root_location + "/" + get_root;
+    std::string complete_path;
+    if (get_root == "/") 
+        complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
+    else
+        complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + get_root;
+    // free(buffer);
+    // std::cerr << "*******|" << complete_path << "|**********" << get_root << "|********" <<std::endl;
     while (complete_path[complete_path.size() - 1] == '/')
     {
         complete_path.resize(complete_path.size() - 1);
@@ -1043,12 +1053,10 @@ void    Request::build_autoindex_page() {
     {
         if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
         if (_directory_path.find(root) != std::string::npos) {
-        _response_body_as_string.append("<a href=\"" + _directory_path.substr(root.size(), _directory_path.size()) + "/");
-        std::cerr << "noice" << std::endl;
+        _response_body_as_string.append("<a href=\"" + _directory_path.substr(_current_directory.size(), _directory_path.size()) + "/");
         }
         else
             _response_body_as_string.append("<a href=\"/");
-        // _response_body_as_string.append("<a href=\"" + _directory_path + "/");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("\">");
         _response_body_as_string.append(files->d_name);

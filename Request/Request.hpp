@@ -43,6 +43,7 @@ class Request {
         int                                 _location_index;
         int                                 _content_length;
         std::vector<std::string>            _file_name_path;
+        std::string                         _current_directory;
         std::string                         _requested_file_path;
         std::string                         _available_file_path;
         std::string                         _directory_path;
