@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/16 15:26:25 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 16:52:34 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1067,8 +1067,13 @@ void    Request::build_autoindex_page() {
 
 int Request::POST_method()
 {
-    if (location_support_upload()) 
+    if (location_support_upload())
+    {
         upload_post_request();
+std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+std::cout<<"|>>>>>>>>>>>>>>|"<<getBody()<<"|<<<<<<<<<<<|"<<std::endl;
+std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
     else
     {
         if (get_request_resource())
@@ -1096,7 +1101,7 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-   if (_header.find("Content-Type") != _header.end())
+    if (_header.find("Content-Type") != _header.end())
     {
         size_t find = _header["Content-Type"].find("multipart/form-data");
         if (find != std::string::npos)
@@ -1107,7 +1112,9 @@ bool Request::location_support_upload()
 int Request::If_is_file()
 {
     if (is_location_has_cgi())
+    {
         request_run_cgi();
+    }
     else
     {
         _http_status = 403;
@@ -1163,8 +1170,6 @@ int     Request::request_run_cgi()
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    // std::cout<< "|++++++|"<< getAvailableFilePath()<<"|************|"<<std::endl;
-    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|"<< this->get_server_buffer()<<"|~~~~~~~~~" << std::endl;
     cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
     _response_body_as_string = cgi.getRespBuffer();
     return (200);
