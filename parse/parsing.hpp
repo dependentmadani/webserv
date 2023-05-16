@@ -69,12 +69,12 @@ typedef struct s_parsing
     t_server **serv;
     void    copy_file(s_parsing *pars, std::string ptr);
     void    check_key(s_parsing *pars);
-    void check_server(s_parsing *pars, size_t len);
-    void check_listen(t_server *pars, std::string str);
-    void check_server_name(t_server *serv, std::string str);
-    void check_error_pages(t_server *serv, std::string str);
-    void check_max_client(t_server *serv, std::string str);
-    void check_location(location *loc);
+    void    check_server(s_parsing *pars, size_t len);
+    void    check_listen(t_server *pars, std::string str);
+    void    check_server_name(t_server *serv, std::string str);
+    void    check_error_pages(t_server *serv, std::string str);
+    void    check_max_client(t_server *serv, std::string str);
+    void    check_location(location *loc);
     std::string trim(const std::string& str);
     
 } parsing;

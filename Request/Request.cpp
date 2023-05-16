@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
+Request::Request() :_requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _server_index = 0;
     _location_index = 0;
@@ -26,7 +26,6 @@ Request::~Request()
 void    Request::clear_request_class() {
     _http_status = 0;
     _file_directory_check = 0;
-    _server_index = 0;
     _location_index = 0;
     _content_length = 0;
     _file_name_path.clear();
@@ -58,8 +57,11 @@ int     Request::ParseRequest(char *request_message)
     char **splited_request = ft_split(request_message, '\n');
 
     this->clear_request_class();
-    this->FirstLinerRequest(splited_request[0]);
-    this->HeaderRequest(request_message);
+    if (this->FirstLinerRequest(splited_request[0]) == 1){
+        return 1;
+    }
+    if (this->HeaderRequest(request_message))
+        return 1;
     this->get_location_index();
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
@@ -112,6 +114,9 @@ void    Request::build_response()
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
     if (!file_type.empty())
         _response_final["Content_Type"] = mime_type[file_type];
+    if (this->getHttpStatus() == 301) {
+        _response_final["Location"] = _arguments["Host"] + this->_path + "/";
+    }
     converted.str("");
     converted.clear();
     converted << _content_length;
@@ -189,7 +194,6 @@ int Request::get_request_resource()
     for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end() ; ++b)
     {
         int stat_return = stat((*b).c_str(), &stat_buff);
-        std::cerr << "value would be: " << stat_return << std::endl;
         if (stat_return != -1)
         {
             _available_file_path = *b;
@@ -455,7 +459,10 @@ int Request::has_write_access_on_folder()
 
 int    Request::FirstLinerRequest(char *request_message)
 {
+    if (!request_message)
+        return 1;
     _first_liner_header = std::string(request_message);
+
     // std::cout << "_first_liner value: " << _first_liner_header << std::endl;
     char **split_first_liner = ft_split(request_message, ' ');
     _method = std::string(split_first_liner[0]);
@@ -518,7 +525,8 @@ int    Request::HeaderRequest(char *request_message)
     // char *tmp = request_message;
     // char *tmp_request = request_message;
     // char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
-
+    if (!strlen(request_message))
+        return 1;
     int i = 1;
     while (splited_header[i] != NULL)
     {
@@ -596,15 +604,12 @@ int Request::get_matched_location_for_request_uri()
         url.erase(0, pos + 1);
     }
     // need to check if its available
-    size_t number_of_location = 2;
     bool check_availability = false;
-    for (size_t i = 0; i < number_of_location; ++i)
-    {
-        // std::cout<<"|**************|"<<_parse->serv[_server_index]->loc[0]->url_location.size()<<std::endl;
-        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
-        if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
-            check_availability = true;
-    }
+
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
+        check_availability = true;
+
     if (!check_availability)
     {
         _http_status = 404;
@@ -983,6 +988,10 @@ std::string Request::getResponse()
     return _response_body_as_string;
 }
 
+std::string Request::getAvailableFilePath() const {
+    return _available_file_path;
+}
+
 void    Request::setParse(s_parsing* parsed)
 {
     this->_parse = parsed;
@@ -1021,18 +1030,25 @@ void    Request::print_parse_vector()
 void    Request::build_autoindex_page() {
     DIR *dir;
     struct dirent *files;
+    std::string root;
 
+    root = _parse->serv[_server_index]->loc[_location_index]->root_location;
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     //for "." and ".." directories, need to be added
-    _response_body_as_string.append("<a href=\"" + _directory_path + "/.\">.</a><br>");
-    _response_body_as_string.append("<a href=\"" + _directory_path + "/..\">..</a><br>");
+    _response_body_as_string.append("<a href=\"/.\">.</a><br>");
+    _response_body_as_string.append("<a href=\"/..\">..</a><br>");
     //this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
         if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
+        if (_directory_path.find(root) != std::string::npos) {
+        _response_body_as_string.append("<a href=\"" + _directory_path.substr(root.size(), _directory_path.size()) + "/");
+        std::cerr << "noice" << std::endl;
+        }
+        else
+            _response_body_as_string.append("<a href=\"/");
         // _response_body_as_string.append("<a href=\"" + _directory_path + "/");
-        _response_body_as_string.append("<a href=\"/");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("\">");
         _response_body_as_string.append(files->d_name);

@@ -77,7 +77,7 @@ int main(int ac, char **av)
         exit(0);
     }
     int accepted_connection = 0;
-    for (int i = 1; i < FD_SETSIZE; ++i) {
+    for (int i = 1; i < 100; ++i) {
         if (FD_ISSET(i, & rds_ready)) {
             int server_id = 0;
             if ((server_id = is_available(server.getSocket_client(), i)) != -1) {
@@ -91,14 +91,19 @@ int main(int ac, char **av)
                 server.recv_data(i);
                 // std::cerr << "it diiiid reaaach heree" << std::endl;
                 std::cerr << server.getBuffer() << std::endl;
-                request.ParseRequest(server.getBuffer());
+                if (request.ParseRequest(server.getBuffer()) == 1) {
+                    close(i);
+                    FD_CLR(i , &rds);
+                    break ;
+                }
                 request.UseMethod();
                 request.build_response();
+                std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
                 send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
                 std::cerr << "*********************************************" << std::endl;
                 std::cout << request.Response << std::endl;
-                FD_CLR(i , &rds);
                 std::cerr << "all should be good :)" << std::endl;
+                FD_CLR(i , &rds);
                 close(i);
             }
         }
