@@ -9,7 +9,7 @@ get_matched_location_for_request_uri() function. -->
 
 <!-- * if there is a specified file in path in request, use it instead of index -->
 
-* work with CGI in get method
+<!-- * work with CGI in get method -->
 
 <!-- * build an autoindex page in response. -->
 
@@ -18,3 +18,5 @@ get_matched_location_for_request_uri() function. -->
 * create a variable that stores the file in autoindex.
 
 * The variable should also stores the url path if file entered from _file_name_path.
+
+* set the main directory for server in /Users/mbadaoui/Desktop/webserv/public

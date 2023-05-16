@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 #include "../cgi-bin/cgi.hpp"
-Request::Request() : _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
+Request::Request() :_requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _server_index = 0;
     _location_index = 0;
@@ -988,6 +988,10 @@ std::string Request::getResponse()
     return _response_body_as_string;
 }
 
+std::string Request::getAvailableFilePath() const {
+    return _available_file_path;
+}
+
 void    Request::setParse(s_parsing* parsed)
 {
     this->_parse = parsed;
@@ -1026,7 +1030,9 @@ void    Request::print_parse_vector()
 void    Request::build_autoindex_page() {
     DIR *dir;
     struct dirent *files;
+    std::string root;
 
+    root = _parse->serv[_server_index]->loc[_location_index]->root_location;
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     //for "." and ".." directories, need to be added
@@ -1036,8 +1042,13 @@ void    Request::build_autoindex_page() {
     while ((files = readdir(dir)) != NULL)
     {
         if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
+        if (_directory_path.find(root) != std::string::npos) {
+        _response_body_as_string.append("<a href=\"" + _directory_path.substr(root.size(), _directory_path.size()) + "/");
+        std::cerr << "noice" << std::endl;
+        }
+        else
+            _response_body_as_string.append("<a href=\"/");
         // _response_body_as_string.append("<a href=\"" + _directory_path + "/");
-        _response_body_as_string.append("<a href=\"/");
         _response_body_as_string.append(files->d_name);
         _response_body_as_string.append("\">");
         _response_body_as_string.append(files->d_name);

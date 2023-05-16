@@ -98,6 +98,7 @@ int main(int ac, char **av)
                 }
                 request.UseMethod();
                 request.build_response();
+                std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
                 send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
                 std::cerr << "*********************************************" << std::endl;
                 std::cout << request.Response << std::endl;
