@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/16 11:18:33 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:27:06 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ private:
 public:
       CGI(int loc_index, int serv_index);
       ~CGI();
-      void fill_cgi(char *buffer, t_server *serv);
-      void handle_cgi_request(Request& req, char *buffer, t_server *serv);
+      void fill_cgi(char const *buffer, t_server *serv);
+      void handle_cgi_request(Request& req, char const *buffer, t_server *serv);
       std::string const& getHoldbuffer() const;
       std::string const& getRespBuffer() const;
       void  check_cgi(std::vector<std::string> str);

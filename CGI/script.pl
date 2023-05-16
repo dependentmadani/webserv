@@ -1,12 +1,11 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl -wT
+use Mojolicious::Lite;
 
-=head1 DESCRIPTION
+# Define a route and its corresponding handler
+get '/' => sub {
+    my $c = shift;
+    $c->render(text => 'Hello, world!');
+};
 
-printenv — a CGI program that just prints its environment
-
-=cut
-print "Content-Type: text/plain\n\n";
-
-foreach ( sort keys %ENV ) {
-    print "$_=\"$ENV{$_}\"\n";
-}
+# Start the Mojolicious server
+app->start;

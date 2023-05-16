@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/16 11:30:24 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:24:45 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Request {
         int                                 _location_index;
         int                                 _content_length;
         std::vector<std::string>            _file_name_path;
-        std::string                         _requested_file_path;
+        std::string                         _buffer;
         std::string                         _available_file_path;
         std::string                         _directory_path;
         std::string                         _first_liner_header;
@@ -132,6 +132,7 @@ class Request {
         std::map<std::string, std::string> getHeader() const;
         std::string getResponse();
         std::string getAvailableFilePath() const;
+        std::string get_server_buffer() const;
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
         void        setServer_index(int index);

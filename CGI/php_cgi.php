@@ -1,4 +1,5 @@
-#!/usr/bin/php
+#!/usr/bin/php-cgi
+
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     

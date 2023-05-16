@@ -6,13 +6,13 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/16 11:37:09 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:26:25 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../CGI/cgi.hpp"
-Request::Request() :_requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
+Request::Request() :_buffer(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
 {
     _server_index = 0;
     _location_index = 0;
@@ -56,6 +56,7 @@ int     Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
 
+    _buffer = std::string(request_message);
     this->clear_request_class();
     if (this->FirstLinerRequest(splited_request[0]) == 1){
         return 1;
@@ -988,6 +989,11 @@ std::string Request::getResponse()
     return _response_body_as_string;
 }
 
+std::string Request::get_server_buffer() const {
+    return _buffer;
+}
+
+
 std::string Request::getAvailableFilePath() const {
     return _available_file_path;
 }
@@ -1157,8 +1163,9 @@ int     Request::request_run_cgi()
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    std::cout<< "|++++++|"<< getAvailableFilePath()<<"|************|"<<std::endl;
-    cgi.handle_cgi_request(*this, _server.getBuffer(), _parse->serv[_server_index]);
+    // std::cout<< "|++++++|"<< getAvailableFilePath()<<"|************|"<<std::endl;
+    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|"<< this->get_server_buffer()<<"|~~~~~~~~~" << std::endl;
+    cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
     _response_body_as_string = cgi.getRespBuffer();
     return (200);
 }

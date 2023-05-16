@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/15 18:25:55 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:05:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ int main(int ac, char **av)
                 std::cerr << "*********************************************" << std::endl;
                 std::cout << request.Response << std::endl;
                 std::cerr << "all should be good :)" << std::endl;
+                // std::cerr << server.getBuffer() << std::endl;
                 FD_CLR(i , &rds);
                 close(i);
             }

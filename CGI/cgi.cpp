@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/16 11:28:40 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:39:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ CGI::~CGI()
 {
 }
 
-void CGI::fill_cgi(char *buffer, t_server *serv)
+void CGI::fill_cgi(char const *buffer, t_server *serv)
 {
     std::stringstream ss(buffer);
     std::string token;
 
-    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|"<< buffer<<"|~~~~~~~~~" << std::endl;
     while (getline(ss, token, '\n'))
     {
         if (token != "\0")
@@ -116,7 +116,7 @@ void CGI::fill_cgi(char *buffer, t_server *serv)
    check_cgi(serv->loc[_location_index]->cgi_pass);
 }
 
-void CGI::handle_cgi_request(Request& req, char *buffer, t_server *serv)
+void CGI::handle_cgi_request(Request& req, char const  *buffer, t_server *serv)
 {
     int pipe_fd[2];
     if (pipe(pipe_fd) == -1) 
@@ -126,7 +126,7 @@ void CGI::handle_cgi_request(Request& req, char *buffer, t_server *serv)
     }
     _script_name = req.getAvailableFilePath();
     fill_cgi(buffer, serv);
-    std::cout<<"|_____________|"<<req.getAvailableFilePath()<<"|______________|"<<std::endl;
+    // std::cout<<"|_____________|"<<req.getAvailableFilePath()<<"|______________|"<<std::endl;
     char **ptr =  new char *[3];
     ptr[0] = const_cast<char*> (executable.c_str());
     ptr[1] = const_cast<char*>(_script_name.c_str());
@@ -170,6 +170,9 @@ void CGI::handle_cgi_request(Request& req, char *buffer, t_server *serv)
         resp_buffer += bufffer;
     }
     close(pipe_fd[0]);
+    size_t found = resp_buffer.find("\r\n\r\n");
+    resp_buffer = resp_buffer.substr(found+1);
+
 }
 
 std::string const& CGI::getRespBuffer() const
