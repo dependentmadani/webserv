@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/11 10:57:24 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:05:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "Server/Server.hpp"
 #include "Request/Request.hpp"
 #include "parse/parsing.hpp"
-#include "cgi-bin/cgi.hpp"
+#include "CGI/cgi.hpp"
 
 int is_available(std::vector<int> tmp, int value) {
 
@@ -77,7 +77,7 @@ int main(int ac, char **av)
         exit(0);
     }
     int accepted_connection = 0;
-    for (int i = 1; i < FD_SETSIZE; ++i) {
+    for (int i = 1; i < 100; ++i) {
         if (FD_ISSET(i, & rds_ready)) {
             int server_id = 0;
             if ((server_id = is_available(server.getSocket_client(), i)) != -1) {
@@ -91,14 +91,20 @@ int main(int ac, char **av)
                 server.recv_data(i);
                 // std::cerr << "it diiiid reaaach heree" << std::endl;
                 std::cerr << server.getBuffer() << std::endl;
-                request.ParseRequest(server.getBuffer());
+                if (request.ParseRequest(server.getBuffer()) == 1) {
+                    close(i);
+                    FD_CLR(i , &rds);
+                    break ;
+                }
                 request.UseMethod();
                 request.build_response();
+                std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
                 send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
                 std::cerr << "*********************************************" << std::endl;
                 std::cout << request.Response << std::endl;
-                FD_CLR(i , &rds);
                 std::cerr << "all should be good :)" << std::endl;
+                // std::cerr << server.getBuffer() << std::endl;
+                FD_CLR(i , &rds);
                 close(i);
             }
         }
