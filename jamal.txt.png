@@ -1,0 +1,84 @@
+POST / HTTP/1.1
+User-Agent: PostmanRuntime/7.32.2
+Accept: */*
+Postman-Token: 15289c38-44d2-432b-aa88-5b9b08fdd877
+Host: localhost:8080
+Connection: keep-alive
+Content-Type: multipart/form-data; boundary=--------------------------532418349302266973869915
+Content-Length: 1355
+
+----------------------------532418349302266973869915
+Content-Disposition: form-data; name=""; filename="file.py"
+Content-Type: application/octet-stream
+
+from concurrent.futures import thread
+#import pyautogui
+import pyglet
+import os
+import threading
+import time
+import sys
+
+#window = pyglet.window.Window(fullscreen = True)
+window = pyglet.window.Window()
+#window. set_mouse_visible(False)
+
+def lock():
+	# os.system("open -a ScreenSaverEngine")
+	os.system(f"./send.sh;kill -9 {os.getpid()};")
+	pass
+
+
+
+
+@window.event
+def on_key_press(symbol, modifiers):
+	lock()
+	print ('A key was pressed')
+
+
+@window.event
+def on_mouse_motion(x, y, dx, dy):
+	#lock()
+	print(f'{x}, {y}')
+
+@window.event
+def on_mouse_press(x, y, button, modifiers):
+	lock()
+	print(f'clicked {button} {os.getpid()}')
+
+@window.event
+def on_mouse_scroll(x, y, scroll_x, scroll_y):
+	lock()
+	print("Mouse scrolled")
+
+@window.event
+def on_close():
+	lock()
+	print("on_close")
+
+
+@window.event
+def on_draw():
+	window.clear()
+
+
+
+
+def my_function(a):
+	time.sleep(a)
+	lock()
+
+
+if (len(sys.argv) == 2):
+	a = int(eval(sys.argv[1]))
+	print(f"Sleep For {a}")
+	# create a new thread
+	my_thread = threading.Thread(name='daemon', target=my_function, args=(a, ))
+	my_thread.setDaemon(True)
+	my_thread.start()
+
+print("App Started")
+pyglet.app.run()
+
+----------------------------532418349302266973869915--

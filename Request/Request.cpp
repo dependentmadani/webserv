@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/17 16:59:00 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/17 18:42:51 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1166,18 +1166,20 @@ int Request::upload_post_request()
     std::string line;
     std::string ext;
     char c;
-    std::string rand_str = randomstring(10);
-    size_t find = _body.find("Content-Type:");
+    std::string rand_str = randomstring(3);
+    size_t find = _body.find("Content-Disposition");
     if (find != std::string::npos)
     {
         ext = _body.substr(find);
-        size_t fnd = ext.find("/");
+        size_t fnd = ext.find("filename=");
         if (fnd != std::string::npos)
         {
-            ext = ext.substr(fnd + 1);
-            size_t found = ext.find("\n");
+            ext = ext.substr(fnd + 2);
+            size_t found = ext.find(".");
             if (found != std::string::npos)
-                ext = "." + ext.substr(0, found - 1);
+                ext = ext.substr(found);
+            size_t trv = ext.find("\"");
+            ext = ext.substr(0, trv);
             rand_str += ext;
         }
     }
