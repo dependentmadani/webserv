@@ -44,6 +44,8 @@ class Request {
         int                                 _content_length;
         std::vector<std::string>            _file_name_path;
         std::string                         _buffer;
+        std::string                         _current_directory;
+        std::string                         _requested_file_path;
         std::string                         _available_file_path;
         std::string                         _directory_path;
         std::string                         _first_liner_header;
@@ -96,7 +98,7 @@ class Request {
         int     Is_file();
 
         //get which location
-        void    get_location_index();
+        int    get_location_index();
         //function to check in the header
         int     is_available(std::string, std::string);
         //function to check url for a character not allowed
