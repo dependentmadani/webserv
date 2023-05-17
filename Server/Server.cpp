@@ -40,9 +40,9 @@ int Server::initiate_socket(int num_serv) {
     struct addrinfo*    bind_address;
     (void)_readfds;
     memset(&hints, 0, sizeof(hints));
-    // _host_addr.sin_family = AF_INET;
-    // _host_addr.sin_port = htons(_port);
-    // _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    _host_addr.sin_family = AF_INET;
+    _host_addr.sin_port = htons(_port);
+    _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 
     hints.ai_family = AF_INET;
@@ -62,10 +62,10 @@ int Server::initiate_socket(int num_serv) {
     //     return -1;
     // }
     std::cout << "The server created successfully, with fd value of " << _socket_fd << std::endl;
-
+    std::cout << "The port to listen to: " << _port << std::endl;
     std::cout << "Binding the socket " << _socket_fd << std::endl;
-    // int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
-    int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
+    int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
+    // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     if (i < 0) {
         perror("webserv error (bind) ");
         return -1;

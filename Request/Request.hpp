@@ -25,6 +25,7 @@
 # include <sys/types.h>
 # include <sys/dir.h>
 # include <unistd.h>
+# include <cmath>
 
 
 # define DIRECTORY  5
@@ -110,6 +111,7 @@ class Request {
         void    build_date();
         void    add_zero(int timer);
         int     check_for_arguments_in_path(std::string path);
+        unsigned long   hex_to_dec(std::string hex);
 
         /*Response functions*/
         void    build_response();

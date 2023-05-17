@@ -195,7 +195,6 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
-    std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl; 
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE) {
@@ -607,10 +606,6 @@ int Request::get_matched_location_for_request_uri()
     {
         tmp = url.substr(0, pos);
         path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
-        // if (tmp == "..")
-        //     --path_counter;
-        // else
-        //     ++path_counter;
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -1070,8 +1065,8 @@ void    Request::build_autoindex_page() {
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     //for "." and ".." directories, need to be added
-    _response_body_as_string.append("<a href=\"/.\">.</a><br>");
-    _response_body_as_string.append("<a href=\"/..\">..</a><br>");
+    _response_body_as_string.append("<a href=\"./\">.</a><br>");
+    _response_body_as_string.append("<a href=\"../\">..</a><br>");
     //this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
@@ -1199,4 +1194,20 @@ int     Request::request_run_cgi()
 std::string const& Request::getBody() const
 {
     return _body;
+}
+
+unsigned long   Request::hex_to_dec(std::string hex) {
+    unsigned long output = 0;
+    for (int i = 0; i < hex.length(); ++i) {
+        if (hex[i] >= 48 && hex[i] <= 57) {
+            output += (hex[i] - 48)* std::pow(16, hex.length() - i - 1);
+        }
+        else if (hex[i] >= 65 && hex[i] <= 70) {
+            output += (hex[i] - 55)* std::pow(16, hex.length() - i - 1);
+        }
+        else if (hex[i] >= 97 && hex[i] <= 102) {
+            output += (hex[i] - 87)* std::pow(16, hex.length() - i - 1);
+        }
+    }
+    return output;
 }

@@ -66,7 +66,7 @@ int main(int ac, char **av)
     for (int i = 0; i < pars->num_serv; ++i) {
     server.setPort(pars->serv[i]->ind_port);
     if (server.initiate_socket(i) < 0)
-        return (1);
+        continue ;
     FD_SET(server.getSocket_fd(), &rds);
     std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
