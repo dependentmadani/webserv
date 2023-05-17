@@ -26,7 +26,7 @@ Request::~Request()
 void    Request::clear_request_class() {
     _http_status = 0;
     _file_directory_check = 0;
-    _location_index = 0;
+    _location_index = -1;
     _content_length = 0;
     _file_name_path.clear();
     _arguments.clear();
@@ -67,7 +67,11 @@ int     Request::ParseRequest(char *request_message)
     }
     if (this->HeaderRequest(request_message))
         return 1;
-    this->get_location_index();
+    if (this->get_location_index() == -1)
+    {
+        _http_status = 404;
+        return ft_http_status(getHttpStatus());
+    }
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
     this->is_request_well_formed(request_message);
@@ -82,7 +86,7 @@ int     Request::ParseRequest(char *request_message)
     return 0;
 }
 
-void    Request::get_location_index() {
+int Request::get_location_index() {
     
     for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
     {
@@ -90,6 +94,12 @@ void    Request::get_location_index() {
         if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
             _location_index = i;
     }
+    if (_location_index == -1)
+    {
+        _location_index = 0;
+        return -1;
+    }
+    return 1;
 }
 
 int     Request::UseMethod()
@@ -185,10 +195,12 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
+    std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl; 
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
-    else if (this->get_resource_type() == FILE)
+    else if (this->get_resource_type() == FILE) {
         return this->Is_file();
+    }
     return 1;
 }
 
@@ -287,12 +299,12 @@ int     Request::is_dir_has_index_files()
 bool Request::get_auto_index()
 {
 
-    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
-    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
-    {
+    // int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    // if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
+    // {
         return _parse->serv[_server_index]->loc[_location_index]->auto_index;
-    }
-    return false;
+    // }
+    // return false;
 }
 
 int    Request::Is_file()
@@ -639,16 +651,16 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-
-    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
-    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
-    {
+    // std::cerr << 
+    // int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    // if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
+    // {
         for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->methods.size(); ++i)
         {
             if (this->getMethod() == _parse->serv[_server_index]->loc[_location_index]->methods[i])
                 return 0;
         }
-    }
+    // }
     return 1;
 }
 
@@ -670,10 +682,21 @@ void    Request::reform_requestPath_locationPath()
         get_root.resize(get_root.size() - 1);
     }
     std::string complete_path;
-    if (get_root == "/") 
+    // if (get_root == "/" && _parse->serv[_server_index]->loc[i]->root_location == "/")
+        // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
+    // else if (_parse->serv[_server_index]->loc[i]->root_location == "/" || get_root == "/")
+    //     complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + getPath();
+    // else
+        // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + "/" + getPath();
+    if (get_root[get_root.size() - 1] == '/' && _parse->serv[_server_index]->loc[i]->root_location[_parse->serv[_server_index]->loc[i]->root_location.size() - 1] == '/')
         complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
-    else
+    else if (_parse->serv[_server_index]->loc[i]->root_location[_parse->serv[_server_index]->loc[i]->root_location.size() - 1] == '/')
         complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + get_root;
+    else if (_parse->serv[_server_index]->loc[i]->root_location[_parse->serv[_server_index]->loc[i]->root_location.size() - 1] == '/' && get_root[0] == '/')
+        complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + get_root.erase(0, 1);
+    else
+        complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + "/" + get_root;
+
     // free(buffer);
     // std::cerr << "*******|" << complete_path << "|**********" << get_root << "|********" <<std::endl;
     while (complete_path[complete_path.size() - 1] == '/')
@@ -681,10 +704,11 @@ void    Request::reform_requestPath_locationPath()
         complete_path.resize(complete_path.size() - 1);
     }
     stat(complete_path.c_str(), &stat_buff);
+    std::cerr << "the compleeete path: " << complete_path << std::endl;
     // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
     if (S_ISDIR(stat_buff.st_mode))
     {
-        std::cout << "complete path: " << complete_path << std::endl;
+        std::cout << "complete path: " << complete_path << std::endl; 
         _directory_path = complete_path;
         _file_directory_check = DIRECTORY;
         if (!_parse->serv[_server_index]->loc[i]->index.empty())
@@ -1052,8 +1076,9 @@ void    Request::build_autoindex_page() {
     while ((files = readdir(dir)) != NULL)
     {
         if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
-        if (_directory_path.find(root) != std::string::npos) {
-        _response_body_as_string.append("<a href=\"" + _directory_path.substr(_current_directory.size(), _directory_path.size()) + "/");
+        if (_directory_path.find(_current_directory) != std::string::npos) {
+        // _response_body_as_string.append("<a href=\"" + _directory_path.substr(_current_directory.size(), _directory_path.size()) + "/");
+        _response_body_as_string.append("<a href=\"" + _path );
         }
         else
             _response_body_as_string.append("<a href=\"/");

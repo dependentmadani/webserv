@@ -19,6 +19,8 @@ get_matched_location_for_request_uri() function. -->
 
 <!-- * The variable should also stores the url path if file entered from _file_name_path. -->
 
-* set the main directory for server in /Users/mbadaoui/Desktop/webserv/public
+<!-- * set the main directory for server in /Users/mbadaoui/Desktop/webserv/public -->
+
+<!-- * check to the complete_path from reform_requestPath_locationPath function. -->
 
 * check this function too: get_matched_location_for_request_uri() that check ".."

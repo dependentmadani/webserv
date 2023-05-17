@@ -97,7 +97,7 @@ class Request {
         int     Is_file();
 
         //get which location
-        void    get_location_index();
+        int    get_location_index();
         //function to check in the header
         int     is_available(std::string, std::string);
         //function to check url for a character not allowed
