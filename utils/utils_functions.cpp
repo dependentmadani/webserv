@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   utils_functions.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 16:54:35 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/31 16:54:35 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/17 13:26:05 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
-void	*ft_memset(void *b, int c, int len)
+void *ft_memset(void *b, int c, int len)
 {
-	int		i;
-	char	*s;
+	int i;
+	char *s;
 
 	s = (char *)b;
 	i = 0;
@@ -24,9 +24,9 @@ void	*ft_memset(void *b, int c, int len)
 	return (b);
 }
 
-void	*ft_calloc(int count, int size)
+void *ft_calloc(int count, int size)
 {
-	void	*ptr;
+	void *ptr;
 
 	ptr = (void *)malloc(count * size);
 	if (!ptr)
@@ -35,10 +35,10 @@ void	*ft_calloc(int count, int size)
 	return (ptr);
 }
 
-char	*str_cut(const char *s, int begin, int fin)
+char *str_cut(const char *s, int begin, int fin)
 {
-	int		i;
-	char	*sp;
+	int i;
+	char *sp;
 
 	i = 0;
 	sp = (char *)ft_calloc(sizeof(char), (fin - begin + 1));
@@ -48,9 +48,9 @@ char	*str_cut(const char *s, int begin, int fin)
 	return (sp);
 }
 
-size_t	ft_strlen(const char *s)
+size_t ft_strlen(const char *s)
 {
-	size_t	i;
+	size_t i;
 
 	i = 0;
 	if (!s)
@@ -58,4 +58,17 @@ size_t	ft_strlen(const char *s)
 	while (s[i])
 		i++;
 	return (i);
+}
+
+std::string randomstring(int length)
+{
+	std::string str;
+	srand(time(0));
+	for (int i = 0; i < length; ++i)
+	{
+		char c = 'a' + (rand() % 26);
+		str += c;
+	}
+
+	return str;
 }

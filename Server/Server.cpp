@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/25 12:09:05 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:58:17 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,14 +109,14 @@ void    Server::accept_connections(int position)
 
 int    Server::recv_data(int position)
 {
-    std::fstream file;
+    std::ofstream file;
     file.open("jamal.txt");
     int data = 1;
     memset(_buffer, 0, BUFFER_SIZE);
 
     // while (data > 0) {
     data = read(position, _buffer, BUFFER_SIZE);
-    for (int i =0; i < data; ++i) {
+    for (int i = 0; i < data; ++i) {
         file << _buffer[i];
     }
     _buffer_complete.append(std::string(_buffer));
