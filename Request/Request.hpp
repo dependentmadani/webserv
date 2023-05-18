@@ -25,6 +25,7 @@
 # include <sys/types.h>
 # include <sys/dir.h>
 # include <unistd.h>
+# include <cmath>
 
 
 # define DIRECTORY  5
@@ -42,6 +43,9 @@ class Request {
         int                                 _server_index;
         int                                 _location_index;
         int                                 _content_length;
+        int                                 _read_fd;
+        int                                 _chunked_content_value;
+        int                                 _content_actual_size;
         std::vector<std::string>            _file_name_path;
         std::string                         _buffer;
         std::string                         _current_directory;
@@ -111,6 +115,7 @@ class Request {
         void    build_date();
         void    add_zero(int timer);
         int     check_for_arguments_in_path(std::string path);
+        int     read_body_request();
 
         /*Response functions*/
         void    build_response();
@@ -122,10 +127,13 @@ class Request {
         bool    is_location_has_cgi();
         int     request_run_cgi();
         int     If_is_file();
+        int     string_to_decimal(std::string);
+        unsigned long   hex_to_dec(std::string hex);
 
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
+        bool                                read_again;
         std::string                         Response;
 
         std::string getMethod() const;
@@ -138,6 +146,8 @@ class Request {
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
         void        setServer_index(int index);
+        void        set_read_fd(int);
+        void        setServer(Server);
         std::string const& getBody() const;
 };
 

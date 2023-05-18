@@ -27,7 +27,7 @@
 # include <netdb.h>
 # include "../parse/parsing.hpp"
 
-# define BUFFER_SIZE 102400
+# define BUFFER_SIZE 180000
 
 class Server {
     public:
@@ -45,10 +45,12 @@ class Server {
         std::vector<int>    getSocket_client() const;
         int                 getSocket_fd() const;
         int                 getSocket_to_accept() const;
+        int                 getFirstReadSize() const;
         void                setPort(int);
         void                setParse(s_parsing* );
 
     private:
+        int                 _first_read_size;
         int                 _socket_fd;
         int                 _socket_to_accept;
         struct sockaddr_in  _host_addr;

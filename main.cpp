@@ -70,17 +70,19 @@ int main(int ac, char **av)
     FD_SET(server.getSocket_fd(), &rds);
     std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
+    int how_many_times = 0;
     while (1) {
     rds_ready = rds;
     if (select(FD_SETSIZE, &rds_ready, NULL, NULL, NULL) < 0) {
         perror("select: ");
         exit(0);
     }
+    how_many_times += 1;
     int accepted_connection = 0;
     for (int i = 1; i < FD_SETSIZE; ++i) {
         if (FD_ISSET(i, & rds_ready)) {
             int server_id = 0;
-            if ((server_id = is_available(server.getSocket_client(), i)) != -1) {
+            if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again) {
                 request.setServer_index(server_id);
                 std::cerr << "accept a connection " << i <<std::endl;
                 server.accept_connections(i);
@@ -88,24 +90,61 @@ int main(int ac, char **av)
                 FD_SET(server.getSocket_to_accept(), &rds);
             }
             else {
-                server.recv_data(i);
-                // std::cerr << "it diiiid reaaach heree" << std::endl;
-                std::cerr << server.getBuffer() << std::endl;
-                if (request.ParseRequest(server.getBuffer()) == 1) {
-                    close(i);
+                std::cerr << "how_many_times: " << how_many_times << std::endl;
+                if (request.read_again) {
+                    std::cerr << "That woouuuuld be cooool " << std::endl;
+                    if (request.UseMethod())
+                        continue;
+                    request.build_response();
+                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    how_many_times = 0;
+                    std::cerr << "************------******************" << std::endl;
+                    std::cerr << "all should be good :):):)" << std::endl;
+                    std::cout << request.Response << std::endl;
+                    // std::cerr << server.getBuffer() << std::endl;
                     FD_CLR(i , &rds);
-                    break ;
+                    close(i);
                 }
-                request.UseMethod();
-                request.build_response();
-                std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
-                send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-                std::cerr << "*********************************************" << std::endl;
-                std::cout << request.Response << std::endl;
-                std::cerr << "all should be good :)" << std::endl;
-                // std::cerr << server.getBuffer() << std::endl;
-                FD_CLR(i , &rds);
-                close(i);
+                else if (!request.read_again && how_many_times == pars->num_serv) {
+                    std::cerr << "wooow waaas heeere" << std::endl;
+                    server.recv_data(i);
+                    request.setServer(server);
+                    std::cerr << server.getBuffer() << std::endl;
+                    if (request.ParseRequest(server.getBuffer()) == 1) {
+                        close(i);
+                        FD_CLR(i , &rds);
+                        break ;
+                    }
+                    request.set_read_fd(i);
+                    request.UseMethod();
+                    if (request.read_again)
+                        continue ;
+                    request.build_response();
+                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                    std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
+                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    how_many_times = 0;
+                    std::cerr << "*********************************************" << std::endl;
+                    std::cout << request.Response << std::endl;
+                    std::cerr << "all should be good :)" << std::endl;
+                    // std::cerr << server.getBuffer() << std::endl;
+                    FD_CLR(i , &rds);
+                    close(i);
+                }
+                else {
+                    std::cerr << "hooooolaaaallaaaa" <<std::endl;
+                    request.build_response();
+                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    how_many_times = 0;
+                    std::cerr << "************------******************" << std::endl;
+                    // std::cout << request.Response << std::endl;
+                    std::cerr << "all should be good :):):)" << std::endl;
+                    // std::cerr << server.getBuffer() << std::endl;
+                    FD_CLR(i , &rds);
+                    close(i);
+                }
             }
         }
     }
