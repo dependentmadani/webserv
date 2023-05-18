@@ -94,7 +94,8 @@ int Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     }
     this->reform_requestPath_locationPath();
-    _content_actual_size = string_to_decimal(_header["Content-Length"]) - _server.getFirstReadSize();
+    if (_header.find("Content-Length") != _header.end())
+        _content_actual_size = string_to_decimal(_header["Content-Length"]) - _server.getFirstReadSize();
     return 0;
 }
 
@@ -212,10 +213,7 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
-<<<<<<< HEAD
-=======
     // std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl;
->>>>>>> master
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
@@ -642,15 +640,7 @@ int Request::get_matched_location_for_request_uri()
     while ((pos = url.find("/")) != std::string::npos)
     {
         tmp = url.substr(0, pos);
-<<<<<<< HEAD
         path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
-=======
-        path_counter = ((tmp == "..") ? --path_counter : ++path_counter);
-        // if (tmp == "..")
-        //     --path_counter;
-        // else
-        //     ++path_counter;
->>>>>>> master
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -1162,6 +1152,7 @@ int Request::read_body_request() {
         // {
             int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
             jojo.write(buffer_chr,content_length_read);
+            _body.append(std::string(buffer_chr));
             // i+=content_length_read;
             // if(content_length_read == 0)
             //     break;
@@ -1176,7 +1167,7 @@ int Request::read_body_request() {
     }
     else if (_header.find("Transfer-Encoding") != _header.end())
     {
-        
+        std::cerr << "whaaaats noooooooow a haaamiiiid" << std::endl;
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
     jojo.close();
