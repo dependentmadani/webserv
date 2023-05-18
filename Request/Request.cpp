@@ -6,28 +6,36 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/10 14:52:22 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:59:00 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include "../cgi-bin/cgi.hpp"
-Request::Request() :_current_directory(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol() , _body(),_header(), http_code(), allowed_methods()
+#include "../CGI/cgi.hpp"
+
+Request::Request() : _buffer(), _current_directory(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
 {
     _server_index = 0;
     _location_index = 0;
     _http_status = 200;
     _content_length = 0;
+    _read_fd = 0;
+    _chunked_content_value = 0;
+    read_again = false;
 }
 
 Request::~Request()
-{ }
+{
+}
 
-void    Request::clear_request_class() {
+void Request::clear_request_class()
+{
     _http_status = 0;
     _file_directory_check = 0;
     _location_index = -1;
     _content_length = 0;
+    _read_fd = 0;
+    _chunked_content_value = 0;
     _file_name_path.clear();
     _arguments.clear();
     _header.clear();
@@ -54,15 +62,18 @@ void    Request::clear_request_class() {
     _response_body_as_string = "";
 }
 
-int     Request::ParseRequest(char *request_message)
+int Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
 
-    this->clear_request_class();
+    _buffer = std::string(request_message);
+    if (!read_again)
+        this->clear_request_class();
     char buffer[100];
     getcwd(buffer, 100);
     _current_directory = std::string(buffer) + "/public";
-    if (this->FirstLinerRequest(splited_request[0]) == 1){
+    if (this->FirstLinerRequest(splited_request[0]) == 1)
+    {
         return 1;
     }
     if (this->HeaderRequest(request_message))
@@ -83,14 +94,16 @@ int     Request::ParseRequest(char *request_message)
         return ft_http_status(getHttpStatus());
     }
     this->reform_requestPath_locationPath();
+    _content_actual_size = string_to_decimal(_header["Content-Length"]) - _server.getFirstReadSize();
     return 0;
 }
 
-int Request::get_location_index() {
-    
+int Request::get_location_index()
+{
+
     for (int i = 0; i < _parse->serv[_server_index]->num_location; ++i)
     {
-        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
+        int size_for_path = _parse->serv[_server_index]->loc[i]->url_location.size() > getPath().size() ? getPath().size() : _parse->serv[_server_index]->loc[i]->url_location.size();
         if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[i]->url_location)
             _location_index = i;
     }
@@ -102,18 +115,18 @@ int Request::get_location_index() {
     return 1;
 }
 
-int     Request::UseMethod()
+int Request::UseMethod()
 {
     if (_method == "GET")
-        this->GET_method();
+        return this->GET_method();
     else if (_method == "POST")
-        this->POST_method();
+        return this->POST_method();
     else if (_method == "DELETE")
-        this->DELETE_method();
+        return this->DELETE_method();
     return 0;
 }
 
-void    Request::build_response()
+void Request::build_response()
 {
     std::ostringstream converted;
 
@@ -129,7 +142,8 @@ void    Request::build_response()
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
     if (!file_type.empty())
         _response_final["Content_Type"] = mime_type[file_type];
-    if (this->getHttpStatus() == 301) {
+    if (this->getHttpStatus() == 301)
+    {
         _response_final["Location"] = _arguments["Host"] + this->_path + "/";
     }
     converted.str("");
@@ -151,26 +165,29 @@ void    Request::build_response()
     -The content-length describes the length of the response
     -The content-type describes the media type of the resource returned.
     */
-//    Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
+    //    Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
     this->build_date();
     Response.append("Server: webserv/1.0\r\n");
     std::map<std::string, std::string>::iterator b = _response_final.begin();
     for (; b != _response_final.end(); ++b)
     {
-         std::string add_line = b->first + ": " + b->second + "\r\n";
-         Response.append(add_line);
+        std::string add_line = b->first + ": " + b->second + "\r\n";
+        Response.append(add_line);
     }
     Response.append("\r\n");
     Response.append(_response_body_as_string);
 }
 
-void Request::add_zero(int timer) {
-    if (timer >= 0 && timer < 10) {
+void Request::add_zero(int timer)
+{
+    if (timer >= 0 && timer < 10)
+    {
         Response.append("0");
     }
 }
 
-void Request::build_date() {
+void Request::build_date()
+{
     time_t now = time(0);
     std::string days_of_week[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     std::string months[13] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -195,10 +212,19 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
+<<<<<<< HEAD
+=======
+    // std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl;
+>>>>>>> master
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
-    else if (this->get_resource_type() == FILE) {
+    else if (this->get_resource_type() == FILE)
+    {
         return this->Is_file();
+    }
+    else if (this->get_resource_type() == ERROR) { 
+        _http_status = 404;
+        return this->ft_http_status(getHttpStatus());
     }
     return 1;
 }
@@ -207,7 +233,7 @@ int Request::get_request_resource()
 {
     struct stat stat_buff;
 
-    for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end() ; ++b)
+    for (std::vector<std::string>::iterator b = _file_name_path.begin(); b != _file_name_path.end(); ++b)
     {
         int stat_return = stat((*b).c_str(), &stat_buff);
         if (stat_return != -1)
@@ -221,7 +247,7 @@ int Request::get_request_resource()
     return 1;
 }
 
-int     Request::if_location_has_cgi()
+int Request::if_location_has_cgi()
 {
     if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
@@ -230,27 +256,27 @@ int     Request::if_location_has_cgi()
         ft_http_status(getHttpStatus());
         return 0;
     }
-    //call the constructor of cgi, than get the data from cgi. All of that as an else condition
+    // call the constructor of cgi, than get the data from cgi. All of that as an else condition
     this->request_run_cgi();
-    _http_status = 200; //to check depends on cgi
+    _http_status = 200; // to check depends on cgi
     ft_http_status(getHttpStatus());
     return 1;
 }
 
-int    Request::Is_directory()
+int Request::Is_directory()
 {
     if (is_uri_has_backslash_in_end())
     {
-        if ( !is_dir_has_index_files() )
+        if (!is_dir_has_index_files())
         {
-            if ( !get_auto_index() )
+            if (!get_auto_index())
             {
                 _http_status = 403;
                 return ft_http_status(getHttpStatus());
             }
             else
             {
-                //build an autoindex page in response.
+                // build an autoindex page in response.
                 this->build_autoindex_page();
                 _http_status = 200;
                 return ft_http_status(getHttpStatus());
@@ -258,7 +284,7 @@ int    Request::Is_directory()
         }
         else
         {
-            //if this directory has an index file, it should check for cgi in location
+            // if this directory has an index file, it should check for cgi in location
             return this->if_location_has_cgi();
         }
     }
@@ -269,7 +295,7 @@ int    Request::Is_directory()
         //     _http_status = 403;
         //     return ft_http_status(getHttpStatus());
         // }
-        //redirect the request by adding "/" to the request path.
+        // redirect the request by adding "/" to the request path.
         // this->build_autoindex_page();
         _http_status = 301;
         return ft_http_status(getHttpStatus());
@@ -277,16 +303,16 @@ int    Request::Is_directory()
     return 0;
 }
 
-int     Request::is_uri_has_backslash_in_end()
+int Request::is_uri_has_backslash_in_end()
 {
     if (_path[_path.size() - 1] == '/')
         return 1;
     return 0;
 }
 
-int     Request::is_dir_has_index_files()
+int Request::is_dir_has_index_files()
 {
-    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size() ? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     {
         if (!_parse->serv[_server_index]->loc[_location_index]->index.empty())
@@ -301,22 +327,22 @@ bool Request::get_auto_index()
     // int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     // if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     // {
-        return _parse->serv[_server_index]->loc[_location_index]->auto_index;
+    return _parse->serv[_server_index]->loc[_location_index]->auto_index;
     // }
     // return false;
 }
 
-int    Request::Is_file()
+int Request::Is_file()
 {
-    std::ifstream   file;
-    std::string     line;
+    std::ifstream file;
+    std::string line;
 
     file.open(_available_file_path.c_str());
     if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
         return this->if_location_has_cgi();
     if (file.is_open())
     {
-        while(file)
+        while (file)
         {
             std::getline(file, line);
             _response_body_as_string.append(line);
@@ -330,7 +356,6 @@ int Request::get_resource_type()
 {
     return _file_directory_check;
 }
-
 
 int Request::DELETE_method()
 {
@@ -346,30 +371,30 @@ int Request::DELETE_method()
     return 0;
 }
 
-int    Request::Is_directory_for_DELETE()
+int Request::Is_directory_for_DELETE()
 {
     if (is_uri_has_backslash_in_end())
     {
-        if ( !if_location_has_cgi() )
+        if (!if_location_has_cgi())
         {
-            if ( is_dir_has_index_files() )
+            if (is_dir_has_index_files())
             {
-                //run cgi on requested file with DELETE REQUEST METHOD
-                //and check if this directory has an index file and cgi
-                //then return code depend on cgi
+                // run cgi on requested file with DELETE REQUEST METHOD
+                // and check if this directory has an index file and cgi
+                // then return code depend on cgi
                 _http_status = this->request_run_cgi();
                 return ft_http_status(getHttpStatus());
             }
             else
             {
-                //build an autoindex page in response.
+                // build an autoindex page in response.
                 _http_status = 403;
                 return ft_http_status(getHttpStatus());
             }
         }
         else
         {
-            //delete all folder content
+            // delete all folder content
             if (this->delete_all_folder_content(_directory_path, DIRECTORY))
             {
                 // std::cout << "well, all is good" << std::endl;
@@ -394,7 +419,7 @@ int    Request::Is_directory_for_DELETE()
     }
     else
     {
-        //redirect the request by adding "/" to the request path.
+        // redirect the request by adding "/" to the request path.
         _http_status = 409;
         return ft_http_status(getHttpStatus());
     }
@@ -406,8 +431,8 @@ int Request::Is_file_for_DELETE()
     if (this->if_location_has_cgi())
     {
         std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
-        //nothing to do here for the moment. waiting for cgi to be done.
-        //return code depend on cgi
+        // nothing to do here for the moment. waiting for cgi to be done.
+        // return code depend on cgi
         _http_status = 200;
         return ft_http_status(getHttpStatus());
     }
@@ -424,11 +449,14 @@ int Request::delete_all_folder_content(std::string folder_file, int type)
     DIR *dir;
     struct dirent *ent;
 
-    if ((dir = opendir(folder_file.c_str())) != NULL) {
-      /* print all the files and directories within directory */
-        while ((ent = readdir (dir)) != NULL) {
+    if ((dir = opendir(folder_file.c_str())) != NULL)
+    {
+        /* print all the files and directories within directory */
+        while ((ent = readdir(dir)) != NULL)
+        {
 
-            if ((!strcmp(ent->d_name, ".") || strcmp(ent->d_name, "..")) && (strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))) {
+            if ((!strcmp(ent->d_name, ".") || strcmp(ent->d_name, "..")) && (strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")))
+            {
                 std::string tmp;
                 if (type == DIRECTORY)
                     tmp = folder_file + "/" + ent->d_name;
@@ -436,28 +464,32 @@ int Request::delete_all_folder_content(std::string folder_file, int type)
                     tmp = folder_file;
                 std::cout << "the file is: " << tmp << std::endl;
                 std::cout << "the file would be: " << ent->d_name << std::endl;
-                if (!std::remove(tmp.c_str())) {
+                if (!std::remove(tmp.c_str()))
+                {
                     std::cout << "well removed file" << std::endl;
                 }
-                else {
+                else
+                {
                     std::cout << "something wrong with file: " << ent->d_name << std::endl;
                     return 0;
                 }
             }
         }
-        closedir (dir);
+        closedir(dir);
     }
     else if (type == FILE)
     {
         std::cout << "I believe it reached here: " << folder_file << std::endl;
-        if (!std::remove(folder_file.c_str())) {
+        if (!std::remove(folder_file.c_str()))
+        {
             std::cout << "well removed the file" << std::endl;
         }
-        else {
+        else
+        {
             std::cout << "something wrong in file" << std::endl;
             return 0;
         }
-     }
+    }
     return 1;
 }
 
@@ -466,12 +498,12 @@ int Request::has_write_access_on_folder()
     int check_access = 0;
 
     check_access = access(_directory_path.c_str(), W_OK);
-    if ( check_access != 0 )
+    if (check_access != 0)
         return 0;
     return 1;
 }
 
-int    Request::FirstLinerRequest(char *request_message)
+int Request::FirstLinerRequest(char *request_message)
 {
     if (!request_message)
         return 1;
@@ -489,25 +521,29 @@ int    Request::FirstLinerRequest(char *request_message)
     return 0;
 }
 
-int     Request::check_for_arguments_in_path(std::string path) {
+int Request::check_for_arguments_in_path(std::string path)
+{
     size_t position = path.find("?");
-    if (position != std::string::npos) {
+    if (position != std::string::npos)
+    {
         char *catcher = strtok((char *)path.c_str(), "?");
         _path = std::string(catcher);
         if ((position + 1) == path.size())
             return 1;
         catcher = strtok(NULL, "?");
         std::string args = std::string(catcher);
-        char** splited_args = ft_split(args.c_str(), '&');
+        char **splited_args = ft_split(args.c_str(), '&');
         int i = 0;
-        while (splited_args[i]) {
+        while (splited_args[i])
+        {
             std::string tmp = splited_args[i];
             size_t pos = tmp.find("=");
             _arguments[tmp.substr(0, pos)] = tmp.substr(pos + 1, tmp.size());
             i++;
         }
     }
-    else {
+    else
+    {
         _path = path;
     }
     return 0;
@@ -533,7 +569,7 @@ int     Request::check_for_arguments_in_path(std::string path) {
 //     return 0;
 // }
 
-int    Request::HeaderRequest(char *request_message)
+int Request::HeaderRequest(char *request_message)
 {
     char **splited_header = ft_split(request_message, '\n');
     // char *tmp = request_message;
@@ -551,12 +587,13 @@ int    Request::HeaderRequest(char *request_message)
             i++;
         }
         else
-            break ;
+            break;
     }
     std::cerr << "the transfer encoding: " << _header["Content-Type"] << "|" << std::endl;
     std::string tmp(request_message);
     size_t position_empty_line = tmp.find("\r\n\r\n");
-    if (position_empty_line != std::string::npos && position_empty_line != tmp.size()) {
+    if (position_empty_line != std::string::npos && position_empty_line != tmp.size())
+    {
         _body = tmp.substr(position_empty_line + 3, tmp.size());
     }
     return 0;
@@ -595,17 +632,25 @@ int Request::is_request_well_formed(char *request_message)
 
 int Request::get_matched_location_for_request_uri()
 {
-    //check if path is valid, for security reason
+    // check if path is valid, for security reason
     int path_counter = 0;
     size_t pos = 0;
     std::string url = getPath();
 
     url.erase(0, 1);
     std::string tmp;
-    while ( ( pos = url.find("/") ) != std::string::npos)
+    while ((pos = url.find("/")) != std::string::npos)
     {
         tmp = url.substr(0, pos);
+<<<<<<< HEAD
         path_counter = ( (tmp == "..") ? --path_counter : ++path_counter );
+=======
+        path_counter = ((tmp == "..") ? --path_counter : ++path_counter);
+        // if (tmp == "..")
+        //     --path_counter;
+        // else
+        //     ++path_counter;
+>>>>>>> master
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -616,7 +661,7 @@ int Request::get_matched_location_for_request_uri()
     // need to check if its available
     bool check_availability = false;
 
-    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
+    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size() ? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
         check_availability = true;
 
@@ -646,24 +691,24 @@ int Request::is_location_have_redirection()
 
 int Request::is_method_allowed_in_location()
 {
-    // std::cerr << 
+    // std::cerr <<
     // int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size()? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     // if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
     // {
-        for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->methods.size(); ++i)
-        {
-            if (this->getMethod() == _parse->serv[_server_index]->loc[_location_index]->methods[i])
-                return 0;
-        }
+    for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->methods.size(); ++i)
+    {
+        if (this->getMethod() == _parse->serv[_server_index]->loc[_location_index]->methods[i])
+            return 0;
+    }
     // }
     return 1;
 }
 
-void    Request::reform_requestPath_locationPath()
+void Request::reform_requestPath_locationPath()
 {
     std::string get_root;
     struct stat stat_buff;
-    int     i = 0;
+    int i = 0;
 
     i = _location_index;
     if (this->getPath()[_parse->serv[_server_index]->loc[i]->url_location.size()] == '/' && this->getPath().size() != 1)
@@ -678,11 +723,11 @@ void    Request::reform_requestPath_locationPath()
     }
     std::string complete_path;
     // if (get_root == "/" && _parse->serv[_server_index]->loc[i]->root_location == "/")
-        // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
+    // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
     // else if (_parse->serv[_server_index]->loc[i]->root_location == "/" || get_root == "/")
     //     complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + getPath();
     // else
-        // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + "/" + getPath();
+    // complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location + "/" + getPath();
     if (get_root[get_root.size() - 1] == '/' && _parse->serv[_server_index]->loc[i]->root_location[_parse->serv[_server_index]->loc[i]->root_location.size() - 1] == '/')
         complete_path = _current_directory + _parse->serv[_server_index]->loc[i]->root_location;
     else if (_parse->serv[_server_index]->loc[i]->root_location[_parse->serv[_server_index]->loc[i]->root_location.size() - 1] == '/')
@@ -703,7 +748,7 @@ void    Request::reform_requestPath_locationPath()
     // std::cout << "value woould be: " << stat_buff.st_mode << " and val " << value << " to check " << S_ISDIR(stat_buff.st_mode) << std::endl;
     if (S_ISDIR(stat_buff.st_mode))
     {
-        std::cout << "complete path: " << complete_path << std::endl; 
+        std::cout << "complete path: " << complete_path << std::endl;
         _directory_path = complete_path;
         _file_directory_check = DIRECTORY;
         if (!_parse->serv[_server_index]->loc[i]->index.empty())
@@ -752,27 +797,29 @@ int Request::check_method_protocol()
     }
     if (_protocol != "HTTP/1.1")
     {
-        _http_status = 403; //to check the http status code after...!!
+        _http_status = 403; // to check the http status code after...!!
         return ft_http_status(this->getHttpStatus());
     }
     _http_status = 501;
     return ft_http_status(this->getHttpStatus());
 }
 
-//this function will be able to use response, where it will build a http message
+// this function will be able to use response, where it will build a http message
 int Request::ft_http_status(int value)
 {
     if (value < 300 || value == 301)
         return 1;
-    if (!_parse->serv[_server_index]->error_num.empty()) {
-    for (size_t i = 0; i < _parse->serv[_server_index]->error_num.size(); ++i) {
-        
-        if (_parse->serv[_server_index]->error_num[i] == value)
+    if (!_parse->serv[_server_index]->error_num.empty())
+    {
+        for (size_t i = 0; i < _parse->serv[_server_index]->error_num.size(); ++i)
         {
-            _response_body_as_string = read_file(_parse->serv[_server_index]->error_page[i]);
-            return value;
+
+            if (_parse->serv[_server_index]->error_num[i] == value)
+            {
+                _response_body_as_string = read_file(_parse->serv[_server_index]->error_page[i]);
+                return value;
+            }
         }
-    }
     }
     _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2>";
     std::ostringstream converted;
@@ -785,151 +832,152 @@ int Request::ft_http_status(int value)
 
 std::string Request::read_file(std::string file)
 {
-    std::ifstream   read_file;
-    std::string     line;
-    std::string     final_output;
+    std::ifstream read_file;
+    std::string line;
+    std::string final_output;
 
     read_file.open(file.c_str());
     if (read_file.is_open())
     {
-        while(read_file)
+        while (read_file)
         {
             std::getline(read_file, line);
             final_output.append(line);
         }
     }
-    else {
+    else
+    {
         perror("");
         return std::string("");
     }
     return final_output;
 }
 
-void    Request::ft_mime_type()
+void Request::ft_mime_type()
 {
-    //text
-    mime_type["php"]    = "text/html";
-    mime_type["html"]   = "text/html";
-    mime_type["htm"]    = "text/html";
-    mime_type["shtml"]  = "text/html";
-    mime_type["css"]    = "text/css";
-    mime_type["xml"]    = "text/xml";
-    //image 
-    mime_type["gif"]    = "image/gif";
-    mime_type["jpeg"]   = "image/jpeg";
-    mime_type["jpg"]    = "image/jpeg";
-    //application 
-    mime_type["js"]     = "application/javascript";
-    mime_type["atom"]   = "application/atom+xml";
-    mime_type["rss"]    = "application/rss+xml";
-    //text 
-    mime_type["mml"]    = "text/mathml";
-    mime_type["txt"]    = "text/plain";
-    mime_type["jad"]    = "text/vnd.sun.j2me.app-descriptor";
-    mime_type["wml"]    = "text/vnd.wap.wml";
-    mime_type["htc"]    = "text/x-component";
-    //image 
-    mime_type["avif"]   = "image/avif";
-    mime_type["png"]    = "image/png";
-    mime_type["svg"]    = "image/svg+xml";
-    mime_type["svgz"]   = "image/svg+xml";
-    mime_type["tif"]    = "image/tiff";
-    mime_type["tiff"]   = "image/tiff";
-    mime_type["wbmp"]   = "image/vnd.wap.wbmp";
-    mime_type["webp"]   = "image/webp";
-    mime_type["ico"]    = "image/x-icon";
-    mime_type["jng"]    = "image/x-jng";
-    mime_type["bmp"]    = "image/x-ms-bmp";
-    //font 
-    mime_type["woff"]   = "font/woff";
-    mime_type["woff2"]  = "font/woff2";
-    //application 
-    mime_type["jar"]    = "application/java-archive";
-    mime_type["war"]    = "application/java-archive";
-    mime_type["ear"]    = "application/java-archive";
-    mime_type["json"]   = "application/json";
-    mime_type["hqx"]    = "application/mac-binhex40";
-    mime_type["doc"]    = "application/msword";
-    mime_type["pdf"]    = "application/pdf";
-    mime_type["ps"]     = "application/postscript";
-    mime_type["eps"]    = "application/postscript";
-    mime_type["ai"]     = "application/postscript";
-    mime_type["rtf"]    = "application/rtf";
-    mime_type["m3u8"]   = "application/vnd.apple.mpegurl";
-    mime_type["kml"]    = "application/vnd.google-earth.kml+xml";
-    mime_type["kmz"]    = "application/vnd.google-earth.kmz";
-    mime_type["xls"]    = "application/vnd.ms-excel";
-    mime_type["eot"]    = "application/vnd.ms-fontobject";
-    mime_type["ppt"]    = "application/vnd.ms-powerpoint";
-    mime_type["odg"]    = "application/vnd.oasis.opendocument.graphics";
-    mime_type["odp"]    = "application/vnd.oasis.opendocument.presentation";
-    mime_type["ods"]    = "application/vnd.oasis.opendocument.spreadsheet";
-    mime_type["odt"]    = "application/vnd.oasis.opendocument.text";
-    mime_type["pptx"]   = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-    mime_type["xlsx"]   = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    mime_type["docx"]   = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    mime_type["wmlc"]   = "application/vnd.wap.wmlc";
-    mime_type["wasm"]   = "application/wasm";
-    mime_type["7z"]     = "application/x-7z-compressed";
-    mime_type["cco"]    = "application/x-cocoa";
-    mime_type["jardiff"]= "application/x-java-archive-diff";
-    mime_type["jnlp"]   = "application/x-java-jnlp-file";
-    mime_type["run"]    = "application/x-makeself";
-    mime_type["pl"]     = "application/x-perl";
-    mime_type["pm"]     = "application/x-perl";
-    mime_type["prc"]    = "application/x-pilot";
-    mime_type["pdb"]    = "application/x-pilot";
-    mime_type["rar"]    = "application/x-rar-compressed";
-    mime_type["rpm"]    = "application/x-redhat-package-manager";
-    mime_type["sea"]    = "application/x-sea";
-    mime_type["swf"]    = "application/x-shockwave-flash";
-    mime_type["sit"]    = "application/x-stuffit";
-    mime_type["tcl"]    = "application/x-tcl";
-    mime_type["tk"]     = "application/x-tcl";
-    mime_type["der"]    = "application/x-x509-ca-cert";
-    mime_type["pem"]    = "application/x-x509-ca-cert";
-    mime_type["crt"]    = "application/x-x509-ca-cert";
-    mime_type["xpi"]    = "application/x-xpinstall";
-    mime_type["xhtml"]  = "application/xhtml+xml";
-    mime_type["xspf"]   = "application/xspf+xml";
-    mime_type["zip"]    = "application/zip";
-    mime_type["bin"]    = "application/octet-stream";
-    mime_type["exe"]    = "application/octet-stream";
-    mime_type["dll"]    = "application/octet-stream";
-    mime_type["deb"]    = "application/octet-stream";
-    mime_type["dmg"]    = "application/octet-stream";
-    mime_type["iso"]    = "application/octet-stream";
-    mime_type["img"]    = "application/octet-stream";
-    mime_type["msi"]    = "application/octet-stream";
-    mime_type["msp"]    = "application/octet-stream";
-    mime_type["msm"]    = "application/octet-stream";
-    //audio
-    mime_type["mid"]    = "audio/midi";
-    mime_type["midi"]   = "audio/midi";
-    mime_type["kar"]    = "audio/midi";
-    mime_type["mp3"]    = "audio/mpeg";
-    mime_type["ogg"]    = "audio/ogg";
-    mime_type["m4a"]    = "audio/x-m4a";
-    mime_type["ra"]     = "audio/x-realaudio";
-    //video
-    mime_type["3gpp"]   = "video/3gpp";
-    mime_type["3gp"]    = "video/3gpp";
-    mime_type["ts"]     = "video/mp2t";
-    mime_type["mp4"]    = "video/mp4";
-    mime_type["mpeg"]   = "video/mpeg";
-    mime_type["mpg"]    = "video/mpeg";
-    mime_type["mov"]    = "video/quicktime";
-    mime_type["webm"]   = "video/webm";
-    mime_type["flv"]    = "video/x-flv";
-    mime_type["m4v"]    = "video/x-m4v";
-    mime_type["mng"]    = "video/x-mng";
-    mime_type["asx"]    = "video/x-ms-asf";
-    mime_type["asf"]    = "video/x-ms-asf";
-    mime_type["wmv"]    = "video/x-ms-wmv";
-    mime_type["avi"]    = "video/x-msvideo";
+    // text
+    mime_type["php"] = "text/html";
+    mime_type["html"] = "text/html";
+    mime_type["htm"] = "text/html";
+    mime_type["shtml"] = "text/html";
+    mime_type["css"] = "text/css";
+    mime_type["xml"] = "text/xml";
+    // image
+    mime_type["gif"] = "image/gif";
+    mime_type["jpeg"] = "image/jpeg";
+    mime_type["jpg"] = "image/jpeg";
+    // application
+    mime_type["js"] = "application/javascript";
+    mime_type["atom"] = "application/atom+xml";
+    mime_type["rss"] = "application/rss+xml";
+    // text
+    mime_type["mml"] = "text/mathml";
+    mime_type["txt"] = "text/plain";
+    mime_type["jad"] = "text/vnd.sun.j2me.app-descriptor";
+    mime_type["wml"] = "text/vnd.wap.wml";
+    mime_type["htc"] = "text/x-component";
+    // image
+    mime_type["avif"] = "image/avif";
+    mime_type["png"] = "image/png";
+    mime_type["svg"] = "image/svg+xml";
+    mime_type["svgz"] = "image/svg+xml";
+    mime_type["tif"] = "image/tiff";
+    mime_type["tiff"] = "image/tiff";
+    mime_type["wbmp"] = "image/vnd.wap.wbmp";
+    mime_type["webp"] = "image/webp";
+    mime_type["ico"] = "image/x-icon";
+    mime_type["jng"] = "image/x-jng";
+    mime_type["bmp"] = "image/x-ms-bmp";
+    // font
+    mime_type["woff"] = "font/woff";
+    mime_type["woff2"] = "font/woff2";
+    // application
+    mime_type["jar"] = "application/java-archive";
+    mime_type["war"] = "application/java-archive";
+    mime_type["ear"] = "application/java-archive";
+    mime_type["json"] = "application/json";
+    mime_type["hqx"] = "application/mac-binhex40";
+    mime_type["doc"] = "application/msword";
+    mime_type["pdf"] = "application/pdf";
+    mime_type["ps"] = "application/postscript";
+    mime_type["eps"] = "application/postscript";
+    mime_type["ai"] = "application/postscript";
+    mime_type["rtf"] = "application/rtf";
+    mime_type["m3u8"] = "application/vnd.apple.mpegurl";
+    mime_type["kml"] = "application/vnd.google-earth.kml+xml";
+    mime_type["kmz"] = "application/vnd.google-earth.kmz";
+    mime_type["xls"] = "application/vnd.ms-excel";
+    mime_type["eot"] = "application/vnd.ms-fontobject";
+    mime_type["ppt"] = "application/vnd.ms-powerpoint";
+    mime_type["odg"] = "application/vnd.oasis.opendocument.graphics";
+    mime_type["odp"] = "application/vnd.oasis.opendocument.presentation";
+    mime_type["ods"] = "application/vnd.oasis.opendocument.spreadsheet";
+    mime_type["odt"] = "application/vnd.oasis.opendocument.text";
+    mime_type["pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    mime_type["xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    mime_type["docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    mime_type["wmlc"] = "application/vnd.wap.wmlc";
+    mime_type["wasm"] = "application/wasm";
+    mime_type["7z"] = "application/x-7z-compressed";
+    mime_type["cco"] = "application/x-cocoa";
+    mime_type["jardiff"] = "application/x-java-archive-diff";
+    mime_type["jnlp"] = "application/x-java-jnlp-file";
+    mime_type["run"] = "application/x-makeself";
+    mime_type["pl"] = "application/x-perl";
+    mime_type["pm"] = "application/x-perl";
+    mime_type["prc"] = "application/x-pilot";
+    mime_type["pdb"] = "application/x-pilot";
+    mime_type["rar"] = "application/x-rar-compressed";
+    mime_type["rpm"] = "application/x-redhat-package-manager";
+    mime_type["sea"] = "application/x-sea";
+    mime_type["swf"] = "application/x-shockwave-flash";
+    mime_type["sit"] = "application/x-stuffit";
+    mime_type["tcl"] = "application/x-tcl";
+    mime_type["tk"] = "application/x-tcl";
+    mime_type["der"] = "application/x-x509-ca-cert";
+    mime_type["pem"] = "application/x-x509-ca-cert";
+    mime_type["crt"] = "application/x-x509-ca-cert";
+    mime_type["xpi"] = "application/x-xpinstall";
+    mime_type["xhtml"] = "application/xhtml+xml";
+    mime_type["xspf"] = "application/xspf+xml";
+    mime_type["zip"] = "application/zip";
+    mime_type["bin"] = "application/octet-stream";
+    mime_type["exe"] = "application/octet-stream";
+    mime_type["dll"] = "application/octet-stream";
+    mime_type["deb"] = "application/octet-stream";
+    mime_type["dmg"] = "application/octet-stream";
+    mime_type["iso"] = "application/octet-stream";
+    mime_type["img"] = "application/octet-stream";
+    mime_type["msi"] = "application/octet-stream";
+    mime_type["msp"] = "application/octet-stream";
+    mime_type["msm"] = "application/octet-stream";
+    // audio
+    mime_type["mid"] = "audio/midi";
+    mime_type["midi"] = "audio/midi";
+    mime_type["kar"] = "audio/midi";
+    mime_type["mp3"] = "audio/mpeg";
+    mime_type["ogg"] = "audio/ogg";
+    mime_type["m4a"] = "audio/x-m4a";
+    mime_type["ra"] = "audio/x-realaudio";
+    // video
+    mime_type["3gpp"] = "video/3gpp";
+    mime_type["3gp"] = "video/3gpp";
+    mime_type["ts"] = "video/mp2t";
+    mime_type["mp4"] = "video/mp4";
+    mime_type["mpeg"] = "video/mpeg";
+    mime_type["mpg"] = "video/mpeg";
+    mime_type["mov"] = "video/quicktime";
+    mime_type["webm"] = "video/webm";
+    mime_type["flv"] = "video/x-flv";
+    mime_type["m4v"] = "video/x-m4v";
+    mime_type["mng"] = "video/x-mng";
+    mime_type["asx"] = "video/x-ms-asf";
+    mime_type["asf"] = "video/x-ms-asf";
+    mime_type["wmv"] = "video/x-ms-wmv";
+    mime_type["avi"] = "video/x-msvideo";
 }
 
-void    Request::ft_http_code()
+void Request::ft_http_code()
 {
     // 2xx success
     http_code[200] = std::string("OK");
@@ -957,7 +1005,7 @@ void    Request::ft_http_code()
     http_code[415] = std::string("Unsupported Media Type");
     // 5xx server errors
     http_code[500] = std::string("Internal Server Error");
-    http_code[501] = std::string("Not Implemented"); 
+    http_code[501] = std::string("Not Implemented");
     http_code[503] = std::string("Service Unavailable");
 }
 
@@ -993,11 +1041,12 @@ std::string Request::getPath() const
     return _path;
 }
 
-std::map<std::string, std::string> Request::getHeader() const {
+std::map<std::string, std::string> Request::getHeader() const
+{
     return _header;
 }
 
-int     Request::getHttpStatus() const
+int Request::getHttpStatus() const
 {
     return _http_status;
 }
@@ -1017,16 +1066,27 @@ std::string Request::getResponse()
     return _response_body_as_string;
 }
 
-std::string Request::getAvailableFilePath() const {
+std::string Request::get_server_buffer() const
+{
+    return _buffer;
+}
+
+std::string Request::getAvailableFilePath() const
+{
     return _available_file_path;
 }
 
-void    Request::setParse(s_parsing* parsed)
+void Request::setParse(s_parsing *parsed)
 {
     this->_parse = parsed;
 }
 
-void    Request::setServer_index(int index) {
+void    Request::setServer(Server serv) {
+    this->_server = serv;
+}
+
+void Request::setServer_index(int index)
+{
     this->_server_index = index;
 }
 
@@ -1042,7 +1102,7 @@ std::string Request::remove_space(std::string tmp)
     return finale;
 }
 
-void    Request::print_parse_vector()
+void Request::print_parse_vector()
 {
     std::vector<std::string>::iterator vec_b = _parse->serv[_server_index]->server.begin();
     std::vector<std::string>::iterator vec_e = _parse->serv[_server_index]->server.end();
@@ -1056,7 +1116,8 @@ void    Request::print_parse_vector()
     std::cout << _parse->serv[_server_index]->loc[_location_index]->url_location << std::endl;
 }
 
-void    Request::build_autoindex_page() {
+void Request::build_autoindex_page()
+{
     DIR *dir;
     struct dirent *files;
     std::string root;
@@ -1064,36 +1125,79 @@ void    Request::build_autoindex_page() {
     root = _parse->serv[_server_index]->loc[_location_index]->root_location;
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
-    //for "." and ".." directories, need to be added
+    // for "." and ".." directories, need to be added
     _response_body_as_string.append("<a href=\"./\">.</a><br>");
     _response_body_as_string.append("<a href=\"../\">..</a><br>");
-    //this loop will add or dirctories and files available
+    // this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
-        if (strcmp(files->d_name, ".") && strcmp(files->d_name, "..") ) {
-        if (_directory_path.find(_current_directory) != std::string::npos) {
-        // _response_body_as_string.append("<a href=\"" + _directory_path.substr(_current_directory.size(), _directory_path.size()) + "/");
-        _response_body_as_string.append("<a href=\"" + _path );
-        }
-        else
-            _response_body_as_string.append("<a href=\"/");
-        _response_body_as_string.append(files->d_name);
-        _response_body_as_string.append("\">");
-        _response_body_as_string.append(files->d_name);
-        _response_body_as_string.append("</a><br>");
+        if (strcmp(files->d_name, ".") && strcmp(files->d_name, ".."))
+        {
+            if (_directory_path.find(_current_directory) != std::string::npos)
+            {
+                // _response_body_as_string.append("<a href=\"" + _directory_path.substr(_current_directory.size(), _directory_path.size()) + "/");
+                _response_body_as_string.append("<a href=\"" + _path);
+            }
+            else
+                _response_body_as_string.append("<a href=\"/");
+            _response_body_as_string.append(files->d_name);
+            _response_body_as_string.append("\">");
+            _response_body_as_string.append(files->d_name);
+            _response_body_as_string.append("</a><br>");
         }
     }
     closedir(dir);
     _response_body_as_string.append("</body></html>");
 }
 
+int Request::read_body_request() {
+    std::ofstream jojo("jamal.txt", std::ios_base::app);
+
+    if (_header.find("Content-Length") != _header.end())
+    {
+        char buffer_chr[BUFFER_SIZE];
+        // int i = 0;
+        // int content_length_read = 1;
+        // while(_content_actual_size > 0)
+        // {
+            int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
+            jojo.write(buffer_chr,content_length_read);
+            // i+=content_length_read;
+            // if(content_length_read == 0)
+            //     break;
+            // std::cout << content_length_read << " i " << i << std::endl;
+            _content_actual_size -= content_length_read;
+            if (_content_actual_size > 0)
+                read_again = true;
+            else
+                read_again = false;
+        //     i++;
+        // }
+    }
+    else if (_header.find("Transfer-Encoding") != _header.end())
+    {
+        
+    }
+    std::cerr << "the content size: " << _content_actual_size << std::endl;
+    jojo.close();
+    std::cerr << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-**" << _buffer << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
+    return read_again;
+}
+
 int Request::POST_method()
 {
-    if (location_support_upload()) 
+    if (location_support_upload())
+    {
+        if (read_body_request())
+            return 1;
         upload_post_request();
+        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+        // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
+        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
     else
     {
-        if (get_request_resource())
+        if (!get_request_resource())
         {
             if (this->get_resource_type() == DIRECTORY)
                 return this->If_is_directory();
@@ -1104,58 +1208,100 @@ int Request::POST_method()
         {
             _http_status = 404;
             return ft_http_status(getHttpStatus());
-        }  
+        }
+        // else if (location_support_upload())
+        // {
+        //     upload_post_request();
+        // }
     }
     return 0;
 }
-
 int Request::upload_post_request()
 {
 
+    std::ifstream jojo("jamal.txt");
+    std::string str = "Content-Disposition";
+    std::string line;
+    std::string ext;
+    char c;
+    std::string rand_str = randomstring(10);
+    size_t find = _body.find("Content-Type:");
+    if (find != std::string::npos)
+    {
+        ext = _body.substr(find);
+        size_t fnd = ext.find("/");
+        if (fnd != std::string::npos)
+        {
+            ext = ext.substr(fnd + 1);
+            size_t found = ext.find("\n");
+            if (found != std::string::npos)
+                ext = "." + ext.substr(0, found - 1);
+            rand_str += ext;
+        }
+    }
+    std::ofstream goku("./upload/" + rand_str);
+    while (std::getline(jojo, line))
+    {
+        if (line.find(str) != std::string::npos)
+        {
+            std::getline(jojo, line);
+            std::getline(jojo, line);
+            std::getline(jojo, line);
+            std::getline(jojo, line);
+            while (jojo.get(c))
+            {
+                goku.put(c);
+            }
+            break;
+        }
+    }
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
 
 bool Request::location_support_upload()
 {
-   if (_header.find("Content-Type") != _header.end())
-    {
-        size_t find = _header["Content-Type"].find("multipart/form-data");
-        if (find != std::string::npos)
-            return true;
-    }
-    return false;
+    // if (_header.find("Content-Type") != _header.end())
+    // {
+    //     size_t find = _header["Content-Type"].find("multipart/form-data");
+    //     if (find != std::string::npos)
+    //         return true;
+    // }
+    // return false;
+    return true;
 }
 int Request::If_is_file()
 {
     if (is_location_has_cgi())
+    {
         request_run_cgi();
+    }
     else
     {
         _http_status = 403;
-        return ft_http_status(getHttpStatus()); 
+        return ft_http_status(getHttpStatus());
     }
     return (0);
 }
 
-int    Request::If_is_directory()
+int Request::If_is_directory()
 {
     if (is_uri_has_backslash_in_end())
     {
-        if ( is_dir_has_index_files() )
+        if (is_dir_has_index_files())
         {
             if (is_location_has_cgi())
                 request_run_cgi();
             else
             {
                 _http_status = 403;
-                return ft_http_status(getHttpStatus()); 
+                return ft_http_status(getHttpStatus());
             }
         }
         else
         {
-            _http_status = 404; //to check after ???????????
-            return ft_http_status(getHttpStatus());     
+            _http_status = 404; // to check after ???????????
+            return ft_http_status(getHttpStatus());
         }
     }
     else
@@ -1175,7 +1321,7 @@ bool Request::is_location_has_cgi()
     return false;
 }
 
-int     Request::request_run_cgi()
+int Request::request_run_cgi()
 {
     // Server server;
     CGI cgi(_location_index, _server_index);
@@ -1185,20 +1331,23 @@ int     Request::request_run_cgi()
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    cgi.fill_cgi(_server.getBuffer(), _parse->serv[_server_index]);
-    cgi.handle_cgi_request(*this);
+    cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
     _response_body_as_string = cgi.getRespBuffer();
     return (200);
 }
 
-std::string const& Request::getBody() const
+std::string const &Request::getBody() const
 {
     return _body;
 }
 
+void    Request::set_read_fd(int fd) {
+    _read_fd = fd;
+}
+
 unsigned long   Request::hex_to_dec(std::string hex) {
     unsigned long output = 0;
-    for (int i = 0; i < hex.length(); ++i) {
+    for (size_t i = 0; i < hex.length(); ++i) {
         if (hex[i] >= 48 && hex[i] <= 57) {
             output += (hex[i] - 48)* std::pow(16, hex.length() - i - 1);
         }
@@ -1210,4 +1359,14 @@ unsigned long   Request::hex_to_dec(std::string hex) {
         }
     }
     return output;
+}
+
+int     Request::string_to_decimal(std::string str) {
+    std::stringstream converted;
+    int               number;
+
+    converted << str;
+    converted >> number;
+
+    return number;
 }

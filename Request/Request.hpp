@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:50 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/10 14:52:28 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/16 15:24:45 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "../Server/Server.hpp"
 # include "../utils/utils.hpp"
 # include "../parse/parsing.hpp"
-# include "../cgi-bin/cgi.hpp"
+# include "../CGI/cgi.hpp"
 # include <iostream>
 # include <map>
 # include <string>
@@ -43,7 +43,11 @@ class Request {
         int                                 _server_index;
         int                                 _location_index;
         int                                 _content_length;
+        int                                 _read_fd;
+        int                                 _chunked_content_value;
+        int                                 _content_actual_size;
         std::vector<std::string>            _file_name_path;
+        std::string                         _buffer;
         std::string                         _current_directory;
         std::string                         _requested_file_path;
         std::string                         _available_file_path;
@@ -111,7 +115,7 @@ class Request {
         void    build_date();
         void    add_zero(int timer);
         int     check_for_arguments_in_path(std::string path);
-        unsigned long   hex_to_dec(std::string hex);
+        int     read_body_request();
 
         /*Response functions*/
         void    build_response();
@@ -123,10 +127,13 @@ class Request {
         bool    is_location_has_cgi();
         int     request_run_cgi();
         int     If_is_file();
+        int     string_to_decimal(std::string);
+        unsigned long   hex_to_dec(std::string hex);
 
         std::map<int, std::string>          http_code;
         std::map<std::string, std::string>  mime_type;
         std::vector<std::string>            allowed_methods;
+        bool                                read_again;
         std::string                         Response;
 
         std::string getMethod() const;
@@ -135,9 +142,12 @@ class Request {
         std::map<std::string, std::string> getHeader() const;
         std::string getResponse();
         std::string getAvailableFilePath() const;
+        std::string get_server_buffer() const;
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
         void        setServer_index(int index);
+        void        set_read_fd(int);
+        void        setServer(Server);
         std::string const& getBody() const;
 };
 

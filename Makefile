@@ -6,7 +6,7 @@
 #    By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/19 15:27:10 by mbadaoui          #+#    #+#              #
-#    Updated: 2023/05/11 10:57:30 by sriyani          ###   ########.fr        #
+#    Updated: 2023/05/16 11:50:33 by sriyani          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,14 +20,14 @@ CPPFLAGS = -std=c++98 -Wall -Werror -Wextra -fsanitize=address
 SRC = main.cpp\
 	Server/Server.cpp \
 	Request/Request.cpp \
-	cgi-bin/cgi.cpp\
+	CGI/cgi.cpp\
 	utils/ft_split.cpp \
 	utils/utils_functions.cpp \
 	parse/parsing.cpp \
 
 HEADERS = Server/Server.hpp \
 	Request/Request.hpp \
-	cgi-bin/cgi.hpp \
+	CGI/cgi.hpp \
 	utils/utils.hpp \
 	parse/parsing.hpp \
 

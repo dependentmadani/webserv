@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:12 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/25 12:09:13 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:57:58 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # include <netdb.h>
 # include "../parse/parsing.hpp"
 
-# define BUFFER_SIZE 8192
+# define BUFFER_SIZE 180000
 
 class Server {
     public:
@@ -45,10 +45,12 @@ class Server {
         std::vector<int>    getSocket_client() const;
         int                 getSocket_fd() const;
         int                 getSocket_to_accept() const;
+        int                 getFirstReadSize() const;
         void                setPort(int);
         void                setParse(s_parsing* );
 
     private:
+        int                 _first_read_size;
         int                 _socket_fd;
         int                 _socket_to_accept;
         struct sockaddr_in  _host_addr;

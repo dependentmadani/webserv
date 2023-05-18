@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/03/25 12:09:05 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:58:17 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include <iostream>
 
-Server::Server() : _host_addr(), _socket_client(), _buffer_complete()
+Server::Server() : _first_read_size(), _host_addr(), _socket_client(), _buffer_complete()
 {
     _socket_fd = 0;
     _socket_to_accept = 0;
@@ -21,7 +21,7 @@ Server::Server() : _host_addr(), _socket_client(), _buffer_complete()
     _connexion_status = false;
 }
 
-Server::Server(int port) : _host_addr(), _socket_client(), _buffer_complete()
+Server::Server(int port) : _first_read_size(), _host_addr(), _socket_client(), _buffer_complete()
 {
     _socket_fd = 0;
     _socket_to_accept = 0;
@@ -64,8 +64,10 @@ int Server::initiate_socket(int num_serv) {
     std::cout << "The server created successfully, with fd value of " << _socket_fd << std::endl;
     std::cout << "The port to listen to: " << _port << std::endl;
     std::cout << "Binding the socket " << _socket_fd << std::endl;
-    int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
-    // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
+    // int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
+    const int enable = 1;
+    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_NOSIGPIPE, &enable, sizeof(int));
+    int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     if (i < 0) {
         perror("webserv error (bind) ");
         return -1;
@@ -109,18 +111,27 @@ void    Server::accept_connections(int position)
 
 int    Server::recv_data(int position)
 {
-    std::fstream file;
+    std::ofstream file;
     file.open("jamal.txt");
-    int data = 1;
     memset(_buffer, 0, BUFFER_SIZE);
 
     // while (data > 0) {
-    data = read(position, _buffer, BUFFER_SIZE);
-    for (int i =0; i < data; ++i) {
+    _first_read_size = recv(position, _buffer, BUFFER_SIZE, 0);
+    for (int i = 0; i < _first_read_size; ++i) {
         file << _buffer[i];
     }
+    // int i = 0;
+    // while(1)
+    // {
+    //      _first_read_size = recv(position, _buffer, BUFFER_SIZE, 0);
+    //      if(_first_read_size == 0)
+    //         break;
+    //      std::cout << _first_read_size<< " i " << i << std::endl;
+    //      i++;
+    // }
+    // exit(1);
     _buffer_complete.append(std::string(_buffer));
-    // std::cout << "check what" << data << std::endl;
+    std::cout << "check what: " << position << std::endl;
     // for (int i = 0; i < 8000; ++i) {
     //     std::cerr << _buffer[i];
     // }
@@ -148,10 +159,10 @@ int    Server::recv_data(int position)
     //     std::cerr << _buffer_complete[i];
     // }
     std::cout << "\n\n" << std::endl;
-	std::cout << "\n\n" << "===============   "  << data << " BYTES  RECEIVED   ===============\n";
+	std::cout << "\n\n" << "===============   "  << _first_read_size << " BYTES  RECEIVED   ===============\n";
 	// std::cout << _buffer;
 	std::cout << "\n======================================================" << std::endl;
-	return (data);
+	return (_first_read_size);
 }
 
 int Server::getServerFd() const
@@ -182,6 +193,10 @@ void    Server::setParse(s_parsing * parsed)
 int Server::getSocket_fd() const
 {
     return _socket_fd;
+}
+
+int Server::getFirstReadSize() const {
+    return _first_read_size;
 }
 
 void    Server::setPort(int port) {
