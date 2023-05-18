@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/16 15:27:06 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/18 16:56:42 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ private:
    std::string  resp_buffer;
    std::string _ext;
    std::string executable;
+   bool flag;
    
 public:
       CGI(int loc_index, int serv_index);

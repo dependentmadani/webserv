@@ -3,7 +3,7 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
-    // save $_FILES['avatar'] to a inside a folder
+    save $_FILES['avatar'] $to a inside a folder
     $avatar = $_FILES['avatar'];
     $avatar_name = $avatar['name'];
     $avatar_tmp_name = $avatar['tmp_name'];

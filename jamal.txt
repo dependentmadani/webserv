@@ -1,13 +1,17 @@
-POST / HTTP/1.1
-User-Agent: PostmanRuntime/7.32.2
-Accept: */*
-Postman-Token: 44bdb553-0c02-4415-8d0b-6f2c8766088c
+GET /favicon.ico HTTP/1.1
 Host: localhost:8080
 Connection: keep-alive
-Content-Type: multipart/form-data; boundary=--------------------------773006321712584558274611
-Content-Length: 78699159
-
-----------------------------773006321712584558274611
-Content-Disposition: form-data; name=""; filename="20230310_203739.mp4"
-Content-Type: video/mp4
+sec-ch-ua: "Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8080/planet/script/script.py
+Accept-Encoding: gzip, deflate, br
+Accept-Language: fr-FR,fr;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6
+dnt: 1
+sec-gpc: 1
 

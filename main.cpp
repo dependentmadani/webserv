@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/16 15:05:51 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/18 15:06:07 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@
 #include "parse/parsing.hpp"
 #include "CGI/cgi.hpp"
 
-int is_available(std::vector<int> tmp, int value) {
+int is_available(std::vector<int> tmp, int value)
+{
 
-    for (size_t i =0 ; i < tmp.size(); ++i) {
+    for (size_t i = 0; i < tmp.size(); ++i)
+    {
         if (tmp[i] == value)
             return i;
     }
@@ -32,7 +34,7 @@ int main(int ac, char **av)
     Request request;
     parsing vars;
     parsing *pars = new parsing();
-    
+
     if (ac == 2)
     {
         file.open(av[1]);
@@ -40,96 +42,104 @@ int main(int ac, char **av)
         {
             vars.copy_file(pars, av[1]);
             vars.check_key(pars);
-            std::cout << " File exist"<<std::endl;
+            std::cout << " File exist" << std::endl;
         }
         else
         {
-          std::cout << " File doesn't exist"<<std::endl;       
+            std::cout << " File doesn't exist" << std::endl;
             return (1);
         }
     }
     else
     {
-        std::cout<<"Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\""<<std::endl;
+        std::cout << "Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\"" << std::endl;
         exit(1);
     }
-    Server  server(pars->serv[0]->ind_port);
+    Server server(pars->serv[0]->ind_port);
     // struct pollfd theOne;
     // memset(&theOne, 0, sizeof(theOne));
     server.setParse(pars);
     request.ft_http_code();
     request.ft_mime_type();
     request.setParse(pars);
-    fd_set  rds, rds_ready;
+    fd_set rds, rds_ready;
     FD_ZERO(&rds);
     FD_ZERO(&rds_ready);
-    for (int i = 0; i < pars->num_serv; ++i) {
-    server.setPort(pars->serv[i]->ind_port);
-    if (server.initiate_socket(i) < 0)
-        return (1);
-    FD_SET(server.getSocket_fd(), &rds);
-    std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
+    for (int i = 0; i < pars->num_serv; ++i)
+    {
+        server.setPort(pars->serv[i]->ind_port);
+        if (server.initiate_socket(i) < 0)
+            return (1);
+        FD_SET(server.getSocket_fd(), &rds);
+        std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
-    while (1) {
-    rds_ready = rds;
-    if (select(FD_SETSIZE, &rds_ready, NULL, NULL, NULL) < 0) {
-        perror("select: ");
-        exit(0);
-    }
-    int accepted_connection = 0;
-    for (int i = 1; i < FD_SETSIZE; ++i) {
-        if (FD_ISSET(i, & rds_ready)) {
-            int server_id = 0;
-            if ((server_id = is_available(server.getSocket_client(), i)) != -1) {
-                request.setServer_index(server_id);
-                std::cerr << "accept a connection " << i <<std::endl;
-                server.accept_connections(i);
-                accepted_connection = i;
-                FD_SET(server.getSocket_to_accept(), &rds);
-            }
-            else {
-                server.recv_data(i);
-                // std::cerr << "it diiiid reaaach heree" << std::endl;
-                std::cerr << server.getBuffer() << std::endl;
-                if (request.ParseRequest(server.getBuffer()) == 1) {
-                    close(i);
-                    FD_CLR(i , &rds);
-                    break ;
+    while (1)
+    {
+        rds_ready = rds;
+        if (select(FD_SETSIZE, &rds_ready, NULL, NULL, NULL) < 0)
+        {
+            perror("select: ");
+            exit(0);
+        }
+        int accepted_connection = 0;
+        for (int i = 1; i < FD_SETSIZE; ++i)
+        {
+            if (FD_ISSET(i, &rds_ready))
+            {
+                int server_id = 0;
+                if ((server_id = is_available(server.getSocket_client(), i)) != -1)
+                {
+                    request.setServer_index(server_id);
+                    std::cerr << "accept a connection " << i << std::endl;
+                    server.accept_connections(i);
+                    accepted_connection = i;
+                    FD_SET(server.getSocket_to_accept(), &rds);
                 }
-                request.UseMethod();
-                request.build_response();
-                std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
-                send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-                std::cerr << "*********************************************" << std::endl;
-                std::cout << request.Response << std::endl;
-                std::cerr << "all should be good :)" << std::endl;
-                // std::cerr << server.getBuffer() << std::endl;
-                FD_CLR(i , &rds);
-                close(i);
+                else
+                {
+                    server.recv_data(i);
+                    // std::cerr << "it diiiid reaaach heree" << std::endl;
+                    std::cerr << server.getBuffer() << std::endl;
+                    if (request.ParseRequest(server.getBuffer()) == 1)
+                    {
+                        close(i);
+                        FD_CLR(i, &rds);
+                        break;
+                    }
+                    request.UseMethod();
+                    request.build_response();
+                    std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() << std::endl;
+                    send(i, request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    std::cerr << "*********************************************" << std::endl;
+                    std::cout << request.Response << std::endl;
+                    std::cerr << "all should be good :)" << std::endl;
+                    // request.set_cookie();
+                    // std::cerr << server.getBuffer() << std::endl;
+                    FD_CLR(i, &rds);
+                    close(i);
+                }
             }
         }
-    }
-    // server.accept_connections();
-    // theOne.fd = (server.getSocket_client())[0];
-    // theOne.events = POLLIN;
-    // int n = server.recv_data(&theOne);
-    // request.ft_http_code();
-    // request.ft_mime_type();
-    // request.setParse(pars);
-    // request.ParseRequest(server.getBuffer());
-    // request.UseMethod();
-    // request.build_response();
-    // send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-    // std::cerr << "*********************************************" << std::endl;
-    // // for (int i = 0; i < n; ++i) {
-    // //     std::cerr << request.getBody()[i];
-    // // }
-    // std::cout << "----------------------------------" << std::endl;
-    // std::cout << request.Response << std::endl;
-    // // close(theOne.fd);
-    // close(server.getServerFd());
-    // close(server.getSocket_client()[0]); 
+        // server.accept_connections();
+        // theOne.fd = (server.getSocket_client())[0];
+        // theOne.events = POLLIN;
+        // int n = server.recv_data(&theOne);
+        // request.ft_http_code();
+        // request.ft_mime_type();
+        // request.setParse(pars);
+        // request.ParseRequest(server.getBuffer());
+        // request.UseMethod();
+        // request.build_response();
+        // send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+        // std::cerr << "*********************************************" << std::endl;
+        // // for (int i = 0; i < n; ++i) {
+        // //     std::cerr << request.getBody()[i];
+        // // }
+        // std::cout << "----------------------------------" << std::endl;
+        // std::cout << request.Response << std::endl;
+        // // close(theOne.fd);
+        // close(server.getServerFd());
+        // close(server.getSocket_client()[0]);
     }
     return (0);
 }
-

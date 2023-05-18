@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/17 18:42:51 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/18 18:02:46 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1130,32 +1130,35 @@ void Request::build_autoindex_page()
 
 int Request::POST_method()
 {
-    if (location_support_upload())
+    // if (location_support_upload())
+    // {
+    //     upload_post_request();
+    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
+    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    // }
+    // else
+    // {
+    if (!get_request_resource())
     {
+        std::cout << 11111111 << "|_______________________________________|" << std::endl;
+        if (this->get_resource_type() == DIRECTORY)
+            return this->If_is_directory();
+        else if (this->get_resource_type() == FILE)
+            return this->If_is_file();
+    }
+    else if (location_support_upload())
+    {
+        std::cout << 22222222 << "|_______________________________________|" << std::endl;
         upload_post_request();
-        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-        // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
     else
     {
-        if (!get_request_resource())
-        {
-            if (this->get_resource_type() == DIRECTORY)
-                return this->If_is_directory();
-            else if (this->get_resource_type() == FILE)
-                return this->If_is_file();
-        }
-        // else if (location_support_upload())
-        // {
-        //     upload_post_request();
-        // }
-        else
-        {
-            _http_status = 404;
-            return ft_http_status(getHttpStatus());
-        }
+        std::cout << 3333333 << "|_______________________________________|" << std::endl;
+        _http_status = 404;
+        return ft_http_status(getHttpStatus());
     }
+    // }
     return 0;
 }
 int Request::upload_post_request()
@@ -1258,9 +1261,7 @@ int Request::If_is_directory()
 bool Request::is_location_has_cgi()
 {
     if (this->_parse->serv[_server_index]->loc[_location_index]->cgi_pass.size())
-    {
         return true;
-    }
     return false;
 }
 
@@ -1282,4 +1283,21 @@ int Request::request_run_cgi()
 std::string const &Request::getBody() const
 {
     return _body;
+}
+
+void Request::set_cookie()
+{
+    // std::map<std::string, std::string>;
+    // size_t find = _header.find("")
+
+    std::map<std::string, std::string>::iterator it = _header.begin();
+    // _cookie["set-cookie:"] =
+    std::cout << "|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|" << std::endl;
+    for (; it != _header.end(); it++)
+    {
+        // if
+        std::cout << "  |>>>>>>>>>>>>>>|    " << it->first << "    |<<<<<<<<<<<|   " << it->second << std::endl;
+    }
+
+    std::cout << " |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| " << std::endl;
 }
