@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/18 18:24:42 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/19 15:12:19 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
     check_cgi(serv->loc[_location_index]->cgi_pass);
 }
 
-void CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
+int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
 {
     int pipe_fd[2];
     if (pipe(pipe_fd) == -1)
@@ -150,11 +150,10 @@ void CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         {
             content.assign((std::istreambuf_iterator<char>(file)),
                            (std::istreambuf_iterator<char>()));
-
             file.close();
         }
         resp_buffer = content;
-        return;
+        return 0;
     }
     pid_t pid = fork();
     if (pid < 0)
@@ -189,8 +188,14 @@ void CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     // td::string cookie = "session=" + sessionId + "; Path=/; HttpOnly";
     close(pipe_fd[0]);
     size_t found = resp_buffer.find("\r\n\r\n");
-    resp_buffer = resp_buffer.substr(found + 1);
-    // for(size_t i = 0; i < _envcgi.size();i++)
+    std::string cgi_header = resp_buffer.substr(0, found);
+    size_t fnd = cgi_header.find("Content-type:");
+    if (fnd != std::string::npos)
+        resp_buffer = resp_buffer.substr(found + 1);
+    else
+        return 500;
+    return 0;
+    // for (size_t i = 0; i < _envcgi.size(); i++)
     //     {
     //     std::cout<<"|____________|"<< _env[i]<<"|_________|"<<std::endl;
 
@@ -222,6 +227,6 @@ void CGI::check_cgi(std::vector<std::string> str)
         ++it;
         ++i;
     }
-    if (it == str.end())
-        flag = true;
+    // if (it == str.end())
+    //     flag = true;
 }

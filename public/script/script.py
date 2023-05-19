@@ -10,6 +10,7 @@ name = form.getvalue('name')
 age = form.getvalue('age')
 
 # Set the content type of the response
+
 print("Content-type:text/html\r\n\r\n")
 
 # Generate the HTML response

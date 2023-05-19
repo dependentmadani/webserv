@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/18 18:02:46 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/19 15:23:20 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1139,6 +1139,11 @@ int Request::POST_method()
     // }
     // else
     // {
+    if (location_support_upload())
+    {
+        std::cout << 22222222 << "|_______________________________________|" << std::endl;
+        upload_post_request();
+    }
     if (!get_request_resource())
     {
         std::cout << 11111111 << "|_______________________________________|" << std::endl;
@@ -1146,11 +1151,6 @@ int Request::POST_method()
             return this->If_is_directory();
         else if (this->get_resource_type() == FILE)
             return this->If_is_file();
-    }
-    else if (location_support_upload())
-    {
-        std::cout << 22222222 << "|_______________________________________|" << std::endl;
-        upload_post_request();
     }
     else
     {
@@ -1268,6 +1268,7 @@ bool Request::is_location_has_cgi()
 int Request::request_run_cgi()
 {
     // Server server;
+    int cgi_return = 1;
     CGI cgi(_location_index, _server_index);
 
     if (is_body_size_good(_server.getBuffer()))
@@ -1275,9 +1276,15 @@ int Request::request_run_cgi()
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
-    _response_body_as_string = cgi.getRespBuffer();
-    return (200);
+    cgi_return = cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
+    if (!cgi_return)
+    {
+        _response_body_as_string = cgi.getRespBuffer();
+        return (200);
+    }
+    std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
+    _http_status = cgi_return;
+    return ft_http_status(getHttpStatus());
 }
 
 std::string const &Request::getBody() const
