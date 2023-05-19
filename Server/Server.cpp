@@ -66,7 +66,7 @@ int Server::initiate_socket(int num_serv) {
     std::cout << "Binding the socket " << _socket_fd << std::endl;
     // int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
     const int enable = 1;
-    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_NOSIGPIPE, &enable, sizeof(int));
+    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
     int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     if (i < 0) {
         perror("webserv error (bind) ");

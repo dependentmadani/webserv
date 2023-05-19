@@ -101,7 +101,7 @@ int main(int ac, char **av)
                     how_many_times = 0;
                     std::cerr << "************------******************" << std::endl;
                     std::cerr << "all should be good :):):)" << std::endl;
-                    std::cout << request.Response << std::endl;
+                    // std::cout << request.Response << std::endl;
                     // std::cerr << server.getBuffer() << std::endl;
                     FD_CLR(i , &rds);
                     close(i);
@@ -122,11 +122,13 @@ int main(int ac, char **av)
                         continue ;
                     request.build_response();
                     // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
-                    std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() <<std::endl;
-                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    std::cerr << "hooooolaaaallaaaaa: " << strlen(request.Response.c_str()) << " and " <<  request.getFile_size() <<std::endl;
+                    // send(i , request.Response.c_str(), BUFFER_SIZE, 0);
+                    // send(i , request.Response.c_str(), strlen(request.Response.c_str()) + request.getFile_size(), 0);
+                    send(i , request.Response.c_str(), request.Response.size() , 0);
                     how_many_times = 0;
                     std::cerr << "*********************************************" << std::endl;
-                    std::cout << request.Response << std::endl;
+                    // std::cout << request.Response << std::endl;
                     std::cerr << "all should be good :)" << std::endl;
                     // std::cerr << server.getBuffer() << std::endl;
                     FD_CLR(i , &rds);

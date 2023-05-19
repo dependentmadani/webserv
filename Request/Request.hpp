@@ -46,6 +46,8 @@ class Request {
         int                                 _read_fd;
         int                                 _chunked_content_value;
         int                                 _content_actual_size;
+        int                                 _final_file_size;
+        char                                _buffer_char[BUFFER_SIZE];
         std::vector<std::string>            _file_name_path;
         std::string                         _buffer;
         std::string                         _current_directory;
@@ -143,6 +145,7 @@ class Request {
         std::string getResponse();
         std::string getAvailableFilePath() const;
         std::string get_server_buffer() const;
+        int         getFile_size() const;
         int         getHttpStatus() const;
         void        setParse(s_parsing *);
         void        setServer_index(int index);
