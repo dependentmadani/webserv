@@ -1287,11 +1287,10 @@ bool Request::location_support_upload()
 {
     if (_header.find("Content-Type") != _header.end())
     {
-        if (_header.find("Content-Type")->second == "multipart/form-data")
+        if (_header.find("Content-Type")->second.find("multipart/form-data") != std::string::npos)
             return true;
     }
     return false;
-    // return true;
 }
 int Request::If_is_file()
 {

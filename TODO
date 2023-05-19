@@ -25,6 +25,6 @@ get_matched_location_for_request_uri() function. -->
 
 <!-- * check this function too: get_matched_location_for_request_uri() that check ".." -->
 
-* GET method can get images.
+<!-- * GET method can get images. -->
 
 * Check the problem with bind for the second server
