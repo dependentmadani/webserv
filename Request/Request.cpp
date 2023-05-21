@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/19 15:23:20 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/21 14:51:01 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1138,13 +1138,13 @@ int Request::POST_method()
     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     // }
     // else
-    // {
+    // // {
     if (location_support_upload())
     {
         std::cout << 22222222 << "|_______________________________________|" << std::endl;
         upload_post_request();
     }
-    if (!get_request_resource())
+    else if (!get_request_resource())
     {
         std::cout << 11111111 << "|_______________________________________|" << std::endl;
         if (this->get_resource_type() == DIRECTORY)
@@ -1154,11 +1154,10 @@ int Request::POST_method()
     }
     else
     {
-        std::cout << 3333333 << "|_______________________________________|" << std::endl;
+        std::cout << 3333333 << "|_____________________| " << _body << "|_________________________|" << std::endl;
         _http_status = 404;
         return ft_http_status(getHttpStatus());
     }
-    // }
     return 0;
 }
 int Request::upload_post_request()
@@ -1186,15 +1185,36 @@ int Request::upload_post_request()
             rand_str += ext;
         }
     }
+    else
+    {
+        ext = ".";
+        std::string find = _header["Content-Type"];
+        if (find.size())
+        {
+            size_t fnd = find.find("/");
+            if (fnd != std::string::npos)
+            {
+                ext += find.substr(fnd + 1);
+                ext = ext.substr(0, ext.length() - 1);
+                rand_str += ext;
+            }
+        }
+        else
+        {
+            _http_status = 400;
+            return ft_http_status(getHttpStatus());
+        }
+    }
+
     std::ofstream goku("./upload/" + rand_str);
+    str = "Content-Type";
     while (std::getline(jojo, line))
     {
         if (line.find(str) != std::string::npos)
         {
             std::getline(jojo, line);
-            std::getline(jojo, line);
-            std::getline(jojo, line);
-            std::getline(jojo, line);
+            // std::getline(jojo, line);
+
             while (jojo.get(c))
             {
                 goku.put(c);
@@ -1205,15 +1225,15 @@ int Request::upload_post_request()
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
-
 bool Request::location_support_upload()
 {
-    if (_header.find("Content-Type") != _header.end())
-    {
-        size_t find = _header["Content-Type"].find("multipart/form-data");
-        if (find != std::string::npos)
+    size_t find = _body.find("Content-Type");
+    size_t found = _body.find("Content-Disposition");
+    std::string fnd = _header["Content-Type"];
+    std::string lent = _header["Content-Length"];
+    int num = atoi(lent.c_str());
+    if (find != std::string::npos || ( found == std::string::npos && fnd.size() && num > 0 ))
             return true;
-    }
     return false;
 }
 int Request::If_is_file()
@@ -1282,7 +1302,7 @@ int Request::request_run_cgi()
         _response_body_as_string = cgi.getRespBuffer();
         return (200);
     }
-    std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
+    // std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
     _http_status = cgi_return;
     return ft_http_status(getHttpStatus());
 }
@@ -1302,9 +1322,7 @@ void Request::set_cookie()
     std::cout << "|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|" << std::endl;
     for (; it != _header.end(); it++)
     {
-        // if
-        std::cout << "  |>>>>>>>>>>>>>>|    " << it->first << "    |<<<<<<<<<<<|   " << it->second << std::endl;
+        std::cout << "|>>>>>>>>>>>>>>|" << it->first << "|<<<<<<<<<<<|" << it->second << std::endl;
     }
-
     std::cout << " |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| " << std::endl;
 }
