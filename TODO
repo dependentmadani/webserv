@@ -27,4 +27,7 @@ get_matched_location_for_request_uri() function. -->
 
 <!-- * GET method can get images. -->
 
-* Check the problem with bind for the second server
+<!-- * Check the problem with bind for the second server -->
+
+* Work on Transfer-Encoding using chunk
+

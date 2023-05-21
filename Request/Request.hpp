@@ -47,7 +47,7 @@ class Request {
         int                                 _chunked_content_value;
         int                                 _content_actual_size;
         int                                 _final_file_size;
-        char                                _buffer_char[BUFFER_SIZE];
+        // char                                _buffer_char[BUFFER_SIZE];
         std::vector<std::string>            _file_name_path;
         std::string                         _buffer;
         std::string                         _current_directory;
@@ -99,7 +99,8 @@ class Request {
         int     delete_all_folder_content(std::string, int);
         int     has_write_access_on_folder();
 
-        void    create_form_for_post();
+        // void    create_form_for_post();
+        void    post_transfer_encoding();
 
         int     Is_file();
 

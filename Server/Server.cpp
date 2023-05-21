@@ -64,10 +64,10 @@ int Server::initiate_socket(int num_serv) {
     std::cout << "The server created successfully, with fd value of " << _socket_fd << std::endl;
     std::cout << "The port to listen to: " << _port << std::endl;
     std::cout << "Binding the socket " << _socket_fd << std::endl;
-    // int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
+    // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     const int enable = 1;
     setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-    int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
+    int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
     if (i < 0) {
         perror("webserv error (bind) ");
         return -1;

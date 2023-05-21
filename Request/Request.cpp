@@ -1176,40 +1176,44 @@ void Request::build_autoindex_page()
 int Request::read_body_request() {
     std::ofstream jojo("jamal.txt", std::ios_base::app);
 
-    if (_header.find("Content-Length") != _header.end())
+    if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
+    {
+        _http_status = 400;
+        return ft_http_status(getHttpStatus());
+    }
+    else if (_header.find("Content-Length") != _header.end())
     {
         char buffer_chr[BUFFER_SIZE];
-        // int i = 0;
-        // int content_length_read = 1;
-        // while(_content_actual_size > 0)
-        // {
-            int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
-            jojo.write(buffer_chr,content_length_read);
-            _body.append(std::string(buffer_chr));
-            // i+=content_length_read;
-            // if(content_length_read == 0)
-            //     break;
-            // std::cout << content_length_read << " i " << i << std::endl;
-            _content_actual_size -= content_length_read;
-            if (_content_actual_size > 0)
-                read_again = true;
-            else
-                read_again = false;
-        //     i++;
-        // }
+        memset(buffer_chr, 0, BUFFER_SIZE);
+        int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
+        jojo.write(buffer_chr,content_length_read);
+        std::cout << content_length_read << std::endl;
+        // if (content_length_read)
+        //     _body.append(std::string(buffer_chr)); /// to check if something goes wrong
+        // i+=content_length_read;
+        // if(content_length_read == 0)
+        //     break;
+        _content_actual_size -= content_length_read;
+        if (_content_actual_size > 0)
+            read_again = true;
+        else
+            read_again = false;
     }
     else if (_header.find("Transfer-Encoding") != _header.end())
     {
         std::cerr << "whaaaats noooooooow a haaamiiiid" << std::endl;
+        post_transfer_encoding();
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
     jojo.close();
-    std::cerr << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-**" << _buffer << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
+    std::cerr << "the status of read_again: " << read_again << std::endl;
+    // std::cerr << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-**" << _buffer << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
     return read_again;
 }
 
 int Request::POST_method()
 {
+    // std::cerr << "all seem to be nice" << std::endl;
     if (location_support_upload())
     {
         if (read_body_request())
@@ -1240,6 +1244,66 @@ int Request::POST_method()
     }
     return 0;
 }
+
+void    Request::post_transfer_encoding() {
+    
+    char buffer_chr[BUFFER_SIZE];
+    bool done = false;
+    std::ofstream jojo("jamal.txt", std::ios_base::app);
+    int size = 0;
+
+    memset(buffer_chr, 0, BUFFER_SIZE);
+    if (_content_actual_size == 0) {
+    std::cerr << "shooouuuuuuld be heeere just onceee" << std::endl;
+    _content_actual_size = _server.getFirstReadSize();
+    for (int i = 0; i < _server.getFirstReadSize(); i++) {
+        if (_server.getBuffer()[i] == '\r' 
+                                && (++i < _server.getFirstReadSize() && _server.getBuffer()[i] == '\n')
+                                && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\r')
+                                && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\n')
+                                && (++i < _server.getFirstReadSize() && _server.getBuffer()[i] == '0') )
+                                // && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\r')
+                                // && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\n'))
+        {
+            // std::cerr << "that's good: |" << buffer_chr[i] << "| " << i  << std::endl;
+            // exit(0);
+            read_again = false;
+            done = true;
+            break;
+        }
+
+    }
+    }
+
+    if (!done) {
+    size = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
+    jojo.write(buffer_chr, size);
+    _content_actual_size += size;
+    for (int i = 0; i < size; i++) {
+        if (buffer_chr[i] == '\r' && (++i < size && buffer_chr[i] == '\n')
+                                && (++i < size && buffer_chr[i] == '\r')
+                                && (++i < size && buffer_chr[i] == '\n')
+                                && (++i < size && buffer_chr[i] == '0')
+                                && (++i < size && buffer_chr[i] == '\r')
+                                && (++i < size && buffer_chr[i] == '\n'))
+        {
+            // std::cerr << "that's good: |" << buffer_chr[i] << "| " << i  << std::endl;
+            // exit(0);
+            read_again = false;
+            done = true;
+            break;
+        }
+    }
+    }
+    if (!done) {
+        read_again = true;
+    }
+    else {
+        read_again = false;
+    }
+    jojo.close();
+}
+
 int Request::upload_post_request()
 {
 

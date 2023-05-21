@@ -134,19 +134,19 @@ int main(int ac, char **av)
                     FD_CLR(i , &rds);
                     close(i);
                 }
-                else {
-                    std::cerr << "hooooolaaaallaaaa" <<std::endl;
-                    request.build_response();
-                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
-                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-                    how_many_times = 0;
-                    std::cerr << "************------******************" << std::endl;
-                    // std::cout << request.Response << std::endl;
-                    std::cerr << "all should be good :):):)" << std::endl;
-                    // std::cerr << server.getBuffer() << std::endl;
-                    FD_CLR(i , &rds);
-                    close(i);
-                }
+                // else {
+                //     std::cerr << "hooooolaaaallaaaa" <<std::endl;
+                //     request.build_response();
+                //     // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                //     send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                //     how_many_times = 0;
+                //     std::cerr << "************------******************" << std::endl;
+                //     // std::cout << request.Response << std::endl;
+                //     std::cerr << "all should be good :):):)" << std::endl;
+                //     // std::cerr << server.getBuffer() << std::endl;
+                //     FD_CLR(i , &rds);
+                //     close(i);
+                // }
             }
         }
     }
