@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/18 15:06:07 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/21 18:01:20 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,11 @@ int main(int ac, char **av)
     {
         server.setPort(pars->serv[i]->ind_port);
         if (server.initiate_socket(i) < 0)
-            return (1);
+            continue ;
         FD_SET(server.getSocket_fd(), &rds);
         std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
+    int how_many_times = 0;
     while (1)
     {
         rds_ready = rds;
@@ -81,45 +82,87 @@ int main(int ac, char **av)
             perror("select: ");
             exit(0);
         }
+        how_many_times += 1;
         int accepted_connection = 0;
         for (int i = 1; i < FD_SETSIZE; ++i)
         {
-            if (FD_ISSET(i, &rds_ready))
+            if (FD_ISSET(i, & rds_ready))
             {
                 int server_id = 0;
-                if ((server_id = is_available(server.getSocket_client(), i)) != -1)
+                if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again)
                 {
                     request.setServer_index(server_id);
-                    std::cerr << "accept a connection " << i << std::endl;
+                    std::cerr << "accept a connection " << i <<std::endl;
                     server.accept_connections(i);
                     accepted_connection = i;
                     FD_SET(server.getSocket_to_accept(), &rds);
                 }
                 else
                 {
+                std::cerr << "how_many_times: " << how_many_times << std::endl;
+                if (request.read_again)
+                {
+                    std::cerr << "That woouuuuld be cooool " << std::endl;
+                    if (request.UseMethod())
+                        continue;
+                    request.build_response();
+                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                    send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    how_many_times = 0;
+                    std::cerr << "************------******************" << std::endl;
+                    std::cerr << "all should be good :):):)" << std::endl;
+                    // std::cout << request.Response << std::endl;
+                    // std::cerr << server.getBuffer() << std::endl;
+                    FD_CLR(i , &rds);
+                    close(i);
+                }
+                else if (!request.read_again && how_many_times == pars->num_serv)
+                {
+                    std::cerr << "wooow waaas heeere" << std::endl;
                     server.recv_data(i);
-                    // std::cerr << "it diiiid reaaach heree" << std::endl;
+                    request.setServer(server);
                     std::cerr << server.getBuffer() << std::endl;
                     if (request.ParseRequest(server.getBuffer()) == 1)
                     {
                         close(i);
-                        FD_CLR(i, &rds);
-                        break;
+                        FD_CLR(i , &rds);
+                        break ;
                     }
+                    request.set_read_fd(i);
                     request.UseMethod();
+                    if (request.read_again)
+                        continue ;
                     request.build_response();
-                    std::cerr << "hooooolaaaallaaaaa: " << request.getAvailableFilePath() << std::endl;
-                    send(i, request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                    // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                    std::cerr << "hooooolaaaallaaaaa: " << request.Response.size() << " and " <<  request.getFile_size() <<std::endl;
+                    // send(i , request.Response.c_str(), BUFFER_SIZE, 0);
+                    // send(i , request.Response.c_str(), strlen(request.Response.c_str()) + request.getFile_size(), 0);
+                    send(i , request.Response.c_str(), request.Response.size() , 0);
+                    how_many_times = 0;
                     std::cerr << "*********************************************" << std::endl;
                     std::cout << request.Response << std::endl;
                     std::cerr << "all should be good :)" << std::endl;
-                    // request.set_cookie();
                     // std::cerr << server.getBuffer() << std::endl;
-                    FD_CLR(i, &rds);
                     close(i);
+                    FD_CLR(i , &rds);
                 }
             }
+                // else {
+                //     std::cerr << "hooooolaaaallaaaa" <<std::endl;
+                //     request.build_response();
+                //     // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                //     send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
+                //     how_many_times = 0;
+                //     std::cerr << "************------******************" << std::endl;
+                //     // std::cout << request.Response << std::endl;
+                //     std::cerr << "all should be good :):):)" << std::endl;
+                //     // std::cerr << server.getBuffer() << std::endl;
+                //     FD_CLR(i , &rds);
+                //     close(i);
+                // }
+            }
         }
+
         // server.accept_connections();
         // theOne.fd = (server.getSocket_client())[0];
         // theOne.events = POLLIN;

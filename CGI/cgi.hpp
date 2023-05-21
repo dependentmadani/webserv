@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/19 11:54:39 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:08:08 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ private:
       std::string _ext;
       std::string executable;
       bool flag;
+      std::string hold_ContentType;
 
 public:
       CGI(int loc_index, int serv_index);
@@ -51,6 +52,7 @@ public:
       std::string const &getHoldbuffer() const;
       std::string const &getRespBuffer() const;
       void check_cgi(std::vector<std::string> str);
+      std::string const &getContentType() const;
 };
 
 #include "../Request/Request.hpp"

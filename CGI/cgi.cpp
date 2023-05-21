@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/19 18:13:47 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:53:19 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             file.close();
         }
         resp_buffer = content;
-        return 0;
+        return 1;
     }
     pid_t pid = fork();
     if (pid < 0)
@@ -192,35 +192,30 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         found = resp_buffer.find("\n\n");
     else
         found = resp_buffer.find("\r\n\r\n");
-    std::string cgi_header = resp_buffer.substr(0, found);
-    size_t fnd = cgi_header.find("Content-type:");
+    hold_ContentType = resp_buffer.substr(0, found);
+
+    size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
-    else
-        return 500;
     return 0;
-    // for (size_t i = 0; i < _envcgi.size(); i++)
-    //     {
-    //     std::cout<<"|____________|"<< _env[i]<<"|_________|"<<std::endl;
-
-    //     }
-    // std::cout<<"|____________|"<< resp_buffer<<"|_________|"<<std::endl;
 }
 
 std::string const &CGI::getRespBuffer() const
 {
     return resp_buffer;
 }
+std::string const &CGI::getContentType() const
+{
+    return hold_ContentType;
+}
+
 void CGI::check_cgi(std::vector<std::string> str)
 {
 
     std::vector<std::string>::iterator it = str.begin();
     std::string hold = _script_name;
-    // std::cout << "|____________|" << _ext << "|_________|" << hold << std::endl;
     _ext = hold.erase(0, hold.find_last_of('.'));
     int i = 0;
-    // if (_ext.empty())
-    //     return ;
     while (it != str.end())
     {
         if (*it == _ext.c_str() + 1)
