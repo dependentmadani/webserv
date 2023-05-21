@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/19 15:12:19 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/19 18:13:47 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,11 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     }
     // td::string cookie = "session=" + sessionId + "; Path=/; HttpOnly";
     close(pipe_fd[0]);
-    size_t found = resp_buffer.find("\r\n\r\n");
+    size_t found = 0;
+    if (_ext == ".pl")
+        found = resp_buffer.find("\n\n");
+    else
+        found = resp_buffer.find("\r\n\r\n");
     std::string cgi_header = resp_buffer.substr(0, found);
     size_t fnd = cgi_header.find("Content-type:");
     if (fnd != std::string::npos)
