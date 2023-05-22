@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/21 14:51:01 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/22 14:52:14 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,10 @@ Request::Request() : _buffer(), _current_directory(), _requested_file_path(), _d
     _location_index = 0;
     _http_status = 200;
     _content_length = 0;
+    _read_fd = 0;
+    _final_file_size = 0;
+    _chunked_content_value = 0;
+    read_again = false;
 }
 
 Request::~Request()
@@ -31,6 +35,9 @@ void Request::clear_request_class()
     _file_directory_check = 0;
     _location_index = -1;
     _content_length = 0;
+    _read_fd = 0;
+    _chunked_content_value = 0;
+    _final_file_size = 0;
     _file_name_path.clear();
     _arguments.clear();
     _header.clear();
@@ -62,7 +69,8 @@ int Request::ParseRequest(char *request_message)
     char **splited_request = ft_split(request_message, '\n');
 
     _buffer = std::string(request_message);
-    this->clear_request_class();
+    if (!read_again)
+        this->clear_request_class();
     char buffer[100];
     getcwd(buffer, 100);
     _current_directory = std::string(buffer) + "/public";
@@ -79,15 +87,20 @@ int Request::ParseRequest(char *request_message)
     }
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
-    this->is_request_well_formed(request_message);
-    this->get_matched_location_for_request_uri();
-    this->is_location_have_redirection();
+    if (this->is_request_well_formed(request_message))
+        return ft_http_status(this->getHttpStatus());
+    if (this->get_matched_location_for_request_uri())
+        return ft_http_status(this->getHttpStatus());
+    if (this->is_location_have_redirection())
+        return ft_http_status(this->getHttpStatus());
     if (this->is_method_allowed_in_location())
     {
         _http_status = 405;
         return ft_http_status(getHttpStatus());
     }
     this->reform_requestPath_locationPath();
+    if (_header.find("Content-Length") != _header.end())
+        _content_actual_size = string_to_decimal(_header["Content-Length"]) - _server.getFirstReadSize();
     return 0;
 }
 
@@ -110,12 +123,13 @@ int Request::get_location_index()
 
 int Request::UseMethod()
 {
+    std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
-        this->GET_method();
+        return this->GET_method();
     else if (_method == "POST")
-        this->POST_method();
+        return this->POST_method();
     else if (_method == "DELETE")
-        this->DELETE_method();
+        return this->DELETE_method();
     return 0;
 }
 
@@ -133,7 +147,7 @@ void Request::build_response()
 
     int position_extension = _available_file_path.find_last_of(".");
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
-    if (!file_type.empty())
+    if (!file_type.empty() && _response_final.find("Content-Type") == _response_final.end())
         _response_final["Content_Type"] = mime_type[file_type];
     if (this->getHttpStatus() == 301)
     {
@@ -205,12 +219,17 @@ int Request::GET_method()
         _http_status = 404;
         return this->ft_http_status(getHttpStatus());
     }
-    std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl;
+    // std::cerr << "Waaaaaaahya hamiiiiiiiiiid: " << this->get_resource_type() << std::endl;
     if (this->get_resource_type() == DIRECTORY)
         return this->Is_directory();
     else if (this->get_resource_type() == FILE)
     {
         return this->Is_file();
+    }
+    else if (this->get_resource_type() == ERROR)
+    {
+        _http_status = 404;
+        return this->ft_http_status(getHttpStatus());
     }
     return 1;
 }
@@ -320,22 +339,36 @@ bool Request::get_auto_index()
 
 int Request::Is_file()
 {
-    std::ifstream file;
-    std::string line;
+    std::cerr << "shouuuuld be heeerreee i guess :((((((: ";
+    // std::ifstream file;
+    // // char line[BUFFER_SIZE];
+    // // std::ifstream file
 
-    file.open(_available_file_path.c_str());
-    if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
-        return this->if_location_has_cgi();
-    if (file.is_open())
+    // file.open(_available_file_path.c_str());
+    // if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
+    //     return this->if_location_has_cgi();
+    // if (file.is_open())
+    // {
+    //     // while (file)
+    //     // {
+    //         file.read(_buffer_char, BUFFER_SIZE);
+    //         _response_body_as_string = std::string(_buffer_char);
+    //         // _response_body_as_string.append(line);
+    //     // }
+    //     // close(file);
+    // }
+    // std::cerr << _response_body_as_string.size() << std::endl;
+
+    if (if_location_has_cgi())
     {
-        while (file)
-        {
-            std::getline(file, line);
-            _response_body_as_string.append(line);
-        }
-        // close(file);
+        return request_run_cgi();
+        // _response_body_as_string = ;
     }
-    return 0;
+    else
+    {
+        _response_body_as_string.append(read_file(_available_file_path));
+    }
+    return 1;
 }
 
 int Request::get_resource_type()
@@ -592,8 +625,9 @@ int Request::is_request_well_formed(char *request_message)
         _http_status = 501;
         return ft_http_status(getHttpStatus());
     }
-    if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
+    if (_method == "POST" && _header.count("Transfer-Encoding") && _header.count("Content-Length"))
     {
+        std::cerr << "what the heeeeck" << std::endl;
         _http_status = 400;
         return ft_http_status(getHttpStatus());
     }
@@ -629,10 +663,6 @@ int Request::get_matched_location_for_request_uri()
     {
         tmp = url.substr(0, pos);
         path_counter = ((tmp == "..") ? --path_counter : ++path_counter);
-        // if (tmp == "..")
-        //     --path_counter;
-        // else
-        //     ++path_counter;
         if (path_counter < 0)
         {
             _http_status = 400;
@@ -795,7 +825,6 @@ int Request::ft_http_status(int value)
     {
         for (size_t i = 0; i < _parse->serv[_server_index]->error_num.size(); ++i)
         {
-
             if (_parse->serv[_server_index]->error_num[i] == value)
             {
                 _response_body_as_string = read_file(_parse->serv[_server_index]->error_page[i]);
@@ -812,26 +841,53 @@ int Request::ft_http_status(int value)
     return this->getHttpStatus();
 }
 
+// std::string Request::read_file(std::string file)
+// {
+//     std::ifstream read_file;
+//     std::string line;
+//     std::string final_output;
+
+//     read_file.open(file.c_str());
+//     if (read_file.is_open())
+//     {
+//         while (read_file)
+//         {
+//             std::getline(read_file, line);
+//             final_output.append(line);
+//         }
+//     }
+//     else
+//     {
+//         perror("");
+//         return std::string("");
+//     }
+//     return final_output;
+// }
+
 std::string Request::read_file(std::string file)
 {
-    std::ifstream read_file;
-    std::string line;
+    int fd_file = open(file.c_str(), O_RDONLY);
+    int size_of_read = 1;
+    char buffer_tmp[BUFFER_SIZE];
     std::string final_output;
 
-    read_file.open(file.c_str());
-    if (read_file.is_open())
+    _final_file_size = 0;
+    if (fd_file != -1)
     {
-        while (read_file)
+        while (size_of_read > 0)
         {
-            std::getline(read_file, line);
-            final_output.append(line);
+            size_of_read = read(fd_file, buffer_tmp, BUFFER_SIZE);
+            for (int i = 0; i < size_of_read; ++i)
+            {
+                final_output += buffer_tmp[i];
+            }
+            _final_file_size += size_of_read;
+            std::cerr << "the size that it reads: " << size_of_read << std::endl;
         }
     }
-    else
-    {
-        perror("");
-        return std::string("");
-    }
+    // if ((int)final_output.size() == _final_file_size)
+    //     _final_file_size = 0;
+    // std::cerr << "should check the final size: " << _final_file_size << " and " << final_output.size() << std::endl;
     return final_output;
 }
 
@@ -965,6 +1021,7 @@ void Request::ft_http_code()
     http_code[200] = std::string("OK");
     http_code[201] = std::string("Created");
     http_code[202] = std::string("Accepted");
+    http_code[203] = std::string("Non-Authoritative Information");
     http_code[204] = std::string("No Content");
     // 3xx redirection
     http_code[300] = std::string("Multiple Choices");
@@ -995,11 +1052,15 @@ int Request::is_available(std::string key, std::string value)
 {
     int val = _header.count(key);
 
-    if (val && !value.empty() && _header[key] != value)
-        return 0;
-    if (!val)
-        return 0;
-    return 1;
+    if (val && _header[key].find("\r") != std::string::npos)
+        _header[key].pop_back();
+
+    if (val && _header[key] != value)
+    {
+        std::cerr << "should be heeere i guess" << std::endl;
+        return 1;
+    }
+    return 0;
 }
 
 int Request::url_characters_checker()
@@ -1058,9 +1119,19 @@ std::string Request::getAvailableFilePath() const
     return _available_file_path;
 }
 
+int Request::getFile_size() const
+{
+    return _final_file_size;
+}
+
 void Request::setParse(s_parsing *parsed)
 {
     this->_parse = parsed;
+}
+
+void Request::setServer(Server serv)
+{
+    this->_server = serv;
 }
 
 void Request::setServer_index(int index)
@@ -1104,8 +1175,8 @@ void Request::build_autoindex_page()
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     // for "." and ".." directories, need to be added
-    _response_body_as_string.append("<a href=\"/.\">.</a><br>");
-    _response_body_as_string.append("<a href=\"/..\">..</a><br>");
+    _response_body_as_string.append("<a href=\"./\">.</a><br>");
+    _response_body_as_string.append("<a href=\"../\">..</a><br>");
     // this loop will add or dirctories and files available
     while ((files = readdir(dir)) != NULL)
     {
@@ -1128,25 +1199,61 @@ void Request::build_autoindex_page()
     _response_body_as_string.append("</body></html>");
 }
 
+int Request::read_body_request()
+{
+    std::ofstream jojo("jamal.txt", std::ios_base::app);
+
+    // if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
+    // {
+    //     _http_status = 400;
+    //     return ft_http_status(getHttpStatus());
+    // }
+    if (_header.find("Content-Length") != _header.end() && _header["Content-Length"] != "")
+    {
+        char buffer_chr[BUFFER_SIZE];
+        memset(buffer_chr, 0, BUFFER_SIZE);
+        int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
+        jojo.write(buffer_chr, content_length_read);
+        std::cout << content_length_read << std::endl;
+        // if (content_length_read)
+        //     _body.append(std::string(buffer_chr)); /// to check if something goes wrong
+        // i+=content_length_read;
+        // if(content_length_read == 0)
+        //     break;
+        _content_actual_size -= content_length_read;
+        if (_content_actual_size > 0)
+            read_again = true;
+        else
+            read_again = false;
+    }
+    else if (_header.find("Transfer-Encoding") != _header.end())
+    {
+        std::cerr << "whaaaats noooooooow a haaamiiiid22" << std::endl;
+        post_transfer_encoding();
+    }
+    std::cerr << "the content size: " << _content_actual_size << std::endl;
+    jojo.close();
+    std::cerr << "the status of read_again: " << read_again << std::endl;
+    // std::cerr << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-**" << _buffer << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
+    return read_again;
+}
+
 int Request::POST_method()
 {
-    // if (location_support_upload())
-    // {
-    //     upload_post_request();
-    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-    // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-    // }
-    // else
-    // // {
     if (location_support_upload())
     {
-        std::cout << 22222222 << "|_______________________________________|" << std::endl;
+        if (read_body_request())
+        {
+            std::cerr << "all seem to be nice" << std::endl;
+            return 1;
+        }
         upload_post_request();
+        // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
+        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
-    else if (!get_request_resource())
+    if (!get_request_resource())
     {
-        std::cout << 11111111 << "|_______________________________________|" << std::endl;
+        std::cout << 2222222222222222222 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         if (this->get_resource_type() == DIRECTORY)
             return this->If_is_directory();
         else if (this->get_resource_type() == FILE)
@@ -1154,12 +1261,69 @@ int Request::POST_method()
     }
     else
     {
-        std::cout << 3333333 << "|_____________________| " << _body << "|_________________________|" << std::endl;
+        std::cout << 333333333333333 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         _http_status = 404;
         return ft_http_status(getHttpStatus());
     }
     return 0;
 }
+
+void Request::post_transfer_encoding()
+{
+
+    char buffer_chr[BUFFER_SIZE];
+    bool done = false;
+    std::ofstream jojo("jamal.txt", std::ios_base::app);
+    int size = 0;
+
+    memset(buffer_chr, 0, BUFFER_SIZE);
+    if (_content_actual_size == 0)
+    {
+        std::cerr << "shooouuuuuuld be heeere just onceee" << std::endl;
+        _content_actual_size = _server.getFirstReadSize();
+        for (int i = 0; i < _server.getFirstReadSize(); i++)
+        {
+            if (_server.getBuffer()[i] == '\r' && (++i < _server.getFirstReadSize() && _server.getBuffer()[i] == '\n') && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\r') && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\n') && (++i < _server.getFirstReadSize() && _server.getBuffer()[i] == '0'))
+            // && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\r')
+            // && (++i < _server.getFirstReadSize() && buffer_chr[i] == '\n'))
+            {
+                // std::cerr << "that's good: |" << buffer_chr[i] << "| " << i  << std::endl;
+                // exit(0);
+                read_again = false;
+                done = true;
+                break;
+            }
+        }
+    }
+
+    if (!done)
+    {
+        size = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
+        jojo.write(buffer_chr, size);
+        _content_actual_size += size;
+        for (int i = 0; i < size; i++)
+        {
+            if (buffer_chr[i] == '\r' && (++i < size && buffer_chr[i] == '\n') && (++i < size && buffer_chr[i] == '\r') && (++i < size && buffer_chr[i] == '\n') && (++i < size && buffer_chr[i] == '0') && (++i < size && buffer_chr[i] == '\r') && (++i < size && buffer_chr[i] == '\n'))
+            {
+                // std::cerr << "that's good: |" << buffer_chr[i] << "| " << i  << std::endl;
+                // exit(0);
+                read_again = false;
+                done = true;
+                break;
+            }
+        }
+    }
+    if (!done)
+    {
+        read_again = true;
+    }
+    else
+    {
+        read_again = false;
+    }
+    jojo.close();
+}
+
 int Request::upload_post_request()
 {
 
@@ -1205,35 +1369,64 @@ int Request::upload_post_request()
             return ft_http_status(getHttpStatus());
         }
     }
-
     std::ofstream goku("./upload/" + rand_str);
-    str = "Content-Type";
-    while (std::getline(jojo, line))
+    if (_body.find("Content-Type") != std::string::npos)
     {
-        if (line.find(str) != std::string::npos)
+        str = "Content-Disposition:";
+        jojo.clear();
+        jojo.seekg(0, std::ios::beg);
+        while (std::getline(jojo, line))
         {
-            std::getline(jojo, line);
-            // std::getline(jojo, line);
-
-            while (jojo.get(c))
+            if (line.find(str) != std::string::npos)
             {
-                goku.put(c);
+                std::getline(jojo, line);
+                std::getline(jojo, line);
+                while (jojo.get(c))
+                {
+                    goku.put(c);
+                }
+                break;
             }
-            break;
         }
     }
+    else
+    {
+        str = "Content-Type";
+        while (std::getline(jojo, line))
+        {
+            if (line.find(str) != std::string::npos)
+            {
+                std::getline(jojo, line);
+                while (jojo.get(c))
+                {
+                    goku.put(c);
+                }
+                break;
+            }
+        }
+    }
+
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
+
 bool Request::location_support_upload()
 {
+    // if (_header.find("Content-Type") != _header.end())
+    // {
+    //     if (_header.find("Content-Type")->second.find("multipart/form-data") != std::string::npos)
+    //         return true;
+    // }
     size_t find = _body.find("Content-Type");
     size_t found = _body.find("Content-Disposition");
     std::string fnd = _header["Content-Type"];
     std::string lent = _header["Content-Length"];
     int num = atoi(lent.c_str());
-    if (find != std::string::npos || ( found == std::string::npos && fnd.size() && num > 0 ))
-            return true;
+    std::cout << "|~~~~~~~~~~~~|" << find << "|~~~~~~~~~~~|" << num << std::endl;
+    if (find != std::string::npos || (found == std::string::npos && fnd.size() && num > 0))
+    {
+        return true;
+    }
     return false;
 }
 int Request::If_is_file()
@@ -1281,7 +1474,9 @@ int Request::If_is_directory()
 bool Request::is_location_has_cgi()
 {
     if (this->_parse->serv[_server_index]->loc[_location_index]->cgi_pass.size())
+    {
         return true;
+    }
     return false;
 }
 
@@ -1300,16 +1495,57 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
-        return (200);
+        _http_status = 200;
+        _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
+        return ft_http_status(getHttpStatus());
+        // return (200);
     }
-    // std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
-    _http_status = cgi_return;
+
+    _response_body_as_string = cgi.getRespBuffer();
+    _http_status = 203;
     return ft_http_status(getHttpStatus());
 }
 
 std::string const &Request::getBody() const
 {
     return _body;
+}
+
+void Request::set_read_fd(int fd)
+{
+    _read_fd = fd;
+}
+
+unsigned long Request::hex_to_dec(std::string hex)
+{
+    unsigned long output = 0;
+    for (size_t i = 0; i < hex.length(); ++i)
+    {
+        if (hex[i] >= 48 && hex[i] <= 57)
+        {
+            output += (hex[i] - 48) * std::pow(16, hex.length() - i - 1);
+        }
+        else if (hex[i] >= 65 && hex[i] <= 70)
+        {
+            output += (hex[i] - 55) * std::pow(16, hex.length() - i - 1);
+        }
+        else if (hex[i] >= 97 && hex[i] <= 102)
+        {
+            output += (hex[i] - 87) * std::pow(16, hex.length() - i - 1);
+        }
+    }
+    return output;
+}
+
+int Request::string_to_decimal(std::string str)
+{
+    std::stringstream converted;
+    int number;
+
+    converted << str;
+    converted >> number;
+
+    return number;
 }
 
 void Request::set_cookie()
@@ -1322,7 +1558,43 @@ void Request::set_cookie()
     std::cout << "|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|" << std::endl;
     for (; it != _header.end(); it++)
     {
-        std::cout << "|>>>>>>>>>>>>>>|" << it->first << "|<<<<<<<<<<<|" << it->second << std::endl;
+        // if
+        std::cout << "  |>>>>>>>>>>>>>>|    " << it->first << "    |<<<<<<<<<<<|   " << it->second << std::endl;
     }
+
     std::cout << " |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| " << std::endl;
 }
+
+// int Request::POST_method()
+// {
+//     // if (location_support_upload())
+//     // {
+//     //     upload_post_request();
+//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+//     // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
+//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+//     // }
+//     // else
+//     // // {
+//     if (location_support_upload())
+//     {
+//         std::cout << 22222222 << "|_______________________________________|" << std::endl;
+//         upload_post_request();
+//     }
+//     // else if (!get_request_resource())
+//     // {
+//     //     std::cout << 11111111 << "|_______________________________________|" << std::endl;
+//     //     if (this->get_resource_type() == DIRECTORY)
+//     //         return this->If_is_directory();
+//     //     else if (this->get_resource_type() == FILE)
+//     //         return this->If_is_file();
+//     // }
+//     // else
+//     // {
+//     //     std::cout << 3333333 << "|_____________________| " << _body << "|_________________________|" << std::endl;
+//     //     _http_status = 404;
+//     //     return ft_http_status(getHttpStatus());
+//     // }
+//     // }
+//     return 0;
+// }
