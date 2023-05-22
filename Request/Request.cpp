@@ -256,15 +256,11 @@ int Request::if_location_has_cgi()
 {
     if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
-        this->Is_file();
+        _response_body_as_string.append(read_file(_available_file_path));
         _http_status = 200;
-        ft_http_status(getHttpStatus());
-        return 0;
+        return ft_http_status(getHttpStatus());
     }
     // call the constructor of cgi, than get the data from cgi. All of that as an else condition
-    this->request_run_cgi();
-    _http_status = 200; // to check depends on cgi
-    ft_http_status(getHttpStatus());
     return 1;
 }
 
@@ -290,7 +286,9 @@ int Request::Is_directory()
         else
         {
             // if this directory has an index file, it should check for cgi in location
-            return this->if_location_has_cgi();
+            if (this->if_location_has_cgi())
+                return this->request_run_cgi();
+
         }
     }
     else
@@ -339,7 +337,7 @@ bool Request::get_auto_index()
 
 int Request::Is_file()
 {
-    std::cerr << "shouuuuld be heeerreee i guess :((((((: ";
+    // std::cerr << "shouuuuld be heeerreee i guess :((((((: " << std::endl;
     // std::ifstream file;
     // // char line[BUFFER_SIZE];
     // // std::ifstream file
@@ -364,8 +362,7 @@ int Request::Is_file()
         return request_run_cgi();
         // _response_body_as_string = ;
     }
-    else
-    {
+    else {
         _response_body_as_string.append(read_file(_available_file_path));
     }
     return 1;
@@ -452,8 +449,7 @@ int Request::Is_file_for_DELETE()
         std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
         // nothing to do here for the moment. waiting for cgi to be done.
         // return code depend on cgi
-        _http_status = 200;
-        return ft_http_status(getHttpStatus());
+        return this->request_run_cgi();
     }
     else
     {
@@ -1240,6 +1236,7 @@ int Request::read_body_request()
 
 int Request::POST_method()
 {
+    int state = 0;
     if (location_support_upload())
     {
         if (read_body_request())
@@ -1248,6 +1245,7 @@ int Request::POST_method()
             return 1;
         }
         upload_post_request();
+        state = 1;
         // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
         // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
@@ -1259,7 +1257,7 @@ int Request::POST_method()
         else if (this->get_resource_type() == FILE)
             return this->If_is_file();
     }
-    else
+    else if (!state)
     {
         std::cout << 333333333333333 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         _http_status = 404;
