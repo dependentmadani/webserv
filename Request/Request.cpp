@@ -123,6 +123,7 @@ int Request::get_location_index()
 
 int Request::UseMethod()
 {
+    std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
         return this->GET_method();
     else if (_method == "POST")
@@ -1202,12 +1203,12 @@ int Request::read_body_request()
 {
     std::ofstream jojo("jamal.txt", std::ios_base::app);
 
-    if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
-    {
-        _http_status = 400;
-        return ft_http_status(getHttpStatus());
-    }
-    else if (_header.find("Content-Length") != _header.end())
+    // if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
+    // {
+    //     _http_status = 400;
+    //     return ft_http_status(getHttpStatus());
+    // }
+    if (_header.find("Content-Length") != _header.end() && _header["Content-Length"] != "")
     {
         char buffer_chr[BUFFER_SIZE];
         memset(buffer_chr, 0, BUFFER_SIZE);
@@ -1227,7 +1228,7 @@ int Request::read_body_request()
     }
     else if (_header.find("Transfer-Encoding") != _header.end())
     {
-        std::cerr << "whaaaats noooooooow a haaamiiiid" << std::endl;
+        std::cerr << "whaaaats noooooooow a haaamiiiid22" << std::endl;
         post_transfer_encoding();
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
@@ -1239,11 +1240,11 @@ int Request::read_body_request()
 
 int Request::POST_method()
 {
-    // std::cerr << "all seem to be nice" << std::endl;
     if (location_support_upload())
     {
-        // if (read_body_request())
-        //     return 1;
+        if (read_body_request()) {
+    std::cerr << "all seem to be nice" << std::endl;
+            return 1;}
         upload_post_request();
         std::cout << 1111111111111 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
