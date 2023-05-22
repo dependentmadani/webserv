@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/22 10:52:04 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/22 11:18:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,9 +87,12 @@ int Request::ParseRequest(char *request_message)
     }
     if (check_method_protocol())
         return ft_http_status(getHttpStatus());
-    this->is_request_well_formed(request_message);
-    this->get_matched_location_for_request_uri();
-    this->is_location_have_redirection();
+    if (this->is_request_well_formed(request_message))
+        return ft_http_status(this->getHttpStatus());
+    if (this->get_matched_location_for_request_uri())
+        return ft_http_status(this->getHttpStatus());
+    if (this->is_location_have_redirection())
+        return ft_http_status(this->getHttpStatus());
     if (this->is_method_allowed_in_location())
     {
         _http_status = 405;
@@ -143,7 +146,7 @@ void Request::build_response()
 
     int position_extension = _available_file_path.find_last_of(".");
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
-    if (!file_type.empty())
+    if (!file_type.empty() && _response_final.find("Content-Type") == _response_final.end())
         _response_final["Content_Type"] = mime_type[file_type];
     if (this->getHttpStatus() == 301)
     {
@@ -618,10 +621,11 @@ int Request::is_request_well_formed(char *request_message)
 {
     if (_method == "POST" && is_available(std::string("Transfer-Encoding"), std::string("chunked")))
     {
+        std::cerr << "what the heeeeck" << std::endl;
         _http_status = 501;
         return ft_http_status(getHttpStatus());
     }
-    if (_method == "POST" && !is_available(std::string("Transfer-Encoding"), std::string("")) && !is_available(std::string("Content-Length"), std::string("")))
+    if (_method == "POST" && _header.count("Transfer-Encoding") && _header.count("Content-Length"))
     {
         _http_status = 400;
         return ft_http_status(getHttpStatus());
@@ -1047,10 +1051,14 @@ int Request::is_available(std::string key, std::string value)
 {
     int val = _header.count(key);
 
-    if (val && !value.empty() && _header[key] != value)
+    if (_header[key].find("\r") != std::string::npos)
+        _header[key].pop_back();
+
+    if (val && _header[key] == value)
+    {
+        std::cerr << "should be heeere i guess" << std::endl;
         return 0;
-    if (!val)
-        return 0;
+    }
     return 1;
 }
 
@@ -1462,7 +1470,9 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
+        // std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
         _http_status = 200;
+        _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
         return ft_http_status(getHttpStatus());
         // return (200);
     }

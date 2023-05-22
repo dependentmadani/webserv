@@ -122,14 +122,17 @@ int main(int ac, char **av)
                     server.recv_data(i);
                     request.setServer(server);
                     std::cerr << server.getBuffer() << std::endl;
-                    if (request.ParseRequest(server.getBuffer()) == 1)
+                    int val = request.ParseRequest(server.getBuffer());
+                    if (val == 1)
                     {
                         close(i);
                         FD_CLR(i , &rds);
                         break ;
                     }
-                    request.set_read_fd(i);
+                    else if (val == 0){
                     request.UseMethod();
+                    }
+                    request.set_read_fd(i);
                     if (request.read_again)
                         continue ;
                     request.build_response();
