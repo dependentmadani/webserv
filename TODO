@@ -31,3 +31,4 @@ get_matched_location_for_request_uri() function. -->
 
 * Work on Transfer-Encoding using chunk
 
+* Check is_available function 

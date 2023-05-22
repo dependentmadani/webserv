@@ -1,17 +1,14 @@
 
-dfgdffdgdf
-gdg
-ds
-gdsg
-g
-dsg
-dsg
-dg
-dg
-dsgds
-gds
-gds
-gContent-Disposition: form-data; name=""; filename="Fs5zX2jXsAAWLGO.jpeg"
+-----------------------------375354858040952534231259182505
+Content-Disposition: form-data; name="name"
+
+lol
+-----------------------------375354858040952534231259182505
+Content-Disposition: form-data; name="email"
+
+lol@local
+-----------------------------375354858040952534231259182505
+Content-Disposition: form-data; name="avatar"; filename="image.jpeg"
 Content-Type: image/jpeg
 
-ÿØÿà2827--
+ÿØÿà

@@ -204,6 +204,7 @@ std::string const &CGI::getRespBuffer() const
 {
     return resp_buffer;
 }
+
 std::string const &CGI::getContentType() const
 {
     return hold_ContentType;
