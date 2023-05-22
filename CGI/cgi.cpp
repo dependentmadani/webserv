@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/21 17:53:19 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/22 11:14:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,25 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     ptr[2] = NULL;
 
     int fd = open("file.txt", O_CREAT | O_RDWR, 0644);
-    write(fd, req.getBody().c_str(), req.getBody().length());
+    std::ifstream jojo("jamal.txt");
+    std::ofstream goku("file.txt");
+    std::string line;
+    char c;
+    std::string str = "Sec-Fetch-Use";
+    while (std::getline(jojo, line))
+    {
+        if (line.find(str) != std::string::npos)
+        {
+            std::getline(jojo, line);
+            while (jojo.get(c))
+            {
+                goku.put(c);
+            }
+            break;
+        }
+    }
+
+    // write(fd, req.getBody().c_str(), req.getBody().length());
     if (!executable.size())
     {
         std::ifstream file(_script_name.c_str());
@@ -185,7 +203,6 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     {
         resp_buffer += bufffer;
     }
-    // td::string cookie = "session=" + sessionId + "; Path=/; HttpOnly";
     close(pipe_fd[0]);
     size_t found = 0;
     if (_ext == ".pl")
@@ -193,7 +210,6 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     else
         found = resp_buffer.find("\r\n\r\n");
     hold_ContentType = resp_buffer.substr(0, found);
-
     size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
@@ -211,7 +227,6 @@ std::string const &CGI::getContentType() const
 
 void CGI::check_cgi(std::vector<std::string> str)
 {
-
     std::vector<std::string>::iterator it = str.begin();
     std::string hold = _script_name;
     _ext = hold.erase(0, hold.find_last_of('.'));
@@ -226,6 +241,4 @@ void CGI::check_cgi(std::vector<std::string> str)
         ++it;
         ++i;
     }
-    // if (it == str.end())
-    //     flag = true;
 }
