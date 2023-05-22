@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/22 13:32:34 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/22 14:52:14 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,7 @@ int Request::get_location_index()
 
 int Request::UseMethod()
 {
+    std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
         return this->GET_method();
     else if (_method == "POST")
@@ -1059,10 +1060,6 @@ int Request::is_available(std::string key, std::string value)
         std::cerr << "should be heeere i guess" << std::endl;
         return 1;
     }
-    // if (val)
-    // {
-    //     return 1;
-    // }
     return 0;
 }
 
@@ -1206,12 +1203,12 @@ int Request::read_body_request()
 {
     std::ofstream jojo("jamal.txt", std::ios_base::app);
 
-    if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
-    {
-        _http_status = 400;
-        return ft_http_status(getHttpStatus());
-    }
-    else if (_header.find("Content-Length") != _header.end())
+    // if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
+    // {
+    //     _http_status = 400;
+    //     return ft_http_status(getHttpStatus());
+    // }
+    if (_header.find("Content-Length") != _header.end() && _header["Content-Length"] != "")
     {
         char buffer_chr[BUFFER_SIZE];
         memset(buffer_chr, 0, BUFFER_SIZE);
@@ -1231,7 +1228,7 @@ int Request::read_body_request()
     }
     else if (_header.find("Transfer-Encoding") != _header.end())
     {
-        std::cerr << "whaaaats noooooooow a haaamiiiid" << std::endl;
+        std::cerr << "whaaaats noooooooow a haaamiiiid22" << std::endl;
         post_transfer_encoding();
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
@@ -1243,12 +1240,13 @@ int Request::read_body_request()
 
 int Request::POST_method()
 {
-    // std::cerr << "all seem to be nice" << std::endl;
-    std::cout << 1111111111111 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     if (location_support_upload())
     {
-        // if (read_body_request())
-        //     return 1;
+        if (read_body_request())
+        {
+            std::cerr << "all seem to be nice" << std::endl;
+            return 1;
+        }
         upload_post_request();
         // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
         // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
@@ -1372,19 +1370,42 @@ int Request::upload_post_request()
         }
     }
     std::ofstream goku("./upload/" + rand_str);
-    str = "Content-Type";
-    while (std::getline(jojo, line))
+    if (_body.find("Content-Type") != std::string::npos)
     {
-        if (line.find(str) != std::string::npos)
+        str = "Content-Disposition:";
+        jojo.clear();
+        jojo.seekg(0, std::ios::beg);
+        while (std::getline(jojo, line))
         {
-            std::getline(jojo, line);
-            while (jojo.get(c))
+            if (line.find(str) != std::string::npos)
             {
-                goku.put(c);
+                std::getline(jojo, line);
+                std::getline(jojo, line);
+                while (jojo.get(c))
+                {
+                    goku.put(c);
+                }
+                break;
             }
-            break;
         }
     }
+    else
+    {
+        str = "Content-Type";
+        while (std::getline(jojo, line))
+        {
+            if (line.find(str) != std::string::npos)
+            {
+                std::getline(jojo, line);
+                while (jojo.get(c))
+                {
+                    goku.put(c);
+                }
+                break;
+            }
+        }
+    }
+
     _http_status = 201;
     return ft_http_status(getHttpStatus());
 }
