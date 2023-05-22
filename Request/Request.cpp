@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/22 11:18:18 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/22 13:32:34 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -621,12 +621,12 @@ int Request::is_request_well_formed(char *request_message)
 {
     if (_method == "POST" && is_available(std::string("Transfer-Encoding"), std::string("chunked")))
     {
-        std::cerr << "what the heeeeck" << std::endl;
         _http_status = 501;
         return ft_http_status(getHttpStatus());
     }
     if (_method == "POST" && _header.count("Transfer-Encoding") && _header.count("Content-Length"))
     {
+        std::cerr << "what the heeeeck" << std::endl;
         _http_status = 400;
         return ft_http_status(getHttpStatus());
     }
@@ -1051,15 +1051,19 @@ int Request::is_available(std::string key, std::string value)
 {
     int val = _header.count(key);
 
-    if (_header[key].find("\r") != std::string::npos)
+    if (val && _header[key].find("\r") != std::string::npos)
         _header[key].pop_back();
 
-    if (val && _header[key] == value)
+    if (val && _header[key] != value)
     {
         std::cerr << "should be heeere i guess" << std::endl;
-        return 0;
+        return 1;
     }
-    return 1;
+    // if (val)
+    // {
+    //     return 1;
+    // }
+    return 0;
 }
 
 int Request::url_characters_checker()
@@ -1240,18 +1244,18 @@ int Request::read_body_request()
 int Request::POST_method()
 {
     // std::cerr << "all seem to be nice" << std::endl;
+    std::cout << 1111111111111 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     if (location_support_upload())
     {
         // if (read_body_request())
         //     return 1;
         upload_post_request();
-        std::cout << 1111111111111 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
         // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
     if (!get_request_resource())
     {
-        // std::cout << 2222222222222222222 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+        std::cout << 2222222222222222222 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         if (this->get_resource_type() == DIRECTORY)
             return this->If_is_directory();
         else if (this->get_resource_type() == FILE)
@@ -1470,7 +1474,6 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
-        // std::cout << "|____________|" << _response_body_as_string << "|_________|" << cgi_return << std::endl;
         _http_status = 200;
         _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
         return ft_http_status(getHttpStatus());
