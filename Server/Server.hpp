@@ -25,6 +25,8 @@
 # include <fcntl.h>
 # include <errno.h>
 # include <netdb.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
 # include "../parse/parsing.hpp"
 
 # define BUFFER_SIZE 180000
@@ -59,7 +61,6 @@ class Server {
         char                _buffer[BUFFER_SIZE + 1];
         std::string         _buffer_complete;
         bool                _connexion_status;
-        fd_set              _readfds;
         s_parsing           *_parse;
 };
 

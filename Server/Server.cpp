@@ -39,30 +39,35 @@ int Server::initiate_socket(int num_serv)
     // int opt = 1;
     struct addrinfo hints;
     struct addrinfo *bind_address;
-    (void)_readfds;
+
     memset(&hints, 0, sizeof(hints));
     _host_addr.sin_family = AF_INET;
     _host_addr.sin_port = htons(_port);
-    _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    _host_addr.sin_addr.s_addr = inet_addr(_parse->serv[num_serv]->host.c_str());
+    // _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    getaddrinfo(_parse->serv[num_serv]->server_name.c_str(), std::to_string(_port).c_str(), &hints, &bind_address);
 
+    std::cerr << "the host would be: " << _parse->serv[num_serv]->host.c_str() << std::endl;
+    std::cerr << "server name: |" << _parse->serv[num_serv]->server_name.c_str() << "|...." << std::endl;
+    int g = getaddrinfo(_parse->serv[num_serv]->host.c_str(), std::to_string(_port).c_str(), &hints, &bind_address);
+
+    std::cerr << "the return value of getaddinfo: " << g << std::endl;
+    // _socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     _socket_fd = socket(bind_address->ai_family, bind_address->ai_socktype, bind_address->ai_protocol); // SOCK_STREAM is virtual circuit service, and AF_INET is IP
     if (_socket_fd < 0)
     {
         perror("webserv error (socket) ");
         return -1;
     }
-    int on = 1;
+    const int on = 1;
     if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
     {
         std::cerr << "Failed to set socket option" << std::endl;
         return 1;
     }
-    _socket_client.push_back(_socket_fd);
     // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
     // {
     //     perror("webserv error (setsockop) ");
@@ -72,14 +77,17 @@ int Server::initiate_socket(int num_serv)
     std::cout << "The port to listen to: " << _port << std::endl;
     std::cout << "Binding the socket " << _socket_fd << std::endl;
     // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
-    const int enable = 1;
-    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-    int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
+    // const int enable = 1;
+    // setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+    // int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
+    int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     if (i < 0) {
+        freeaddrinfo(bind_address);
         perror("webserv error (bind) ");
         return -1;
     }
     freeaddrinfo(bind_address);
+    _socket_client.push_back(_socket_fd);
     std::cout << "Now, we are going to listen, for requests" << std::endl;
     if (listen(_socket_fd, 10) < 0)
     {

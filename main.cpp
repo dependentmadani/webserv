@@ -143,8 +143,8 @@ int main(int ac, char **av)
                     send(i , request.Response.c_str(), request.Response.size() , 0);
                     how_many_times = 0;
                     std::cerr << "*********************************************" << std::endl;
-                    std::cout << request.Response << std::endl;
-                    std::cerr << "all should be good :)" << std::endl;
+                    // std::cout << request.Response << std::endl;
+                    // std::cerr << "all should be good :)" << std::endl;
                     // std::cerr << server.getBuffer() << std::endl;
                     close(i);
                     FD_CLR(i , &rds);
