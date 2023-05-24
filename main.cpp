@@ -68,7 +68,7 @@ int main(int ac, char **av)
     for (int i = 0; i < pars->num_serv; ++i)
     {
         server.setPort(pars->serv[i]->ind_port);
-        if (server.initiate_socket(i) < 0)
+        if (server.initiate_socket() < 0)
             continue ;
         FD_SET(server.getSocket_fd(), &rds);
         std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
@@ -91,6 +91,7 @@ int main(int ac, char **av)
                 int server_id = 0;
                 if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again)
                 {
+                    server.set_num_serv(server_id);
                     request.setServer_index(server_id);
                     std::cerr << "accept a connection " << i <<std::endl;
                     server.accept_connections(i);
