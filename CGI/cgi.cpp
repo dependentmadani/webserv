@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/22 11:14:18 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/24 14:30:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,6 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
                 _envcgi.push_back(str);
             }
         }
-
         found = hold[j].find("Cookie:");
         if (found != std::string::npos)
         {
@@ -102,7 +101,6 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
             str += hold[j].c_str() + 8;
             _envcgi.push_back(str);
         }
-
         found = hold[j].find("Content-Length:");
         if (found != std::string::npos)
         {
@@ -113,7 +111,7 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
         found = hold[j].find("Content-Type:");
         if (found != std::string::npos)
         {
-            std::string str = "CONTENT_Type=";
+            std::string str = "CONTENT_TYPE=";
             str += hold[j].c_str() + 14;
             _envcgi.push_back(str);
         }
@@ -123,6 +121,12 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
         _env[i] = const_cast<char *>(strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
     check_cgi(serv->loc[_location_index]->cgi_pass);
+}
+
+bool isBlankString(const std::string &str)
+{
+    // Check if the string is empty or contains only whitespace characters
+    return str.empty() || str.find_first_not_of(' ') == std::string::npos;
 }
 
 int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
@@ -140,7 +144,6 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     ptr[1] = const_cast<char *>(_script_name.c_str());
     ptr[2] = NULL;
 
-    int fd = open("file.txt", O_CREAT | O_RDWR, 0644);
     std::ifstream jojo("jamal.txt");
     std::ofstream goku("file.txt");
     std::string line;
@@ -158,8 +161,8 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             break;
         }
     }
-
-    // write(fd, req.getBody().c_str(), req.getBody().length());
+    // unlink("jamal.txt");
+    goku.close();
     if (!executable.size())
     {
         std::ifstream file(_script_name.c_str());
@@ -173,6 +176,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         resp_buffer = content;
         return 1;
     }
+    int fd = open("file.txt", O_CREAT | O_RDWR, 0644);
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -191,9 +195,10 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     }
     else
     {
-        close(pipe_fd[1]);
-        int status;
 
+        close(pipe_fd[1]);
+        close(fd);
+        int status;
         if (waitpid(pid, &status, WNOHANG) == -1)
             perror("wait() error");
     }
@@ -213,6 +218,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
+    std::cout << pipe_fd[0] << "|++++++++++|+++++÷++|" << fd << "|+++++++++|++++++++++++|" << pipe_fd[1] << std::endl;
     return 0;
 }
 
