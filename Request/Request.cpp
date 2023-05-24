@@ -808,7 +808,25 @@ int Request::ft_http_status(int value)
             }
         }
     }
-    _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2>";
+    _response_body_as_string = "<!DOCTYPE html><html lang=\"en\">"
+    "<head>"
+    "<meta charset=\"UTF-8\">"
+    "<title>Bad Request</title>"
+    "<style>"
+    "    h1{"
+    "        font-size:80px;"
+    "        font-weight:800;"
+    "        text-align:center;"
+    "    }"
+    "    h2"
+    "    {"
+    "        font-size:25px;"
+    "        text-align:center;"
+    "        margin-top:-40px;"
+    "    }"
+    "</style>"
+    "</head>"
+    "<body>\n<h2>";
     std::ostringstream converted;
     converted << this->getHttpStatus();
     _response_body_as_string.append(converted.str());

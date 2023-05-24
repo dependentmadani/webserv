@@ -91,8 +91,8 @@ int main(int ac, char **av)
                 int server_id = 0;
                 if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again)
                 {
-                    server.set_num_serv(server_id);
-                    request.setServer_index(server_id);
+                    // server.set_num_serv(server_id);
+                    // request.setServer_index(server_id);
                     std::cerr << "accept a connection " << i <<std::endl;
                     server.accept_connections(i);
                     accepted_connection = i;
@@ -120,7 +120,9 @@ int main(int ac, char **av)
                 else if (!request.read_again && how_many_times == pars->num_serv)
                 {
                     std::cerr << "wooow waaas heeere" << std::endl;
-                    server.recv_data(i);
+                    int d = server.recv_data(i);
+                    std::cerr << "the server index would be: " << d << std::endl;
+                    request.setServer_index(d);
                     request.setServer(server);
                     std::cerr << server.getBuffer() << std::endl;
                     int val = request.ParseRequest(server.getBuffer());
@@ -147,6 +149,10 @@ int main(int ac, char **av)
                     // std::cout << request.Response << std::endl;
                     // std::cerr << "all should be good :)" << std::endl;
                     // std::cerr << server.getBuffer() << std::endl;
+                    close(i);
+                    FD_CLR(i , &rds);
+                }
+                else {
                     close(i);
                     FD_CLR(i , &rds);
                 }

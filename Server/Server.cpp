@@ -64,11 +64,12 @@ int Server::initiate_socket()
         return -1;
     }
     const int on = 1;
-    if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
-    {
-        std::cerr << "Failed to set socket option" << std::endl;
-        return 1;
-    }
+    // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
+    // {
+    //     std::cerr << "Failed to set socket option" << std::endl;
+    //     return 1;
+    // }
+    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
     // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
     // {
     //     perror("webserv error (setsockop) ");
@@ -161,12 +162,26 @@ int Server::recv_data(int position)
         find_next_cr = _buffer_complete.substr(find_host , _buffer_complete.size()).find("\r\n");
         _request_hostname =  _buffer_complete.substr(find_host + std::string("Host: ").size() , find_next_cr - std::string("Host: ").size());
     }
-    if (_parse->serv[_num_serv]->server_name == _request_hostname) {
-        std::cout << "it does match the servername :)" << std::endl;
+    int which_serv = -1;
+    for (int i = 0; i < _parse->num_serv; ++i) {
+        if (_parse->serv[i]->server_name == _request_hostname) {
+            std::cout << "it does match the servername :)" << std::endl;
+            which_serv = i;
+            break ;
+        }
+        else if ((_parse->serv[i]->host + ":" + std::to_string(_parse->serv[i]->ind_port)) == _request_hostname) {
+            std::cout << "it does not match the host :))))))) " << i << std::endl;
+            which_serv = i;
+            break ;
+        }
+        std::cerr << "hihihihi: |" << ((_parse->serv[i]->host + ": " + std::to_string(_parse->serv[i]->ind_port))) << "|" << std::endl;
+        std::cerr << "hohohoho: |" << _parse->serv[i]->server_name << "|"<< std::endl;
+        std::cerr << "hahahaha: |" << _request_hostname << "|" << std::endl;
     }
-    else {
-        std::cout << "it does not match the servername :(" << std::endl;
+    if (which_serv == -1) {
+        which_serv = 0;
     }
+    _num_serv = which_serv;
     // std::cerr << "|" << _buffer_complete[find_next_cr - 2] << "|" << std::endl;
     // std::cerr << "the position of host: " << find_host << ", the position of cr: " << find_next_cr << std::endl;
     // if (data < 0)
@@ -195,7 +210,7 @@ int Server::recv_data(int position)
 	std::cout << "\n\n" << "===============   "  << _first_read_size << " BYTES  RECEIVED   ===============\n";
 	// std::cout << _buffer;
 	std::cout << "\n======================================================" << std::endl;
-	return (_first_read_size);
+	return (_num_serv);
 }
 
 int Server::getServerFd() const
