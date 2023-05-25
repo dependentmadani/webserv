@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/22 11:14:18 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/25 16:13:44 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <cstdio>
 #include <fcntl.h>
+#include <regex>
 
 CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_index(serv_index)
 {
@@ -28,13 +29,17 @@ CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_in
 CGI::~CGI()
 {
 }
+std::string CGI::trim(const std::string &str)
+{
+    std::regex pattern("^\\s+|\\s+$");
 
-void CGI::fill_cgi(char const *buffer, t_server *serv)
+    return std::regex_replace(str, pattern, "");
+}
+void CGI::fill_env(std::string buffer)
 {
     std::stringstream ss(buffer);
     std::string token;
 
-    // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|"<< buffer<<"|~~~~~~~~~" << std::endl;
     while (getline(ss, token, '\n'))
     {
         if (token != "\0")
@@ -42,10 +47,6 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
             hold.push_back(token);
         }
     }
-    std::string s = "SCRIPT_FILENAME=";
-    s += _script_name;
-    _envcgi.push_back(s);
-    _envcgi.push_back("REDIRECT_STATUS=200");
     for (size_t j = 0; j < hold.size(); j++)
     {
         size_t found = hold[j].find("HTTP/");
@@ -94,72 +95,54 @@ void CGI::fill_cgi(char const *buffer, t_server *serv)
                 _envcgi.push_back(str);
             }
         }
+    }
+}
 
-        found = hold[j].find("Cookie:");
-        if (found != std::string::npos)
-        {
-            std::string str = "HTTP_COOKIE=";
-            str += hold[j].c_str() + 8;
-            _envcgi.push_back(str);
-        }
-
-        found = hold[j].find("Content-Length:");
-        if (found != std::string::npos)
-        {
-            std::string str = "CONTENT_LENGTH=";
-            str += hold[j].c_str() + 16;
-            _envcgi.push_back(str);
-        }
-        found = hold[j].find("Content-Type:");
-        if (found != std::string::npos)
-        {
-            std::string str = "CONTENT_Type=";
-            str += hold[j].c_str() + 14;
-            _envcgi.push_back(str);
-        }
+void CGI::fill_cgi(std::map<std::string, std::string> header, std::string buffer, t_server *serv)
+{
+    fill_env(buffer);
+    std::string s = "SCRIPT_FILENAME=";
+    s += _script_name;
+    _envcgi.push_back(s);
+    _envcgi.push_back("REDIRECT_STATUS=200");
+    std::map<std::string, std::string>::iterator it = header.begin();
+    while (it != header.end())
+    {
+        if (it->first == "Content-Type")
+            _envcgi.push_back("CONTENT_TYPE=" + trim(it->second));
+        if (it->first == "Content-Length")
+            _envcgi.push_back("CONTENT_LENGTH=" + trim(it->second));
+        if (it->first == "Cookie")
+            _envcgi.push_back("HTTP_COOKIE=");
+        it++;
     }
     _env = new char *[_envcgi.size() + 1];
     for (size_t i = 0; i < _envcgi.size(); i++)
-        _env[i] = const_cast<char *>(strdup(_envcgi[i].c_str()));
+        _env[i] = (strdup(_envcgi[i].c_str()));
     _env[_envcgi.size()] = NULL;
     check_cgi(serv->loc[_location_index]->cgi_pass);
 }
 
 int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
 {
-    int pipe_fd[2];
-    if (pipe(pipe_fd) == -1)
-    {
-        std::cerr << "Error creating pipe" << std::endl;
-        exit(1);
-    }
     _script_name = req.getAvailableFilePath();
-    fill_cgi(buffer, serv);
     char **ptr = new char *[3];
     ptr[0] = const_cast<char *>(executable.c_str());
     ptr[1] = const_cast<char *>(_script_name.c_str());
     ptr[2] = NULL;
 
-    int fd = open("file.txt", O_CREAT | O_RDWR, 0644);
     std::ifstream jojo("jamal.txt");
     std::ofstream goku("file.txt");
-    std::string line;
-    char c;
-    std::string str = "Sec-Fetch-Use";
-    while (std::getline(jojo, line))
+    std::string fileContent = readFileToString("jamal.txt");
+    std::string substring = "\r\n\r\n";
+    size_t position = fileContent.find(substring);
+    std::string head = fileContent.substr(0, position);
+    for (size_t i = position + 4; i < fileContent.size(); i++)
     {
-        if (line.find(str) != std::string::npos)
-        {
-            std::getline(jojo, line);
-            while (jojo.get(c))
-            {
-                goku.put(c);
-            }
-            break;
-        }
+        goku.put(fileContent[i]);
     }
-
-    // write(fd, req.getBody().c_str(), req.getBody().length());
+    goku.close();
+    fill_cgi(req.getHeader(), head, serv);
     if (!executable.size())
     {
         std::ifstream file(_script_name.c_str());
@@ -173,6 +156,11 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         resp_buffer = content;
         return 1;
     }
+
+    for (size_t i = 0; i < _envcgi.size(); i++)
+    {
+        std::cout << i << "|++++++++++|+++++÷++|" << _env[i] << "|+++++++++|++++++++++++|" << strlen(_env[i]) << std::endl;
+    }
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -181,29 +169,39 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     }
     else if (pid == 0)
     {
+        int fd = open("file.txt", O_RDONLY);
+        int out_fd = open("./out_result.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+        // std::cout << "=> " << out_fd << " " << fd << std::endl;
         dup2(fd, STDIN_FILENO);
-        close(fd);
-        dup2(pipe_fd[1], STDOUT_FILENO);
-        close(pipe_fd[1]);
+        // close(fd);
+        dup2(out_fd, STDOUT_FILENO);
+        close(out_fd);
+
+        // char *env[] = {
+        //     "CONTENT_LENGTH=87864",
+        //     "CONTENT_TYPE=multipart/form-data; boundary=---------------------------290948205715912812062873960758",
+        //     "REQUEST_METHOD=POST",
+        //     "SCRIPT_FILENAME=/Users/sriyani/Desktop/goku/public/script/php_cgi.php",
+        //     "REDIRECT_STATUS=200"};
+
         execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
     }
     else
     {
-        close(pipe_fd[1]);
         int status;
-
-        if (waitpid(pid, &status, WNOHANG) == -1)
+        if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
     }
     size_t rd;
-    char bufffer[2048] = " ";
-    while ((rd = read(pipe_fd[0], bufffer, sizeof(buffer))) > 0)
+    char bufffer[4096] = " ";
+    int out_fd = open("./out_result.txt", O_RDONLY);
+    while ((rd = read(out_fd, bufffer, sizeof(buffer))) > 0)
     {
         resp_buffer += bufffer;
     }
-    close(pipe_fd[0]);
+    close(out_fd);
     size_t found = 0;
     if (_ext == ".pl")
         found = resp_buffer.find("\n\n");
@@ -213,7 +211,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
-    return 0;
+    return (0);
 }
 
 std::string const &CGI::getRespBuffer() const

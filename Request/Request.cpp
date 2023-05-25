@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/22 14:52:14 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/25 15:33:30 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,7 +288,6 @@ int Request::Is_directory()
             // if this directory has an index file, it should check for cgi in location
             if (this->if_location_has_cgi())
                 return this->request_run_cgi();
-
         }
     }
     else
@@ -362,7 +361,8 @@ int Request::Is_file()
         return request_run_cgi();
         // _response_body_as_string = ;
     }
-    else {
+    else
+    {
         _response_body_as_string.append(read_file(_available_file_path));
     }
     return 1;
@@ -1247,7 +1247,7 @@ int Request::POST_method()
         upload_post_request();
         state = 1;
         // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+        std::cout << 111111111111 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
     if (!get_request_resource())
     {
@@ -1263,6 +1263,7 @@ int Request::POST_method()
         _http_status = 404;
         return ft_http_status(getHttpStatus());
     }
+
     return 0;
 }
 
@@ -1368,41 +1369,31 @@ int Request::upload_post_request()
         }
     }
     std::ofstream goku("./upload/" + rand_str);
-    if (_body.find("Content-Type") != std::string::npos)
-    {
-        str = "Content-Disposition:";
-        jojo.clear();
-        jojo.seekg(0, std::ios::beg);
-        while (std::getline(jojo, line))
+
+    // if (_body.find("Content-Type") != std::string::npos)
+    // {
+    //     std::string fileContent = readFileToString("jamal.txt");
+    //     std::string substring = "\r\n\r\n";
+    //     size_t position = fileContent.find(substring);
+    //     std::string mybody = fileContent.substr(position + 4);
+    //     size_t pos = mybody.find("\r\n\r\n");
+
+    //     for (size_t i = pos + 4; i < mybody.size(); i++)
+    //     {
+    //         goku.put(mybody[i]);
+    //     }
+    // }
+    // else
+    // {
+        std::string fileContent = readFileToString("jamal.txt");
+        std::string substring = "\r\n\r\n";
+        size_t position = fileContent.find(substring);
+        _response_body_as_string = fileContent.substr(position + 4);
+        for (size_t i = position + 4; i < fileContent.size(); i++)
         {
-            if (line.find(str) != std::string::npos)
-            {
-                std::getline(jojo, line);
-                std::getline(jojo, line);
-                while (jojo.get(c))
-                {
-                    goku.put(c);
-                }
-                break;
-            }
+            goku.put(fileContent[i]);
         }
-    }
-    else
-    {
-        str = "Content-Type";
-        while (std::getline(jojo, line))
-        {
-            if (line.find(str) != std::string::npos)
-            {
-                std::getline(jojo, line);
-                while (jojo.get(c))
-                {
-                    goku.put(c);
-                }
-                break;
-            }
-        }
-    }
+    // }
 
     _http_status = 201;
     return ft_http_status(getHttpStatus());
@@ -1420,7 +1411,7 @@ bool Request::location_support_upload()
     std::string fnd = _header["Content-Type"];
     std::string lent = _header["Content-Length"];
     int num = atoi(lent.c_str());
-    std::cout << "|~~~~~~~~~~~~|" << find << "|~~~~~~~~~~~|" << num << std::endl;
+    // std::cout << "|~~~~~~~~~~~~|" << find << "|~~~~~~~~~~~|" << num << std::endl;
     if (find != std::string::npos || (found == std::string::npos && fnd.size() && num > 0))
     {
         return true;
@@ -1562,37 +1553,3 @@ void Request::set_cookie()
 
     std::cout << " |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| " << std::endl;
 }
-
-// int Request::POST_method()
-// {
-//     // if (location_support_upload())
-//     // {
-//     //     upload_post_request();
-//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-//     // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-//     // }
-//     // else
-//     // // {
-//     if (location_support_upload())
-//     {
-//         std::cout << 22222222 << "|_______________________________________|" << std::endl;
-//         upload_post_request();
-//     }
-//     // else if (!get_request_resource())
-//     // {
-//     //     std::cout << 11111111 << "|_______________________________________|" << std::endl;
-//     //     if (this->get_resource_type() == DIRECTORY)
-//     //         return this->If_is_directory();
-//     //     else if (this->get_resource_type() == FILE)
-//     //         return this->If_is_file();
-//     // }
-//     // else
-//     // {
-//     //     std::cout << 3333333 << "|_____________________| " << _body << "|_________________________|" << std::endl;
-//     //     _http_status = 404;
-//     //     return ft_http_status(getHttpStatus());
-//     // }
-//     // }
-//     return 0;
-// }

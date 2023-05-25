@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 16:54:35 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/17 13:26:05 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/24 15:46:16 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,12 @@ std::string randomstring(int length)
 	}
 
 	return str;
+}
+
+std::string readFileToString(const std::string &filename)
+{
+    std::ifstream file(filename);
+    std::string content((std::istreambuf_iterator<char>(file)),
+                        (std::istreambuf_iterator<char>()));
+    return content;
 }

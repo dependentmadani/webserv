@@ -1,0 +1,20 @@
+X-Powered-By: PHP/8.0.2
+Content-type: text/html; charset=UTF-8
+
+
+<br />
+<b>Warning</b>:  Cannot modify header information - headers already sent by (output started at /Users/sriyani/Desktop/goku/public/script/php_cgi.php:1) in <b>/Users/sriyani/Desktop/goku/public/script/php_cgi.php</b> on line <b>27</b><br />
+<br />
+<b>Warning</b>:  Cannot modify header information - headers already sent by (output started at /Users/sriyani/Desktop/goku/public/script/php_cgi.php:1) in <b>/Users/sriyani/Desktop/goku/public/script/php_cgi.php</b> on line <b>28</b><br />
+<br />
+<b>Warning</b>:  Cannot modify header information - headers already sent by (output started at /Users/sriyani/Desktop/goku/public/script/php_cgi.php:1) in <b>/Users/sriyani/Desktop/goku/public/script/php_cgi.php</b> on line <b>29</b><br />
+<!DOCTYPE html>
+<div>
+            <p>
+            <center><h1>Hello, hami!</h1></center><hr>
+            <center><img src="uploads/646f7c5e8c19a6.12683940.jpeg" alt="avatar" width="300" height="300" style="object-fit: cover;"></center><hr><br/>
+            <center>hami</center>
+            <center>lmerdi</center><br/><br/>
+            <center><a href="?logout">Logout</a></center>
+        </p>
+    </div>
