@@ -1,14 +1,15 @@
-GET /favicon.ico/ HTTP/1.1
+GET /planet/script/php_cgi.php?logout HTTP/1.1
 Host: localhost:8080
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/113.0
-Accept: image/avif,image/webp,*/*
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
 Accept-Language: en-US,en;q=0.5
 Accept-Encoding: gzip, deflate, br
-Referer: http://localhost:8080/planet/script/php_cgi.php
 Connection: keep-alive
-Sec-Fetch-Dest: image
-Sec-Fetch-Mode: no-cors
+Referer: http://localhost:8080/planet/script/php_cgi.php
+Cookie: name=hamid; email=lili; avatar=uploads%2F6470792796c233.93226403.jpeg
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
 Sec-Fetch-Site: same-origin
-Pragma: no-cache
-Cache-Control: no-cache
+Sec-Fetch-User: ?1
 

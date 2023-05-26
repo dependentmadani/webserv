@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/25 16:13:44 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/26 10:08:54 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ void CGI::fill_cgi(std::map<std::string, std::string> header, std::string buffer
         if (it->first == "Content-Length")
             _envcgi.push_back("CONTENT_LENGTH=" + trim(it->second));
         if (it->first == "Cookie")
-            _envcgi.push_back("HTTP_COOKIE=");
+            _envcgi.push_back("HTTP_COOKIE=" + trim(it->second));
         it++;
     }
     _env = new char *[_envcgi.size() + 1];
