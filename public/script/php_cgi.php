@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 <!DOCTYPE html>
 <div>
-    <?php echo var_dump($_COOKIE); ?>
     <?php if (isset($_COOKIE['name']) && isset($_COOKIE['email'])): ?>
         <p>
             <center><h1>Hello, <?= $_COOKIE['name'] ?>!</h1></center><hr>

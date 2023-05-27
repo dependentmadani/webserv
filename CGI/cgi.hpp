@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:33 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/24 18:03:22 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/27 11:35:29 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ public:
       std::string const &getRespBuffer() const;
       void check_cgi(std::vector<std::string> str);
       std::string const &getContentType() const;
-      std::string trim(const std::string &str);
       void fill_env(std::string buffer);
 };
 

@@ -6,21 +6,11 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/26 10:08:54 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/27 16:30:27 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include "cgi.hpp"
-#include <stdlib.h>
-#include <sstream>
-#include <fstream>
-#include <cstdio>
-#include <fcntl.h>
-#include <regex>
 
 CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_index(serv_index)
 {
@@ -29,12 +19,7 @@ CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_in
 CGI::~CGI()
 {
 }
-std::string CGI::trim(const std::string &str)
-{
-    std::regex pattern("^\\s+|\\s+$");
 
-    return std::regex_replace(str, pattern, "");
-}
 void CGI::fill_env(std::string buffer)
 {
     std::stringstream ss(buffer);
@@ -131,17 +116,17 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     ptr[1] = const_cast<char *>(_script_name.c_str());
     ptr[2] = NULL;
 
-    std::ifstream jojo("jamal.txt");
-    std::ofstream goku("file.txt");
-    std::string fileContent = readFileToString("jamal.txt");
+    std::ifstream in_file("temp_file");
+    std::ofstream out_file("file.txt");
+    std::string fileContent = readFileToString("temp_file");
     std::string substring = "\r\n\r\n";
     size_t position = fileContent.find(substring);
     std::string head = fileContent.substr(0, position);
     for (size_t i = position + 4; i < fileContent.size(); i++)
     {
-        goku.put(fileContent[i]);
+        out_file.put(fileContent[i]);
     }
-    goku.close();
+    out_file.close();
     fill_cgi(req.getHeader(), head, serv);
     if (!executable.size())
     {
@@ -156,11 +141,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         resp_buffer = content;
         return 1;
     }
-
-    for (size_t i = 0; i < _envcgi.size(); i++)
-    {
-        std::cout << i << "|++++++++++|+++++÷++|" << _env[i] << "|+++++++++|++++++++++++|" << strlen(_env[i]) << std::endl;
-    }
+    unlink("temp_file");
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -171,19 +152,10 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     {
         int fd = open("file.txt", O_RDONLY);
         int out_fd = open("./out_result.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
-        // std::cout << "=> " << out_fd << " " << fd << std::endl;
         dup2(fd, STDIN_FILENO);
-        // close(fd);
+        close(fd);
         dup2(out_fd, STDOUT_FILENO);
         close(out_fd);
-
-        // char *env[] = {
-        //     "CONTENT_LENGTH=87864",
-        //     "CONTENT_TYPE=multipart/form-data; boundary=---------------------------290948205715912812062873960758",
-        //     "REQUEST_METHOD=POST",
-        //     "SCRIPT_FILENAME=/Users/sriyani/Desktop/goku/public/script/php_cgi.php",
-        //     "REDIRECT_STATUS=200"};
-
         execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
@@ -202,6 +174,8 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         resp_buffer += bufffer;
     }
     close(out_fd);
+    unlink("file.txt");
+    unlink("out_result.txt");
     size_t found = 0;
     if (_ext == ".pl")
         found = resp_buffer.find("\n\n");

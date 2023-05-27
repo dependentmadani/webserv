@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 16:54:35 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/24 15:46:16 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/27 10:59:25 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,4 +79,10 @@ std::string readFileToString(const std::string &filename)
     std::string content((std::istreambuf_iterator<char>(file)),
                         (std::istreambuf_iterator<char>()));
     return content;
+}
+std::string trim(const std::string &str)
+{
+    std::regex pattern("^\\s+|\\s+$");
+
+    return std::regex_replace(str, pattern, "");
 }
