@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/27 16:30:27 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/28 11:24:06 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void Request::clear_request_class()
 int Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
-
     _buffer = std::string(request_message);
     if (!read_again)
         this->clear_request_class();
@@ -76,8 +75,10 @@ int Request::ParseRequest(char *request_message)
     _current_directory = std::string(buffer) + "/public";
     if (this->FirstLinerRequest(splited_request[0]) == 1)
     {
+        free_doublep(splited_request);
         return 1;
     }
+    free_doublep(splited_request);
     if (this->HeaderRequest(request_message))
         return 1;
     if (this->get_location_index() == -1)
@@ -528,11 +529,18 @@ int Request::FirstLinerRequest(char *request_message)
     char **split_first_liner = ft_split(request_message, ' ');
     _method = std::string(split_first_liner[0]);
     if (!split_first_liner[1])
+    {
+        free_doublep(split_first_liner);
         return -1;
+    }
     this->check_for_arguments_in_path(std::string(split_first_liner[1]));
     if (!split_first_liner[2])
+    {
+        free_doublep(split_first_liner);
         return -1;
+    }
     _protocol = std::string(split_first_liner[2]);
+    free_doublep(split_first_liner);
     return 0;
 }
 
@@ -556,6 +564,7 @@ int Request::check_for_arguments_in_path(std::string path)
             _arguments[tmp.substr(0, pos)] = tmp.substr(pos + 1, tmp.size());
             i++;
         }
+        free_doublep(splited_args);
     }
     else
     {
@@ -599,6 +608,7 @@ int Request::HeaderRequest(char *request_message)
         {
             char **split_each_line = ft_split(splited_header[i], ':');
             _header[std::string(split_each_line[0])] = std::string(split_each_line[1]).erase(0, 1);
+            free_doublep(split_each_line);
             i++;
         }
         else
@@ -611,6 +621,7 @@ int Request::HeaderRequest(char *request_message)
     {
         _body = tmp.substr(position_empty_line + 3, tmp.size());
     }
+    free_doublep(splited_header);
     return 0;
 }
 

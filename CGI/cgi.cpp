@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/27 16:30:27 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/28 10:00:11 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,6 @@ void CGI::fill_env(std::string buffer)
                 str += s;
                 _envcgi.push_back(str);
             }
-
-            found = hold[j].find("DELETE");
-            if (found != std::string::npos)
-            {
-                str = "REQUEST_METHOD=";
-                char *s = strtok(const_cast<char *>(hold[j].c_str()), " ");
-                str += s;
-                _envcgi.push_back(str);
-            }
         }
     }
 }
@@ -111,10 +102,6 @@ void CGI::fill_cgi(std::map<std::string, std::string> header, std::string buffer
 int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
 {
     _script_name = req.getAvailableFilePath();
-    char **ptr = new char *[3];
-    ptr[0] = const_cast<char *>(executable.c_str());
-    ptr[1] = const_cast<char *>(_script_name.c_str());
-    ptr[2] = NULL;
 
     std::ifstream in_file("temp_file");
     std::ofstream out_file("file.txt");
@@ -139,10 +126,19 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             file.close();
         }
         resp_buffer = content;
+        for (size_t i = 0; i < _envcgi.size(); i++)
+        {
+            delete _env[i];
+        }
+        delete[] _env;
         return 1;
     }
     unlink("temp_file");
     pid_t pid = fork();
+    char **ptr = new char *[3];
+    ptr[0] = const_cast<char *>(executable.c_str());
+    ptr[1] = const_cast<char *>(_script_name.c_str());
+    ptr[2] = NULL;
     if (pid < 0)
     {
         std::cerr << "Error forking process" << std::endl;
@@ -185,6 +181,12 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
+    for (size_t i = 0; i < _envcgi.size(); i++)
+    {
+        delete _env[i];
+    }
+    delete[] _env;
+    delete[] ptr;
     return (0);
 }
 

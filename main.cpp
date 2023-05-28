@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/25 11:14:24 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/28 11:24:49 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ int main(int ac, char **av)
         {
             if (FD_ISSET(i, &rds_ready))
             {
+
                 int server_id = 0;
                 if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again)
                 {
@@ -187,6 +188,8 @@ int main(int ac, char **av)
         // // close(theOne.fd);
         // close(server.getServerFd());
         // close(server.getSocket_client()[0]);
+
+        // system("leaks webserv");
     }
     return (0);
 }
