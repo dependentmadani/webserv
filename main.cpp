@@ -74,6 +74,7 @@ int main(int ac, char **av)
         std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
     int how_many_times = 0;
+    int fd_size = server.getSocket_client()[pars->num_serv - 1];
     while (1)
     {
         rds_ready = rds;
@@ -84,7 +85,7 @@ int main(int ac, char **av)
         }
         how_many_times += 1;
         int accepted_connection = 0;
-        for (int i = 1; i < FD_SETSIZE; ++i)
+        for (int i = 1; i <= fd_size; ++i)
         {
             if (FD_ISSET(i, &rds_ready))
             {
@@ -97,10 +98,13 @@ int main(int ac, char **av)
                     server.accept_connections(i);
                     accepted_connection = i;
                     FD_SET(server.getSocket_to_accept(), &rds);
+                    if (server.getSocket_to_accept() > fd_size)
+                        fd_size = server.getSocket_to_accept();
                 }
                 else
                 {
                     std::cerr << "how_many_times: " << how_many_times << std::endl;
+                    std::cerr << "read again value: " << request.read_again << std::endl;
                     if (request.read_again)
                     {
                         std::cerr << "That woouuuuld be cooool " << std::endl;
@@ -117,7 +121,7 @@ int main(int ac, char **av)
                         FD_CLR(i, &rds);
                         close(i);
                     }
-                    else if (!request.read_again && how_many_times == pars->num_serv)
+                    else if (!request.read_again && how_many_times <= pars->num_serv)
                     {
                         std::cerr << "wooow waaas heeere" << std::endl;
                         server.recv_data(i);
@@ -150,6 +154,11 @@ int main(int ac, char **av)
                         // std::cerr << server.getBuffer() << std::endl;
                         close(i);
                         FD_CLR(i, &rds);
+                    }
+                    else {
+                        close(i);
+                        FD_CLR(i, &rds);
+                        how_many_times = 0;
                     }
                 }
                 // else {
