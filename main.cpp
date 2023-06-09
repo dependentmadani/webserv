@@ -68,7 +68,7 @@ int main(int ac, char **av)
     for (int i = 0; i < pars->num_serv; ++i)
     {
         server.setPort(pars->serv[i]->ind_port);
-        if (server.initiate_socket(i) < 0)
+        if (server.initiate_socket() < 0)
             continue;
         FD_SET(server.getSocket_fd(), &rds);
         std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
@@ -98,8 +98,10 @@ int main(int ac, char **av)
                     server.accept_connections(i);
                     accepted_connection = i;
                     FD_SET(server.getSocket_to_accept(), &rds);
+                    std::cerr << "socket_to_accept: " << server.getSocket_to_accept() << std::endl;
                     if (server.getSocket_to_accept() > fd_size)
                         fd_size = server.getSocket_to_accept();
+                    std::cerr << "the value of fd_size: " << fd_size << std::endl;
                 }
                 else
                 {
@@ -125,6 +127,7 @@ int main(int ac, char **av)
                     {
                         std::cerr << "wooow waaas heeere" << std::endl;
                         server.recv_data(i);
+                        request.setServer_index(server.get_num_serv());
                         request.setServer(server);
                         std::cerr << server.getBuffer() << std::endl;
                         int val = request.ParseRequest(server.getBuffer());

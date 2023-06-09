@@ -1,14 +1,8 @@
-GET /script/script.py HTTP/1.1
-Host: localhost:8080
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/113.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate, br
-Connection: keep-alive
-Referer: http://localhost:8080/script/
-Upgrade-Insecure-Requests: 1
-Sec-Fetch-Dest: document
-Sec-Fetch-Mode: navigate
-Sec-Fetch-Site: same-origin
-Sec-Fetch-User: ?1
+POST / HTTP/1.1
+Host: example.com
+User-Agent: curl/7.54.0
+Accept: */*
+Content-Type: plain/text
+Content-Length: 62
 
+BODY IS HERE write something shorter or longer than body limit
