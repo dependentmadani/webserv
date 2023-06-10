@@ -1,0 +1,7 @@
+GET / HTTP/1.1
+Host: localhost:10
+Accept: */*
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (apple-x86_64-darwin18.7.0) Siege/4.1.6
+Connection: close
+

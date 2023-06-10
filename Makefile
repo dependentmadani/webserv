@@ -17,6 +17,7 @@ CPP = c++
 
 CPPFLAGS = -std=c++98 -Wall -Werror -Wextra #-fsanitize=address   -g
 
+
 SRC = main.cpp\
 	Server/Server.cpp \
 	Request/Request.cpp \
