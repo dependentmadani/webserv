@@ -74,7 +74,10 @@ int main(int ac, char **av)
         //std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
     int how_many_times = 0;
-    int fd_size = server.getSocket_client()[pars->num_serv - 1];
+    int fd_size = server.getSocket_client()[server.getSocket_client().size() - 1];
+    // for (size_t i = 0; i < server.getSocket_client().size(); ++i){
+    //     std::cout << "the values: "<< server.getSocket_client()[i] << " " << server.getSocket_client().size() << std::endl;
+    // }
     while (1)
     {
         rds_ready = rds;
@@ -83,7 +86,7 @@ int main(int ac, char **av)
             perror("select: ");
             exit(0);
         }
-        std::cout << "pass through select" << std::endl;
+        std::cout << "pass through select: "<< fd_size << std::endl;
         how_many_times += 1;
         int accepted_connection = 0;
         for (int i = 1; i <= fd_size; ++i)

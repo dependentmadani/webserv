@@ -1344,7 +1344,7 @@ int Request::upload_post_request()
     std::string str = "Content-Disposition";
     std::string line;
     std::string ext;
-    char c;
+    // char c;
     std::string rand_str = randomstring(3);
     size_t find = _body.find("Content-Disposition");
     if (find != std::string::npos)

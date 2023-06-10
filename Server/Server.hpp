@@ -62,7 +62,7 @@ class Server {
         std::string         _buffer_complete;
         std::string         _request_hostname;
         bool                _connexion_status;
-        fd_set              _readfds;
+        // fd_set              _readfds;
         s_parsing           *_parse;
 };
 

@@ -69,7 +69,9 @@ int Server::initiate_socket()
     //     //std::cerr << "Failed to set socket option" << std::endl;
     //     return 1;
     // }
-    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+    if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0) {
+        std::cerr << "Failed to set socket option" << std::endl;
+    }
     // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
     // {
     //     perror("webserv error (setsockop) ");
@@ -86,7 +88,7 @@ int Server::initiate_socket()
     if (i < 0) {
         // freeaddrinfo(bind_address);
         //std::cerr << "error: " << errno << ", " << strerror(errno) << std::endl;
-        // perror("webserv error (bind) ");
+        perror("webserv error (bind) ");
         return -1;
     }
     // freeaddrinfo(bind_address);
@@ -94,10 +96,11 @@ int Server::initiate_socket()
     std::cout << "Now, we are going to listen, for requests" << std::endl;
     if (listen(_socket_fd, 10) < 0)
     {
-        perror("webserv error (listen) ");
+        std::cerr << "webserv error port: " << _port << " ";
+        perror("(listen) ");
         return -1;
     }
-    std::cout << "listen works successfully" << std::endl;
+    std::cout << "listen successfully on this port: " << _port << std::endl;
     return 0;
 }
 

@@ -89,7 +89,7 @@ std::string trim(const std::string &str)
 
 void deleteCharArray(char **arr, size_t size)
 {
-	for (int i = 0; i < size; ++i)
+	for (size_t i = 0; i < size; ++i)
 	{
 		delete[] arr[i];
 		delete[] arr;
