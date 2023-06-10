@@ -204,10 +204,10 @@ int Server::recv_data(int position)
     // for (int i =0; i < data; ++i) {
     //     std::cerr << _buffer_complete[i];
     // }
-    std::cout << "\n\n" << std::endl;
-	std::cout << "\n\n" << "===============   "  << _first_read_size << " BYTES  RECEIVED   ===============\n";
-	// std::cout << _buffer;
-	std::cout << "\n======================================================" << std::endl;
+    // std::cout << "\n\n" << std::endl;
+	// std::cout << "\n\n" << "===============   "  << _first_read_size << " BYTES  RECEIVED   ===============\n";
+	// // std::cout << _buffer;
+	// std::cout << "\n======================================================" << std::endl;
 	return (_first_read_size);
 }
 

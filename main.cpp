@@ -106,7 +106,7 @@ int main(int ac, char **av)
                 }
                 else
                 {
-                    //std::cerr << "how_many_times: " << how_many_times << std::endl;
+                    std::cerr << "how_many_times: " << how_many_times << std::endl;
                     //std::cerr << "read again value: " << request.read_again << std::endl;
                     if (request.read_again)
                     {

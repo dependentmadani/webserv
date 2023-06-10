@@ -1,10 +1,10 @@
 print('Content-Type: text/html', end='\r\n\r\n')
-
+print()
 import sys
 import os
 
 print("Hi")
-print(os.environ)
+# print(os.environ)
 
 a = '''
 
@@ -36,4 +36,4 @@ a = '''
 
 '''
 
-#print(a, end='')
+print(a, end='')
