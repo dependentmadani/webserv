@@ -15,7 +15,8 @@ NAME = webserv
 
 CPP = c++
 
-CPPFLAGS = -std=c++98 -Wall -Werror -Wextra  -g #-fsanitize=address
+CPPFLAGS = -std=c++98 -Wall -Werror -Wextra #-fsanitize=address   -g
+
 
 SRC = main.cpp\
 	Server/Server.cpp \

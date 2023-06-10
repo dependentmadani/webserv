@@ -42,17 +42,17 @@ int main(int ac, char **av)
         {
             vars.copy_file(pars, av[1]);
             vars.check_key(pars);
-            std::cout << " File exist" << std::endl;
+            //std::cout << " File exist" << std::endl;
         }
         else
         {
-            std::cout << " File doesn't exist" << std::endl;
+            //std::cout << " File doesn't exist" << std::endl;
             return (1);
         }
     }
     else
     {
-        std::cout << "Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\"" << std::endl;
+        //std::cout << "Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\"" << std::endl;
         exit(1);
     }
     Server server(pars->serv[0]->ind_port);
@@ -71,10 +71,13 @@ int main(int ac, char **av)
         if (server.initiate_socket() < 0)
             continue;
         FD_SET(server.getSocket_fd(), &rds);
-        std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
+        //std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
     int how_many_times = 0;
-    int fd_size = server.getSocket_client()[pars->num_serv - 1];
+    int fd_size = server.getSocket_client()[server.getSocket_client().size() - 1];
+    // for (size_t i = 0; i < server.getSocket_client().size(); ++i){
+    //     std::cout << "the values: "<< server.getSocket_client()[i] << " " << server.getSocket_client().size() << std::endl;
+    // }
     while (1)
     {
         rds_ready = rds;
@@ -83,6 +86,7 @@ int main(int ac, char **av)
             perror("select: ");
             exit(0);
         }
+        std::cout << "pass through select: "<< fd_size << std::endl;
         how_many_times += 1;
         int accepted_connection = 0;
         for (int i = 1; i <= fd_size; ++i)
@@ -94,42 +98,42 @@ int main(int ac, char **av)
                 if ((server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again)
                 {
                     request.setServer_index(server_id);
-                    std::cerr << "accept a connection " << i << std::endl;
+                    //std::cerr << "accept a connection " << i << std::endl;
                     server.accept_connections(i);
                     accepted_connection = i;
                     FD_SET(server.getSocket_to_accept(), &rds);
-                    std::cerr << "socket_to_accept: " << server.getSocket_to_accept() << std::endl;
+                    //std::cerr << "socket_to_accept: " << server.getSocket_to_accept() << std::endl;
                     if (server.getSocket_to_accept() > fd_size)
                         fd_size = server.getSocket_to_accept();
-                    std::cerr << "the value of fd_size: " << fd_size << std::endl;
+                    //std::cerr << "the value of fd_size: " << fd_size << std::endl;
                 }
                 else
                 {
                     std::cerr << "how_many_times: " << how_many_times << std::endl;
-                    std::cerr << "read again value: " << request.read_again << std::endl;
+                    //std::cerr << "read again value: " << request.read_again << std::endl;
                     if (request.read_again)
                     {
-                        std::cerr << "That woouuuuld be cooool " << std::endl;
+                        //std::cerr << "That woouuuuld be cooool " << std::endl;
                         if (request.UseMethod())
                             continue;
                         request.build_response();
-                        // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                        // //std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
                         send(i, request.Response.c_str(), strlen(request.Response.c_str()), 0);
                         how_many_times = 0;
-                        std::cerr << "************------******************" << std::endl;
-                        std::cerr << "all should be good :):):)" << std::endl;
-                        // std::cout << request.Response << std::endl;
-                        // std::cerr << server.getBuffer() << std::endl;
+                        //std::cerr << "************------******************" << std::endl;
+                        //std::cerr << "all should be good :):):)" << std::endl;
+                        // //std::cout << request.Response << std::endl;
+                        // //std::cerr << server.getBuffer() << std::endl;
                         FD_CLR(i, &rds);
                         close(i);
                     }
                     else if (!request.read_again && how_many_times <= pars->num_serv)
                     {
-                        std::cerr << "wooow waaas heeere" << std::endl;
+                        //std::cerr << "wooow waaas heeere" << std::endl;
                         server.recv_data(i);
                         request.setServer_index(server.get_num_serv());
                         request.setServer(server);
-                        std::cerr << server.getBuffer() << std::endl;
+                        //std::cerr << server.getBuffer() << std::endl;
                         int val = request.ParseRequest(server.getBuffer());
                         if (val == 1)
                         {
@@ -145,16 +149,16 @@ int main(int ac, char **av)
                         if (request.read_again)
                             continue;
                         request.build_response();
-                        // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
-                        std::cerr << "hooooolaaaallaaaaa: " << request.Response.size() << " and " << request.getFile_size() << std::endl;
+                        // //std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                        //std::cerr << "hooooolaaaallaaaaa: " << request.Response.size() << " and " << request.getFile_size() << std::endl;
                         // send(i , request.Response.c_str(), BUFFER_SIZE, 0);
                         // send(i , request.Response.c_str(), strlen(request.Response.c_str()) + request.getFile_size(), 0);
                         send(i, request.Response.c_str(), request.Response.size(), 0);
                         how_many_times = 0;
-                        std::cerr << "*********************************************" << std::endl;
-                        // std::cout << request.Response << std::endl;
-                        std::cerr << "all should be good :)" << std::endl;
-                        // std::cerr << server.getBuffer() << std::endl;
+                        //std::cerr << "*********************************************" << std::endl;
+                        // //std::cout << request.Response << std::endl;
+                        std::cerr << "everything seem to be good:)" << std::endl;
+                        // //std::cerr << server.getBuffer() << std::endl;
                         close(i);
                         FD_CLR(i, &rds);
                     }
@@ -165,15 +169,15 @@ int main(int ac, char **av)
                     }
                 }
                 // else {
-                //     std::cerr << "hooooolaaaallaaaa" <<std::endl;
+                //     //std::cerr << "hooooolaaaallaaaa" <<std::endl;
                 //     request.build_response();
-                //     // std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
+                //     // //std::cerr << "it diiiid reaaach heree: " << server.getFirstReadSize() << std::endl;
                 //     send(i , request.Response.c_str(), strlen(request.Response.c_str()), 0);
                 //     how_many_times = 0;
-                //     std::cerr << "************------******************" << std::endl;
-                //     // std::cout << request.Response << std::endl;
-                //     std::cerr << "all should be good :):):)" << std::endl;
-                //     // std::cerr << server.getBuffer() << std::endl;
+                //     //std::cerr << "************------******************" << std::endl;
+                //     // //std::cout << request.Response << std::endl;
+                //     //std::cerr << "all should be good :):):)" << std::endl;
+                //     // //std::cerr << server.getBuffer() << std::endl;
                 //     FD_CLR(i , &rds);
                 //     close(i);
                 // }
@@ -191,12 +195,12 @@ int main(int ac, char **av)
         // request.UseMethod();
         // request.build_response();
         // send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-        // std::cerr << "*********************************************" << std::endl;
+        // //std::cerr << "*********************************************" << std::endl;
         // // for (int i = 0; i < n; ++i) {
-        // //     std::cerr << request.getBody()[i];
+        // //     //std::cerr << request.getBody()[i];
         // // }
-        // std::cout << "----------------------------------" << std::endl;
-        // std::cout << request.Response << std::endl;
+        // //std::cout << "----------------------------------" << std::endl;
+        // //std::cout << request.Response << std::endl;
         // // close(theOne.fd);
         // close(server.getServerFd());
         // close(server.getSocket_client()[0]);

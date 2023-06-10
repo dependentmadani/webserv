@@ -48,7 +48,8 @@ class Server {
         int                 getSocket_fd() const;
         int                 getSocket_to_accept() const;
         int                 getFirstReadSize() const;
-        std::string         get_request_hostname() const;
+        int                 get_num_serv() const;
+
         void                setPort(int);
         void                setParse(s_parsing* );
         int                 get_num_serv() const;

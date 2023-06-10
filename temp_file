@@ -1,8 +1,9 @@
-POST / HTTP/1.1
-Host: example.com
-User-Agent: curl/7.54.0
+GET / HTTP/1.1
+Host: localhost:1111
 Accept: */*
-Content-Type: plain/text
-Content-Length: 62
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (apple-x86_64-darwin18.7.0) Siege/4.1.6
+Connection: close
+
 
 BODY IS HERE write something shorter or longer than body limit
