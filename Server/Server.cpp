@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 12:09:05 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/21 15:09:04 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/27 16:30:27 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void Server::accept_connections(int position)
 int Server::recv_data(int position)
 {
     std::ofstream file;
-    file.open("jamal.txt");
+    file.open("temp_file");
     memset(_buffer, 0, BUFFER_SIZE);
 
     // while (data > 0) {

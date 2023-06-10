@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/22 14:52:14 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/28 11:24:06 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void Request::clear_request_class()
 int Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
-
     _buffer = std::string(request_message);
     if (!read_again)
         this->clear_request_class();
@@ -76,8 +75,10 @@ int Request::ParseRequest(char *request_message)
     _current_directory = std::string(buffer) + "/public";
     if (this->FirstLinerRequest(splited_request[0]) == 1)
     {
+        free_doublep(splited_request);
         return 1;
     }
+    free_doublep(splited_request);
     if (this->HeaderRequest(request_message))
         return 1;
     if (this->get_location_index() == -1)
@@ -288,7 +289,6 @@ int Request::Is_directory()
             // if this directory has an index file, it should check for cgi in location
             if (this->if_location_has_cgi())
                 return this->request_run_cgi();
-
         }
     }
     else
@@ -362,7 +362,8 @@ int Request::Is_file()
         return request_run_cgi();
         // _response_body_as_string = ;
     }
-    else {
+    else
+    {
         _response_body_as_string.append(read_file(_available_file_path));
     }
     return 1;
@@ -528,11 +529,18 @@ int Request::FirstLinerRequest(char *request_message)
     char **split_first_liner = ft_split(request_message, ' ');
     _method = std::string(split_first_liner[0]);
     if (!split_first_liner[1])
+    {
+        free_doublep(split_first_liner);
         return -1;
+    }
     this->check_for_arguments_in_path(std::string(split_first_liner[1]));
     if (!split_first_liner[2])
+    {
+        free_doublep(split_first_liner);
         return -1;
+    }
     _protocol = std::string(split_first_liner[2]);
+    free_doublep(split_first_liner);
     return 0;
 }
 
@@ -556,6 +564,7 @@ int Request::check_for_arguments_in_path(std::string path)
             _arguments[tmp.substr(0, pos)] = tmp.substr(pos + 1, tmp.size());
             i++;
         }
+        free_doublep(splited_args);
     }
     else
     {
@@ -579,6 +588,7 @@ int Request::HeaderRequest(char *request_message)
         {
             char **split_each_line = ft_split(splited_header[i], ':');
             _header[std::string(split_each_line[0])] = std::string(split_each_line[1]).erase(0, 1);
+            free_doublep(split_each_line);
             i++;
         }
         else
@@ -591,6 +601,7 @@ int Request::HeaderRequest(char *request_message)
     {
         _body = tmp.substr(position_empty_line + 3, tmp.size());
     }
+    free_doublep(splited_header);
     return 0;
 }
 
@@ -1195,7 +1206,7 @@ void Request::build_autoindex_page()
 
 int Request::read_body_request()
 {
-    std::ofstream jojo("jamal.txt", std::ios_base::app);
+    std::ofstream in_file("temp_file", std::ios_base::app);
 
     // if (_header.find("Content-Length") != _header.end() && _header.find("Transfer-Encoding") != _header.end())
     // {
@@ -1207,7 +1218,7 @@ int Request::read_body_request()
         char buffer_chr[BUFFER_SIZE];
         memset(buffer_chr, 0, BUFFER_SIZE);
         int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
-        jojo.write(buffer_chr, content_length_read);
+        in_file.write(buffer_chr, content_length_read);
         std::cout << content_length_read << std::endl;
         // if (content_length_read)
         //     _body.append(std::string(buffer_chr)); /// to check if something goes wrong
@@ -1226,9 +1237,8 @@ int Request::read_body_request()
         post_transfer_encoding();
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
-    jojo.close();
+    in_file.close();
     std::cerr << "the status of read_again: " << read_again << std::endl;
-    // std::cerr << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-**" << _buffer << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
     return read_again;
 }
 
@@ -1244,12 +1254,11 @@ int Request::POST_method()
         }
         upload_post_request();
         state = 1;
-        // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-        // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+        if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.size())
+            unlink("temp_file");
     }
     if (!get_request_resource())
     {
-        std::cout << 2222222222222222222 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         if (this->get_resource_type() == DIRECTORY)
             return this->If_is_directory();
         else if (this->get_resource_type() == FILE)
@@ -1257,7 +1266,6 @@ int Request::POST_method()
     }
     else if (!state)
     {
-        std::cout << 333333333333333 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         _http_status = 404;
         return ft_http_status(getHttpStatus());
     }
@@ -1269,7 +1277,7 @@ void Request::post_transfer_encoding()
 
     char buffer_chr[BUFFER_SIZE];
     bool done = false;
-    std::ofstream jojo("jamal.txt", std::ios_base::app);
+    std::ofstream in_file("temp_file", std::ios_base::app);
     int size = 0;
 
     memset(buffer_chr, 0, BUFFER_SIZE);
@@ -1295,7 +1303,7 @@ void Request::post_transfer_encoding()
     if (!done)
     {
         size = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
-        jojo.write(buffer_chr, size);
+        in_file.write(buffer_chr, size);
         _content_actual_size += size;
         for (int i = 0; i < size; i++)
         {
@@ -1317,13 +1325,13 @@ void Request::post_transfer_encoding()
     {
         read_again = false;
     }
-    jojo.close();
+    in_file.close();
 }
 
 int Request::upload_post_request()
 {
 
-    std::ifstream jojo("jamal.txt");
+    std::ifstream in_file("temp_file");
     std::string str = "Content-Disposition";
     std::string line;
     std::string ext;
@@ -1365,40 +1373,30 @@ int Request::upload_post_request()
             return ft_http_status(getHttpStatus());
         }
     }
-    std::ofstream goku("./upload/" + rand_str);
+    std::ofstream out_file("./upload/" + rand_str);
+
     if (_body.find("Content-Type") != std::string::npos)
     {
-        str = "Content-Disposition:";
-        jojo.clear();
-        jojo.seekg(0, std::ios::beg);
-        while (std::getline(jojo, line))
+        std::string fileContent = readFileToString("temp_file");
+        std::string substring = "\r\n\r\n";
+        size_t position = fileContent.find(substring);
+        std::string mybody = fileContent.substr(position + 4);
+        size_t pos = mybody.find("\r\n\r\n");
+
+        for (size_t i = pos + 4; i < mybody.size(); i++)
         {
-            if (line.find(str) != std::string::npos)
-            {
-                std::getline(jojo, line);
-                std::getline(jojo, line);
-                while (jojo.get(c))
-                {
-                    goku.put(c);
-                }
-                break;
-            }
+            out_file.put(mybody[i]);
         }
     }
     else
     {
-        str = "Content-Type";
-        while (std::getline(jojo, line))
+        std::string fileContent = readFileToString("temp_file");
+        std::string substring = "\r\n\r\n";
+        size_t position = fileContent.find(substring);
+        _response_body_as_string = fileContent.substr(position + 4);
+        for (size_t i = position + 4; i < fileContent.size(); i++)
         {
-            if (line.find(str) != std::string::npos)
-            {
-                std::getline(jojo, line);
-                while (jojo.get(c))
-                {
-                    goku.put(c);
-                }
-                break;
-            }
+            out_file.put(fileContent[i]);
         }
     }
 
@@ -1408,17 +1406,12 @@ int Request::upload_post_request()
 
 bool Request::location_support_upload()
 {
-    // if (_header.find("Content-Type") != _header.end())
-    // {
-    //     if (_header.find("Content-Type")->second.find("multipart/form-data") != std::string::npos)
-    //         return true;
-    // }
+
     size_t find = _body.find("Content-Type");
     size_t found = _body.find("Content-Disposition");
     std::string fnd = _header["Content-Type"];
     std::string lent = _header["Content-Length"];
     int num = atoi(lent.c_str());
-    std::cout << "|~~~~~~~~~~~~|" << find << "|~~~~~~~~~~~|" << num << std::endl;
     if (find != std::string::npos || (found == std::string::npos && fnd.size() && num > 0))
     {
         return true;
@@ -1478,7 +1471,6 @@ bool Request::is_location_has_cgi()
 
 int Request::request_run_cgi()
 {
-    // Server server;
     int cgi_return = 1;
     CGI cgi(_location_index, _server_index);
 
@@ -1491,10 +1483,9 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
-        _http_status = 200;
         _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
+        _http_status = 200;
         return ft_http_status(getHttpStatus());
-        // return (200);
     }
 
     _response_body_as_string = cgi.getRespBuffer();
@@ -1543,54 +1534,3 @@ int Request::string_to_decimal(std::string str)
 
     return number;
 }
-
-void Request::set_cookie()
-{
-    // std::map<std::string, std::string>;
-    // size_t find = _header.find("")
-
-    std::map<std::string, std::string>::iterator it = _header.begin();
-    // _cookie["set-cookie:"] =
-    std::cout << "|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|" << std::endl;
-    for (; it != _header.end(); it++)
-    {
-        // if
-        std::cout << "  |>>>>>>>>>>>>>>|    " << it->first << "    |<<<<<<<<<<<|   " << it->second << std::endl;
-    }
-
-    std::cout << " |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| " << std::endl;
-}
-
-// int Request::POST_method()
-// {
-//     // if (location_support_upload())
-//     // {
-//     //     upload_post_request();
-//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-//     // std::cout << "|>>>>>>>>>>>>>>|" << getBody() << "|<<<<<<<<<<<|" << std::endl;
-//     // std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-//     // }
-//     // else
-//     // // {
-//     if (location_support_upload())
-//     {
-//         std::cout << 22222222 << "|_______________________________________|" << std::endl;
-//         upload_post_request();
-//     }
-//     // else if (!get_request_resource())
-//     // {
-//     //     std::cout << 11111111 << "|_______________________________________|" << std::endl;
-//     //     if (this->get_resource_type() == DIRECTORY)
-//     //         return this->If_is_directory();
-//     //     else if (this->get_resource_type() == FILE)
-//     //         return this->If_is_file();
-//     // }
-//     // else
-//     // {
-//     //     std::cout << 3333333 << "|_____________________| " << _body << "|_________________________|" << std::endl;
-//     //     _http_status = 404;
-//     //     return ft_http_status(getHttpStatus());
-//     // }
-//     // }
-//     return 0;
-// }
