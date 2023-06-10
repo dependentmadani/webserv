@@ -29,10 +29,6 @@ get_matched_location_for_request_uri() function. -->
 
 <!-- * Check the problem with bind for the second server -->
 
-<!-- * Work on Transfer-Encoding using chunk -->
+* Work on Transfer-Encoding using chunk
 
-<!-- * Check is_available function  -->
-
-* Work on host creation with socket function and bind it.
-
-* if the size of body is too big, need to send chunk by chunk, until ending the whole body!
+* Check is_available function 

@@ -573,6 +573,26 @@ int Request::check_for_arguments_in_path(std::string path)
     return 0;
 }
 
+// int    Request::HeaderRequest(char *request_message)
+// {
+//     // char **splited_header = ft_split(request_message, '\r');
+//     char *tmp = request_message;
+//     char *tmp_request = request_message;
+//     char *splited_header = strtok_r(tmp_request, "\r\n", &tmp);
+
+//     splited_header = strtok_r(NULL, "\r\n", &tmp);
+//     while (splited_header != NULL)
+//     {
+//         char **split_each_line = ft_split(splited_header, ':');
+//         _header[std::string(split_each_line[0])] = std::string(split_each_line[1]);
+//         splited_header = strtok_r(NULL, "\r\n", &tmp);
+//         if (splited_header && !strcmp(splited_header,""))
+//             std::cout << "kan hna" << std::endl;
+//     }
+//     // std::cout << "all good for now :) !" << std::endl;
+//     return 0;
+// }
+
 int Request::HeaderRequest(char *request_message)
 {
     char **splited_header = ft_split(request_message, '\n');
@@ -819,25 +839,7 @@ int Request::ft_http_status(int value)
             }
         }
     }
-    _response_body_as_string = "<!DOCTYPE html><html lang=\"en\">"
-    "<head>"
-    "<meta charset=\"UTF-8\">"
-    "<title>Bad Request</title>"
-    "<style>"
-    "    h1{"
-    "        font-size:80px;"
-    "        font-weight:800;"
-    "        text-align:center;"
-    "    }"
-    "    h2"
-    "    {"
-    "        font-size:25px;"
-    "        text-align:center;"
-    "        margin-top:-40px;"
-    "    }"
-    "</style>"
-    "</head>"
-    "<body>\n<h2>";
+    _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2>";
     std::ostringstream converted;
     converted << this->getHttpStatus();
     _response_body_as_string.append(converted.str());
