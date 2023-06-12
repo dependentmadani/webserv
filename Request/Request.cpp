@@ -125,8 +125,10 @@ int Request::UseMethod()
     std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
         return this->GET_method();
-    else if (_method == "POST")
+    else if (_method == "POST") {
+        std::cerr << "nchouuuuf wach wssel lhna" << std::endl;
         return this->POST_method();
+    }
     else if (_method == "DELETE")
         return this->DELETE_method();
     return 0;
@@ -255,10 +257,9 @@ int Request::if_location_has_cgi()
 {
     if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
-        // _response_body_as_string.append(read_file(_available_file_path));
-        // _http_status = 200;
-        // return ft_http_status(getHttpStatus());
-        return 0;
+        _response_body_as_string.append(read_file(_available_file_path));
+        _http_status = 200;
+        return ft_http_status(getHttpStatus());
     }
     // call the constructor of cgi, than get the data from cgi. All of that as an else condition
     return 1;
@@ -339,6 +340,7 @@ int Request::Is_file()
 
     if (if_location_has_cgi())
     {
+        std::cerr << "kan hnaa a hmida rass lmida" << std::endl;
         return request_run_cgi();
         // _response_body_as_string = ;
     }

@@ -114,16 +114,17 @@ int main(int ac, char **av)
                     // std::cerr << "the value of fd_size before: " << fd_size << std::endl;
                     if (server.getSocket_to_accept() > fd_size)
                         fd_size = server.getSocket_to_accept();
+                    how_many_times = 0;
                     // std::cerr << "the value of fd_size: " << fd_size << std::endl;
                 }
                 else
                 {
-                    std::cerr << "how_many_times: " << how_many_times << std::endl;
+                    std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                     // std::cerr << "read again value: " << request.read_again << std::endl;
                     if (request.read_again || send_again)
                     {
                         // std::cerr << "That woouuuuld be cooool " << std::endl;
-                        if (!send_again && FD_ISSET(i, &rds_read_ready)) {
+                        if (!send_again && request.read_again && FD_ISSET(i, &rds_read_ready)) {
                             if (request.UseMethod()) 
                                 continue;
                             request.build_response();
@@ -141,7 +142,7 @@ int main(int ac, char **av)
                                 send_again = 0;
                             }
                         }
-                        else if (FD_ISSET(i, &rds_write_ready)){
+                        if (FD_ISSET(i, &rds_write_ready) && send_again && !request.read_again) {
                             // std::cerr << "----------------------------was heree----------------------------" << std::endl;
                             int ret = send(i, &(request.Response.c_str())[send_size], request.Response.size() - send_size, 0);
                             // std::cerr << "the value of returned value of send: " << ret << std::endl;
@@ -182,6 +183,7 @@ int main(int ac, char **av)
                         {
                             close(i);
                             FD_CLR(i, &rds_read);
+                            how_many_times = 0;
                             break;
                         }
                         else if (val == 0)
@@ -211,7 +213,7 @@ int main(int ac, char **av)
                         how_many_times = 0;
                         // std::cerr << "***********************lol***************" << std::endl;
                         // //std::cout << request.Response << std::endl;
-                        // std::cerr << "everything seem to be good:)" << std::endl;
+                        std::cerr << "everything seem not to be good:)" << std::endl;
                         // //std::cerr << server.getBuffer() << std::endl;
                         close(i);
                         FD_CLR(i, &rds_read);
