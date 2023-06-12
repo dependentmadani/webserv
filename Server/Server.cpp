@@ -99,7 +99,7 @@ int Server::initiate_socket()
     // freeaddrinfo(bind_address);
     _socket_client.push_back(_socket_fd);
     std::cout << "Now, we are going to listen, for requests" << std::endl;
-    if (listen(_socket_fd, 10) < 0)
+    if (listen(_socket_fd, SOMAXCONN) < 0)
     {
         std::cerr << "webserv error port: " << _port << " ";
         perror("(listen) ");
@@ -120,11 +120,11 @@ void Server::accept_connections(int position)
         perror("webserv error (accept)");
         exit(1);
     }
-    // int return_fd = fcntl(_socket_to_accept, F_SETFL, O_NONBLOCK);
-    // if (return_fd < 0){
-    //     perror("webserv error2 (fcntl)");
-    //     exit(1);
-    // }
+    int return_fd = fcntl(_socket_to_accept, F_SETFL, O_NONBLOCK);
+    if (return_fd < 0){
+        perror("webserv error2 (fcntl)");
+        exit(1);
+    }
     std::cerr << "fd of accepted socket after is: " << _socket_to_accept << std::endl;
 
     // fcntl(_socket_to_accept,F_SETFL,O_NONBLOCK);
