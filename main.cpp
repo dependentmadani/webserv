@@ -179,6 +179,7 @@ int main(int ac, char **av)
                         request.setServer(server);
                         //std::cerr << server.getBuffer() << std::endl;
                         int val = request.ParseRequest(server.getBuffer());
+                        request.set_read_fd(i);
                         if (val == 1)
                         {
                             close(i);
@@ -188,7 +189,6 @@ int main(int ac, char **av)
                         }
                         else if (val == 0)
                             request.UseMethod();
-                        request.set_read_fd(i);
                         if (request.read_again)
                             continue;
                         request.build_response();
@@ -203,7 +203,7 @@ int main(int ac, char **av)
                         if (send_size < (int)request.Response.size() && ret_val >= 0) {
                             send_again = 1;
                             FD_SET(i, &rds_write);
-                            // std::cerr << "kaaaaaaaaaaan hnaaaa a hamiiiiiiiid *********************" << std::endl;
+                            std::cerr << "kaaaaaaaaaaan hnaaaa a hamiiiiiiiid *********************" << std::endl;
                             continue;
                         }
                         else {
@@ -213,7 +213,7 @@ int main(int ac, char **av)
                         how_many_times = 0;
                         // std::cerr << "***********************lol***************" << std::endl;
                         // //std::cout << request.Response << std::endl;
-                        std::cerr << "everything seem not to be good:)" << std::endl;
+                        std::cerr << "everything seem to be good:)" << std::endl;
                         // //std::cerr << server.getBuffer() << std::endl;
                         close(i);
                         FD_CLR(i, &rds_read);

@@ -125,10 +125,8 @@ int Request::UseMethod()
     std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
         return this->GET_method();
-    else if (_method == "POST") {
-        std::cerr << "nchouuuuf wach wssel lhna" << std::endl;
+    else if (_method == "POST") 
         return this->POST_method();
-    }
     else if (_method == "DELETE")
         return this->DELETE_method();
     return 0;
@@ -267,9 +265,16 @@ int Request::if_location_has_cgi()
 
 int Request::Is_directory()
 {
-    if (is_uri_has_backslash_in_end())
+    std::cerr << "-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-fd: " << _read_fd << std::endl;
+    char buffer_chr[BUFFER_SIZE];
+
+    memset(buffer_chr, 0, BUFFER_SIZE);
+    int ret_val;
+    while ((ret_val = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0)) > 0)
+        std::cerr << "interesting, ret_val: " << ret_val << std::endl;
+    if ( is_uri_has_backslash_in_end() )
     {
-        if (!is_dir_has_index_files())
+        if ( !is_dir_has_index_files() )
         {
             if (!get_auto_index())
             {
@@ -293,13 +298,7 @@ int Request::Is_directory()
     }
     else
     {
-        // if ( !get_auto_index() )
-        // {
-        //     _http_status = 403;
-        //     return ft_http_status(getHttpStatus());
-        // }
-        // redirect the request by adding "/" to the request path.
-        // this->build_autoindex_page();
+        //resend a request with uri joined with backslash in end
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
@@ -427,7 +426,7 @@ int Request::Is_file_for_DELETE()
 {
     if (this->if_location_has_cgi())
     {
-        std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
+        // std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
         // nothing to do here for the moment. waiting for cgi to be done.
         // return code depend on cgi
         return this->request_run_cgi();
