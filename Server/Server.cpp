@@ -63,6 +63,11 @@ int Server::initiate_socket()
         perror("webserv error (socket) ");
         return -1;
     }
+    int return_fd = fcntl(_socket_fd, F_SETFL, O_NONBLOCK);
+    if (return_fd < 0){
+        perror("webserv error1 (fcntl)");
+        exit(1);
+    }
     const int on = 1;
     // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
     // {
@@ -109,11 +114,19 @@ void Server::accept_connections(int position)
     int addr_length = sizeof(_host_addr);
 
     _socket_to_accept = accept(position, (struct sockaddr *)&_host_addr, (socklen_t *)&addr_length);
+    std::cerr << "fd of accepted socket before is: " << _socket_to_accept << " position: " << position << std::endl;
     if (_socket_to_accept < 0)
     {
         perror("webserv error (accept)");
-        _socket_to_accept = -1;
+        exit(1);
     }
+    // int return_fd = fcntl(_socket_to_accept, F_SETFL, O_NONBLOCK);
+    // if (return_fd < 0){
+    //     perror("webserv error2 (fcntl)");
+    //     exit(1);
+    // }
+    std::cerr << "fd of accepted socket after is: " << _socket_to_accept << std::endl;
+
     // fcntl(_socket_to_accept,F_SETFL,O_NONBLOCK);
     // std::cout << "working properly" << std::endl;
     // char buffer[1024] = {0};

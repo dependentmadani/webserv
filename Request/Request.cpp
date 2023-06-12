@@ -13,8 +13,11 @@
 #include "Request.hpp"
 #include "../CGI/cgi.hpp"
 
-Request::Request() : _buffer(), _current_directory(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
+Request::Request() : _buffer(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
 {
+    char buffer[100];
+    getcwd(buffer, 100);
+    _current_directory = std::string(buffer) + "/public";
     _server_index = 0;
     _location_index = 0;
     _http_status = 200;
@@ -46,8 +49,6 @@ void Request::clear_request_class()
     Response = "";
     _available_file_path.clear();
     _available_file_path = "";
-    _current_directory.clear();
-    _current_directory = "";
     _directory_path.clear();
     _directory_path = "";
     _first_liner_header.clear();
@@ -68,11 +69,8 @@ int Request::ParseRequest(char *request_message)
 {
     char **splited_request = ft_split(request_message, '\n');
     _buffer = std::string(request_message);
-    if (!read_again)
-        this->clear_request_class();
-    char buffer[100];
-    getcwd(buffer, 100);
-    _current_directory = std::string(buffer) + "/public";
+    // if (!read_again)
+    this->clear_request_class();
     if (this->FirstLinerRequest(splited_request[0]) == 1)
     {
         free_doublep(splited_request);
@@ -257,9 +255,10 @@ int Request::if_location_has_cgi()
 {
     if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
-        _response_body_as_string.append(read_file(_available_file_path));
-        _http_status = 200;
-        return ft_http_status(getHttpStatus());
+        // _response_body_as_string.append(read_file(_available_file_path));
+        // _http_status = 200;
+        // return ft_http_status(getHttpStatus());
+        return 0;
     }
     // call the constructor of cgi, than get the data from cgi. All of that as an else condition
     return 1;
@@ -337,36 +336,15 @@ bool Request::get_auto_index()
 
 int Request::Is_file()
 {
-    // std::cerr << "shouuuuld be heeerreee i guess :((((((: " << std::endl;
-    // std::ifstream file;
-    // // char line[BUFFER_SIZE];
-    // // std::ifstream file
-
-    // file.open(_available_file_path.c_str());
-    // if (!_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
-    //     return this->if_location_has_cgi();
-    // if (file.is_open())
-    // {
-    //     // while (file)
-    //     // {
-    //         file.read(_buffer_char, BUFFER_SIZE);
-    //         _response_body_as_string = std::string(_buffer_char);
-    //         // _response_body_as_string.append(line);
-    //     // }
-    //     // close(file);
-    // }
-    // std::cerr << _response_body_as_string.size() << std::endl;
 
     if (if_location_has_cgi())
     {
         return request_run_cgi();
         // _response_body_as_string = ;
     }
-    else
-    {
-        _response_body_as_string.append(read_file(_available_file_path));
-    }
-    return 1;
+    _response_body_as_string = read_file(_available_file_path);
+    _http_status = 200;
+    return ft_http_status(getHttpStatus());
 }
 
 int Request::get_resource_type()
@@ -890,6 +868,7 @@ std::string Request::read_file(std::string file)
     {
         while (size_of_read > 0)
         {
+            memset(buffer_tmp, 0, BUFFER_SIZE);
             size_of_read = read(fd_file, buffer_tmp, BUFFER_SIZE);
             for (int i = 0; i < size_of_read; ++i)
             {
@@ -899,6 +878,8 @@ std::string Request::read_file(std::string file)
             std::cerr << "the size that it reads: " << size_of_read << std::endl;
         }
     }
+    if (fd_file > 0)
+        close(fd_file);
     // if ((int)final_output.size() == _final_file_size)
     //     _final_file_size = 0;
     // std::cerr << "should check the final size: " << _final_file_size << " and " << final_output.size() << std::endl;
