@@ -266,12 +266,12 @@ int Request::if_location_has_cgi()
 int Request::Is_directory()
 {
     std::cerr << "-*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-*-*-*-*-fd: " << _read_fd << std::endl;
-    char buffer_chr[BUFFER_SIZE];
+    // char buffer_chr[BUFFER_SIZE];
 
-    memset(buffer_chr, 0, BUFFER_SIZE);
-    int ret_val;
-    while ((ret_val = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0)) > 0)
-        std::cerr << "interesting, ret_val: " << ret_val << std::endl;
+    // memset(buffer_chr, 0, BUFFER_SIZE);
+    // int ret_val;
+    // while ((ret_val = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0)) > 0)
+    //     std::cerr << "interesting, ret_val: " << ret_val << std::endl;
     if ( is_uri_has_backslash_in_end() )
     {
         if ( !is_dir_has_index_files() )
@@ -1274,7 +1274,7 @@ void Request::post_transfer_encoding()
     memset(buffer_chr, 0, BUFFER_SIZE);
     if (_content_actual_size == 0)
     {
-        std::cerr << "shooouuuuuuld be heeere just onceee" << std::endl;
+        // std::cerr << "shooouuuuuuld be heeere just onceee" << std::endl;
         _content_actual_size = _server.getFirstReadSize();
         for (int i = 0; i < _server.getFirstReadSize(); i++)
         {

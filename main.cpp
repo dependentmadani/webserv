@@ -138,7 +138,7 @@ int main(int ac, char **av)
                                 continue;
                             }
                             else {
-                                // std::cerr << "loooooooooooooooooooool *********************" << std::endl;
+                                std::cerr << "loooooooooooooooooooool *********************" << std::endl;
                                 send_again = 0;
                             }
                         }
@@ -168,8 +168,11 @@ int main(int ac, char **av)
                         // //std::cout << request.Response << std::endl;
                         // //std::cerr << server.getBuffer() << std::endl;
                         std::cerr << "cloosed successefully!!!!!!!!!!!!!" << std::endl;
-                        close(i);
-                        FD_CLR(i, &rds_read);
+                        if ((is_available(server.getSocket_client(), i)) == -1)
+                        {
+                            close(i);
+                            FD_CLR(i, &rds_read);
+                        }
                     }
                     else if (!send_again && !request.read_again && how_many_times <= pars->num_serv)
                     {
