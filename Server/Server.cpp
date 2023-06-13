@@ -38,25 +38,10 @@ Server::~Server()
 
 int Server::initiate_socket()
 {
-    // int opt = 1;
-    // struct addrinfo hints;
-    // struct addrinfo *bind_address;
-
-    // memset(&hints, 0, sizeof(hints));
     _host_addr.sin_family = AF_INET;
     _host_addr.sin_port = htons(_port);
     _host_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // hints.ai_family = AF_INET;
-    // hints.ai_socktype = SOCK_STREAM;
-    // hints.ai_flags = AI_PASSIVE;
-
-    // //std::cerr << "the host would be: " << _parse->serv[num_serv]->host.c_str() << std::endl;
-    // //std::cerr << "server name: |" << _parse->serv[num_serv]->server_name.c_str() << "|...." << std::endl;
-    // int g = getaddrinfo(_parse->serv[num_serv]->host.c_str(), std::to_string(_port).c_str(), &hints, &bind_address);
-
-    // //std::cerr << "the return value of getaddinfo: " << g << std::endl;
-    // _socket_fd = socket(bind_address->ai_family, bind_address->ai_socktype, bind_address->ai_protocol); // SOCK_STREAM is virtual circuit service, and AF_INET is IP
     _socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_socket_fd < 0)
     {
@@ -69,34 +54,14 @@ int Server::initiate_socket()
         exit(1);
     }
     const int on = 1;
-    // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
-    // {
-    //     //std::cerr << "Failed to set socket option" << std::endl;
-    //     return 1;
-    // }
     if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0) {
         std::cerr << "Failed to set socket option" << std::endl;
     }
-    // if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
-    // {
-    //     perror("webserv error (setsockop) ");
-    //     return -1;
-    // }
-    //std::cout << "The server created successfully, with fd value of " << _socket_fd << std::endl;
-    //std::cout << "The port to listen to: " << _port << std::endl;
-    //std::cout << "Binding the socket " << _socket_fd << std::endl;
-    // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
-    // const int enable = 1;
-    // setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-    // int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
     int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
     if (i < 0) {
-        // freeaddrinfo(bind_address);
-        //std::cerr << "error: " << errno << ", " << strerror(errno) << std::endl;
         perror("webserv error (bind) ");
         return -1;
     }
-    // freeaddrinfo(bind_address);
     _socket_client.push_back(_socket_fd);
     std::cout << "Now, we are going to listen, for requests" << std::endl;
     if (listen(_socket_fd, SOMAXCONN) < 0)
@@ -126,21 +91,6 @@ void Server::accept_connections(int position)
         exit(1);
     }
     std::cerr << "fd of accepted socket after is: " << _socket_to_accept << std::endl;
-
-    // fcntl(_socket_to_accept,F_SETFL,O_NONBLOCK);
-    // std::cout << "working properly" << std::endl;
-    // char buffer[1024] = {0};
-    // int valread = read( socket_to_accept , buffer, 1024);
-    // std::cout << buffer << "\n" << std::endl;
-    // if(valread < 0)
-    // {
-    //     printf("No bytes are there to read");
-    // }
-    // char hello[78] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
-    // write(socket_to_accept , hello , sizeof(hello));
-    // close(socket_to_accept);
-    // std::cout << "\n listening to new socket \n" << std::endl;
-    // close(_socket_to_accept);
 }
 
 int Server::recv_data(int position)
@@ -154,31 +104,11 @@ int Server::recv_data(int position)
     for (int i = 0; i < _first_read_size; ++i) {
         file << _buffer[i];
     }
-    // int i = 0;
-    // while(1)
-    // {
-    //      _first_read_size = recv(position, _buffer, BUFFER_SIZE, 0);
-    //      if(_first_read_size == 0)
-    //         break;
-    //      std::cout << _first_read_size<< " i " << i << std::endl;
-    //      i++;
-    // }
-    // exit(1);
     _buffer_complete.append(std::string(_buffer));
     std::cout << "check what: " << position << std::endl;
-    // for (int i = 0; i < 8000; ++i) {
-    //     std::cerr << _buffer[i];
-    // }
-    // }
-    // if (data < 0)
-    // {
-    // 	_connexion_status = true;
-    // 	std::cout << "webserv error (recv)" << std::endl;
-    // 	return (data);
-    // }
+
     size_t find_host = _buffer_complete.find("Host:");
     size_t find_next_cr = 0;
-    // //std::cerr << "check this: |" << _buffer_complete.substr(find_host , _buffer_complete.size()) << "|" << std::endl;
     if (find_host != std::string::npos)
     {
         find_next_cr = _buffer_complete.substr(find_host , _buffer_complete.size()).find("\r\n");
@@ -187,12 +117,10 @@ int Server::recv_data(int position)
     int which_serv = -1;
     for (int i = 0; i < _parse->num_serv; ++i) {
         if (_parse->serv[i]->server_name == _request_hostname) {
-            //std::cout << "it does match the servername :)" << std::endl;
             which_serv = i;
             break ;
         }
         else if ((_parse->serv[i]->host + ":" + std::to_string(_parse->serv[i]->ind_port)) == _request_hostname) {
-            //std::cout << "it does not match the host :))))))) " << i << std::endl;
             which_serv = i;
             break ;
         }
@@ -200,30 +128,8 @@ int Server::recv_data(int position)
     if (which_serv == -1) {
         which_serv = 0;
     }
-    //std::cerr << "hihihihi: |" << _parse->serv[which_serv]->server_name << "|" << std::endl;
-    //std::cerr << "hohohoho: |" << _parse->serv[which_serv]->host << "|"<< std::endl;
-    //std::cerr << "hahahaha: |" << _request_hostname << "|" << std::endl;
     _num_serv = which_serv;
-    // if (data == 0)
-    // {
-    // 	std::cout << "connection closed from remote side" << std::endl;
-    // 	_connexion_status = true;
-    // 	return(data);
-    // }
-    // if (data == 0)
-    // {
-    // 	std::cout << "connection closed from remote side" << std::endl;
-    // 	_connexion_status = true;
-    // 	return(data);
-    // }
     _buffer_complete.append("\0");
-    // for (int i =0; i < data; ++i) {
-    //     std::cerr << _buffer_complete[i];
-    // }
-    // std::cout << "\n\n" << std::endl;
-	// std::cout << "\n\n" << "===============   "  << _first_read_size << " BYTES  RECEIVED   ===============\n";
-	// // std::cout << _buffer;
-	// std::cout << "\n======================================================" << std::endl;
 	return (_first_read_size);
 }
 
