@@ -80,7 +80,7 @@ int main(int ac, char **av)
     //     std::cout << "the values: "<< server.getSocket_client()[i] << " " << server.getSocket_client().size() << std::endl;
     // }
     struct timeval timeout_val;
-    timeout_val.tv_usec = 500000;
+    timeout_val.tv_usec = 100000;
     int send_again = 0;
     int send_size = 0;
     while (1)
@@ -114,11 +114,12 @@ int main(int ac, char **av)
                     if (server.getSocket_to_accept() > fd_size)
                         fd_size = server.getSocket_to_accept();
                     how_many_times = 0;
+                    break ;
                     // std::cerr << "the value of fd_size: " << fd_size << std::endl;
                 }
                 else
                 {
-                    std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
+                    // std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                     // std::cerr << "read again value: " << request.read_again << std::endl;
                     //the first time, and first entry should be in this function
                     if (FD_ISSET(i, &rds_read_ready) && is_available(server.getSocket_client(), i) == -1)
@@ -132,12 +133,12 @@ int main(int ac, char **av)
                             send_size = 0;
                             FD_CLR(i, &rds_write);
                         }
-                        std::cerr << "That woouuuuld be cooool to reeaaaaaad, i: " << i << std::endl;
+                        // std::cerr << "That woouuuuld be cooool to reeaaaaaad, i: " << i << std::endl;
                         int checker = server.recv_data(i);
                         if (checker == -1 && is_available(server.getSocket_client(), i) == -1)
                         {
                             FD_CLR(i, &rds_read);
-                            std::cerr << "close 1 : " << i << std::endl;
+                            // std::cerr << "close 1 : " << i << std::endl;
                             close(i);
                             continue ;
                         }
@@ -148,7 +149,7 @@ int main(int ac, char **av)
                         request.set_read_fd(i);
                         if (val == 1)
                         {
-                            std::cerr << "close 2 : " << i << std::endl;
+                            // std::cerr << "close 2 : " << i << std::endl;
                             if (is_available(server.getSocket_client(), i) == -1) {
                                 FD_CLR(i, &rds_read);
                                 close(i);
@@ -161,15 +162,16 @@ int main(int ac, char **av)
                         if (request.read_again)
                             continue;
                         request.build_response();
-                        std::cerr << "normalement dakchi nadi" << std::endl;
+                        // std::cerr << "normalement dakchi nadi" << std::endl;
                         FD_SET(i, &rds_write);
                         send_again = 1;
+                        break ;
                         // FD_CLR(i, &rds_read);
                     }
                     // if there is remaining stuff to read or to send, it should be here
                     else if ( (request.read_again || send_again) )
                     {
-                        std::cerr << "That woouuuuld be cooool to wriiite, i: " << i << std::endl;
+                        // std::cerr << "That woouuuuld be cooool to wriiite, i: " << i << std::endl;
                         if (!send_again && request.read_again && FD_ISSET(i, &rds_read_ready)) {
                             if (request.UseMethod()) 
                                 continue ;
@@ -179,17 +181,17 @@ int main(int ac, char **av)
                             // FD_CLR(i, &rds_read);
                         }
                         else if ( send_again && FD_ISSET(i, &rds_write_ready) ) {
-                            std::cerr << "----------------------------was heree----------------------------fd: " << i << std::endl;
+                            // std::cerr << "----------------------------was heree----------------------------fd: " << i << std::endl;
                             int ret = 0;
                             ret = send(i, &(request.Response.c_str())[send_size], request.Response.size() - send_size, 0);
-                            std::cerr << "the return value of send: " << ret << std::endl;
+                            // std::cerr << "the return value of send: " << ret << std::endl;
                             // std::cerr << "the value of returned value of send: " << ret << std::endl;
-                            std::cerr << "send_size: " << send_size << ", request.Response size: " << request.Response.size() << std::endl;
+                            // std::cerr << "send_size: " << send_size << ", request.Response size: " << request.Response.size() << std::endl;
                             if (ret > 0) {
                                 send_size += ret;
                             }
                             if (send_size < (int)request.Response.size() && ret > 0) {
-                                std::cerr << "******keep seeendiiiiing*****fd: " << i << std::endl;
+                                // std::cerr << "******keep seeendiiiiing*****fd: " << i << std::endl;
                                 continue ;
                             }
                             else {
@@ -200,14 +202,14 @@ int main(int ac, char **av)
                                 close(i);
                                 send_again = 0;
                                 send_size = 0;
-                                std::cerr << "cloosed successefully!!!!!!!!!!!!!" << std::endl;
+                                // std::cerr << "cloosed successefully!!!!!!!!!!!!!" << std::endl;
                             }
                         }
                         how_many_times = 0;
-                        std::cerr << "************------******************" << std::endl;
+                        // std::cerr << "************------******************" << std::endl;
                     }
                     else if (is_available(server.getSocket_client(), i) == -1){
-                        std::cerr << "*************************was here************************************" << std::endl;
+                        // std::cerr << "*************************was here************************************" << std::endl;
                         std::cerr << "close 4 : " << i << std::endl;
                         close(i);
                         FD_CLR(i, &rds_read);
