@@ -121,7 +121,7 @@ int main(int ac, char **av)
                     std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                     // std::cerr << "read again value: " << request.read_again << std::endl;
                     //the first time, and first entry should be in this function
-                    if (FD_ISSET(i, &rds_read_ready))
+                    if (FD_ISSET(i, &rds_read_ready) && is_available(server.getSocket_client(), i) == -1)
                     {
                         // for (; i < fd_size; ++i) {
                         //     std::cerr << "THe rest of it, send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
@@ -193,7 +193,7 @@ int main(int ac, char **av)
                                 continue ;
                             }
                             else {
-                                std::cerr << "should not be here at alll aaaaaa hhaaaaamiiiiidd" << std::endl;
+                                // std::cerr << "should not be here at alll aaaaaa hhaaaaamiiiiidd" << std::endl;
                                 FD_CLR(i, &rds_read);
                                 FD_CLR(i, &rds_write);
                                 std::cerr << "close 3 : " << i << std::endl;
