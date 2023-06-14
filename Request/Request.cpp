@@ -73,12 +73,15 @@ int Request::ParseRequest(char *request_message)
     this->clear_request_class();
     if (this->FirstLinerRequest(splited_request[0]) == 1)
     {
+        std::cerr << "first_liner_request" << std::endl;
         free_doublep(splited_request);
         return 1;
     }
     free_doublep(splited_request);
-    if (this->HeaderRequest(request_message))
+    if (this->HeaderRequest(request_message)){
+        std::cerr << "header request" << std::endl;
         return 1;
+    }
     if (this->get_location_index() == -1)
     {
         _http_status = 404;
