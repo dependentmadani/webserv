@@ -16,6 +16,7 @@
 #include "Request/Request.hpp"
 #include "parse/parsing.hpp"
 #include "CGI/cgi.hpp"
+
 int is_available(std::vector<int> tmp, int value)
 {
 
@@ -26,6 +27,7 @@ int is_available(std::vector<int> tmp, int value)
     }
     return -1;
 }
+
 //TODO: fix the blocked file descriptor in the case where it needs to complete sending of response
 int main(int ac, char **av)
 {
@@ -80,7 +82,7 @@ int main(int ac, char **av)
     //     std::cout << "the values: "<< server.getSocket_client()[i] << " " << server.getSocket_client().size() << std::endl;
     // }
     struct timeval timeout_val;
-    timeout_val.tv_usec = 100000;
+    timeout_val.tv_usec = 500000;
     int send_again = 0;
     int send_size = 0;
     while (1)
@@ -100,10 +102,9 @@ int main(int ac, char **av)
             // std::cerr << "check the return value of read: " << FD_ISSET(i, &rds_read_ready) << ", and write: " << FD_ISSET(i, &rds_write_ready) << ", at: " << i << std::endl;
             if (FD_ISSET(i, &rds_read_ready) || FD_ISSET(i, &rds_write_ready))
             {
-                // std::cerr << "khassso ikouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuun hna" << std::endl;
+                // std::cerr << "khassso ikouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuun hna, request.read_again: " << request.read_again << ", send_again:" << send_again << std::endl;
                 // std::cout << "pass through select: "<< i << std::endl;
-                int server_id = 0;
-                if ( (server_id = is_available(server.getSocket_client(), i)) != -1 && !request.read_again && !send_again )
+                if ( is_available(server.getSocket_client(), i) != -1 && !request.read_again && !send_again )
                 {
                     // request.setServer_index(server_id);
                     std::cerr << "accept a connection " << i << std::endl;
@@ -122,7 +123,7 @@ int main(int ac, char **av)
                     // std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                     // std::cerr << "read again value: " << request.read_again << std::endl;
                     //the first time, and first entry should be in this function
-                    if (FD_ISSET(i, &rds_read_ready) && is_available(server.getSocket_client(), i) == -1)
+                    if (FD_ISSET(i, &rds_read_ready) && is_available(server.getSocket_client(), i) == -1 && !request.read_again)
                     {
                         // for (; i < fd_size; ++i) {
                         //     std::cerr << "THe rest of it, send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
@@ -162,7 +163,7 @@ int main(int ac, char **av)
                         if (request.read_again)
                             continue;
                         request.build_response();
-                        // std::cerr << "normalement dakchi nadi" << std::endl;
+                        // std::cerr << "normalement dakchi nadi :ooooooooooooooooooooo" << std::endl;
                         FD_SET(i, &rds_write);
                         send_again = 1;
                         break ;
@@ -205,43 +206,30 @@ int main(int ac, char **av)
                                 // std::cerr << "cloosed successefully!!!!!!!!!!!!!" << std::endl;
                             }
                         }
+                        else if (send_again && request.read_again)
+                        {
+                            // std::cerr << "entered here :)))))))))))))))))))))))))))))))))))" << std::endl;
+                            send_again = 0;
+                            request.read_again = 0;
+                        }
                         how_many_times = 0;
                         // std::cerr << "************------******************" << std::endl;
                     }
                     else if (is_available(server.getSocket_client(), i) == -1){
                         // std::cerr << "*************************was here************************************" << std::endl;
-                        std::cerr << "close 4 : " << i << std::endl;
+                        // std::cerr << "close 4 : " << i << std::endl;
                         close(i);
                         FD_CLR(i, &rds_read);
                         FD_CLR(i, &rds_write);
                         how_many_times = 0;
                     }
+                    // else if (how_many_times > pars->num_serv) {
+                    //     request.read_again = 0;
+                    //     send_again = 0;
+                    // }
                 }
             }
         }
-
-        // server.accept_connections();
-        // theOne.fd = (server.getSocket_client())[0];
-        // theOne.events = POLLIN;
-        // int n = server.recv_data(&theOne);
-        // request.ft_http_code();
-        // request.ft_mime_type();
-        // request.setParse(pars);
-        // request.ParseRequest(server.getBuffer());
-        // request.UseMethod();
-        // request.build_response();
-        // send(server.getSocket_client()[0] , request.Response.c_str(), strlen(request.Response.c_str()), 0);
-        // //std::cerr << "*********************************************" << std::endl;
-        // // for (int i = 0; i < n; ++i) {
-        // //     //std::cerr << request.getBody()[i];
-        // // }
-        // //std::cout << "----------------------------------" << std::endl;
-        // //std::cout << request.Response << std::endl;
-        // // close(theOne.fd);
-        // close(server.getServerFd());
-        // close(server.getSocket_client()[0]);
-
-        // system("leaks webserv");
     }
     return (0);
 }

@@ -1,30 +1,30 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    
-    // save $_FILES['avatar'] to a inside a folder
-    $avatar = $_FILES['avatar'];
-    $avatar_name = $avatar['name'];
-    $avatar_tmp_name = $avatar['tmp_name'];
-    $avatar_size = $avatar['size'];
-    $avatar_error = $avatar['error'];
 
-    $avatar_ext = explode('.', $avatar_name);
-    $avatar_actual_ext = strtolower(end($avatar_ext));
+    // save $_FILES['video'] to a folder
+    $video = $_FILES['video'];
+    $video_name = $video['name'];
+    $video_tmp_name = $video['tmp_name'];
+    $video_size = $video['size'];
+    $video_error = $video['error'];
 
-    $allowed = array('jpg', 'jpeg', 'png', 'mp4');
+    $video_ext = explode('.', $video_name);
+    $video_actual_ext = strtolower(end($video_ext));
 
-    if (in_array($avatar_actual_ext, $allowed)) {
-        if ($avatar_error === 0) {
-            if ($avatar_size < 1000000000000000000000000000000) {
-                $avatar_name_new = uniqid('', true) . '.' . $avatar_actual_ext;
-                $avatar_destination = 'uploads/' . $avatar_name_new;
-                move_uploaded_file($avatar_tmp_name, $avatar_destination);
+    $allowed = array('mov', 'mp4', 'avi');
+
+    if (in_array($video_actual_ext, $allowed)) {
+        if ($video_error === 0) {
+            if ($video_size < 10000000000000000000000) {
+                $video_name_new = uniqid('', true) . '.' . $video_actual_ext;
+                $video_destination = 'uploads/' . $video_name_new;
+                move_uploaded_file($video_tmp_name, $video_destination);
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
-                $_COOKIE['avatar'] = $avatar_destination;
+                $_COOKIE['video'] = $video_destination;
                 setcookie('name', $_POST['name'], time() + 3600 * 24 * 7);
                 setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
-                setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
+                setcookie('video', $video_destination, time() + 3600 * 24 * 7);
             } else {
                 echo 'File too big';
                 exit(1);
@@ -40,19 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 } else if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['logout'])) {
     unset($_COOKIE['name']);
     unset($_COOKIE['email']);
-    unset($_COOKIE['avatar']);
+    unset($_COOKIE['video']);
     setcookie('name', '', time() - 3600);
     setcookie('email', '', time() - 3600);
-    setcookie('avatar', '', time() - 3600);
+    setcookie('video', '', time() - 3600);
 }
-
 ?>
 <!DOCTYPE html>
 <div>
     <?php if (isset($_COOKIE['name']) && isset($_COOKIE['email'])): ?>
         <p>
             <center><h1>Hello, <?= $_COOKIE['name'] ?>!</h1></center><hr>
-            <center><img src="<?= $_COOKIE['avatar'] ?>" alt="avatar" width="300" height="300" style="object-fit: cover;"></center><hr><br/>
+            <center><video width="400" controls><source src="<?= $_COOKIE['video'] ?>" type="video/mp4"></video></center><hr><br/>
             <center><?php echo $_COOKIE['name']; ?></center>
             <center><?php echo $_COOKIE['email']; ?></center><br/><br/>
             <center><a href="?logout">Logout</a></center>
@@ -61,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <form method="post" enctype="multipart/form-data">
             <input type="text" name="name" placeholder="Name" />
             <input type="text" name="email" placeholder="Email" />
-            <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, video/mp4" />
+            <input type="file" id="video" name="video" accept="video/mp4, video/avi, video/quicktime" />
             <input type="submit" value="Submit" />
         </form>
     <?php endif; ?>
