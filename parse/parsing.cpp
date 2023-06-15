@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/28 09:35:56 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/15 18:53:06 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,6 +357,19 @@ void parsing::check_location(location *loc)
             delete[] ss;
             flag++;
         }
+        if (!strncmp(ptr.c_str(), "uploads", strlen("uploads")))
+        {
+            j = 0;
+            ss = new char[ptr.size() - (strlen("uploads") - 1)];
+            for (size_t i = strlen("uploads"); i < ptr.size(); i++)
+                ss[j++] = ptr[i];
+            ss[j] = '\0';
+            ptr = static_cast<std::string>(ss);
+            ptr = trim(ptr);
+            loc->uploads = ptr;
+            delete[] ss;
+            flag++;
+        }
         if (isWhitespace(loc->location[i]))
             loc->location_flag++;
     }
@@ -446,7 +459,6 @@ void parsing::check_server(s_parsing *pars, size_t len)
             }
         }
         pars->pars_flag += pars->serv[i]->server_flag;
-
         if (((flag + num - 1) - pars->serv[i]->server_flag) != pars->serv[i]->server.size())
         {
             std::cout << "ERROR FROM SERVER " << std::endl;
@@ -465,7 +477,7 @@ void parsing::check_key(s_parsing *pars)
     pars->serv = new t_server *[pars->vec.size()];
     pars->num_serv = 0;
     int flag = 0;
-    size_t len;
+    int len = 0;
     size_t i = 0;
     pars->pars_flag = 0;
     pars->count_flag = 0;
@@ -495,7 +507,7 @@ void parsing::check_key(s_parsing *pars)
     pars->num_serv = k;
     check_server(pars, k);
     len = k - pars->pars_flag + pars->count_flag;
-    if ((flag + len) != i)
+    if ((flag + len) != (int)i)
     {
         std::cout << "ERROR FROM PARS " << std::endl;
         exit(0);

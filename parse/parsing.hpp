@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/27 16:59:57 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/15 18:36:18 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct s_location
     std::vector<std::string> methods;
     std::vector<std::string> index;
     std::vector<std::string> cgi_pass;
+    std::string uploads;
     std::string return_url;
     int num_return;
     bool auto_index;

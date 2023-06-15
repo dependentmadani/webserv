@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 15:40:02 by sriyani           #+#    #+#             */
-/*   Updated: 2023/05/28 11:24:49 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/15 18:16:07 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int is_available(std::vector<int> tmp, int value)
     return -1;
 }
 
-//TODO: fix the blocked file descriptor in the case where it needs to complete sending of response
+// TODO: fix the blocked file descriptor in the case where it needs to complete sending of response
 int main(int ac, char **av)
 {
     std::ifstream file;
@@ -43,17 +43,18 @@ int main(int ac, char **av)
         {
             vars.copy_file(pars, av[1]);
             vars.check_key(pars);
-            //std::cout << " File exist" << std::endl;
+            // std::cout << ">>>>>>>>>>>>>>>>>>>|" << pars->serv[0]->loc[0]->uploads << "|||||||||||" << std::endl;
+            // std::cout << " File exist" << std::endl;
         }
         else
         {
-            //std::cout << " File doesn't exist" << std::endl;
+            // std::cout << " File doesn't exist" << std::endl;
             return (1);
         }
     }
     else
     {
-        //std::cout << "Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\"" << std::endl;
+        // std::cout << "Error from number of arguments, make sure to have something as follows \"./webserv config_file.conf\"" << std::endl;
         exit(1);
     }
     Server server(pars->serv[0]->ind_port);
@@ -104,7 +105,7 @@ int main(int ac, char **av)
             {
                 // std::cerr << "khassso ikouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuun hna, request.read_again: " << request.read_again << ", send_again:" << send_again << std::endl;
                 // std::cout << "pass through select: "<< i << std::endl;
-                if ( is_available(server.getSocket_client(), i) != -1 && !request.read_again && !send_again )
+                if (is_available(server.getSocket_client(), i) != -1 && !request.read_again && !send_again)
                 {
                     // request.setServer_index(server_id);
                     std::cerr << "accept a connection " << i << std::endl;
@@ -115,21 +116,22 @@ int main(int ac, char **av)
                     if (server.getSocket_to_accept() > fd_size)
                         fd_size = server.getSocket_to_accept();
                     how_many_times = 0;
-                    break ;
+                    break;
                     // std::cerr << "the value of fd_size: " << fd_size << std::endl;
                 }
                 else
                 {
                     // std::cerr << "how_many_times: " << how_many_times << ",send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                     // std::cerr << "read again value: " << request.read_again << std::endl;
-                    //the first time, and first entry should be in this function
+                    // the first time, and first entry should be in this function
                     if (FD_ISSET(i, &rds_read_ready) && is_available(server.getSocket_client(), i) == -1 && !request.read_again)
                     {
                         // for (; i < fd_size; ++i) {
                         //     std::cerr << "THe rest of it, send_again: " << send_again << ",request.read_again: " << request.read_again << std::endl;
                         // }
                         // std::cerr << "wooow waaas heeere" << std::endl;
-                        if (FD_ISSET(i, &rds_write_ready) && send_again) {
+                        if (FD_ISSET(i, &rds_write_ready) && send_again)
+                        {
                             send_again = 0;
                             send_size = 0;
                             FD_CLR(i, &rds_write);
@@ -141,22 +143,23 @@ int main(int ac, char **av)
                             FD_CLR(i, &rds_read);
                             // std::cerr << "close 1 : " << i << std::endl;
                             close(i);
-                            continue ;
+                            continue;
                         }
                         request.setServer_index(server.get_num_serv());
                         request.setServer(server);
-                        //std::cerr << server.getBuffer() << std::endl;
+                        // std::cerr << server.getBuffer() << std::endl;
                         int val = request.ParseRequest(server.getBuffer());
                         request.set_read_fd(i);
                         if (val == 1)
                         {
                             // std::cerr << "close 2 : " << i << std::endl;
-                            if (is_available(server.getSocket_client(), i) == -1) {
+                            if (is_available(server.getSocket_client(), i) == -1)
+                            {
                                 FD_CLR(i, &rds_read);
                                 close(i);
                                 how_many_times = 0;
                             }
-                            continue ;
+                            continue;
                         }
                         else if (val == 0)
                             request.UseMethod();
@@ -166,36 +169,41 @@ int main(int ac, char **av)
                         // std::cerr << "normalement dakchi nadi :ooooooooooooooooooooo" << std::endl;
                         FD_SET(i, &rds_write);
                         send_again = 1;
-                        break ;
+                        break;
                         // FD_CLR(i, &rds_read);
                     }
                     // if there is remaining stuff to read or to send, it should be here
-                    else if ( (request.read_again || send_again) )
+                    else if ((request.read_again || send_again))
                     {
                         // std::cerr << "That woouuuuld be cooool to wriiite, i: " << i << std::endl;
-                        if (!send_again && request.read_again && FD_ISSET(i, &rds_read_ready)) {
-                            if (request.UseMethod()) 
-                                continue ;
+                        if (!send_again && request.read_again && FD_ISSET(i, &rds_read_ready))
+                        {
+                            if (request.UseMethod())
+                                continue;
                             request.build_response();
                             FD_SET(i, &rds_write);
                             send_again = 1;
                             // FD_CLR(i, &rds_read);
                         }
-                        else if ( send_again && FD_ISSET(i, &rds_write_ready) ) {
+                        else if (send_again && FD_ISSET(i, &rds_write_ready))
+                        {
                             // std::cerr << "----------------------------was heree----------------------------fd: " << i << std::endl;
                             int ret = 0;
                             ret = send(i, &(request.Response.c_str())[send_size], request.Response.size() - send_size, 0);
                             // std::cerr << "the return value of send: " << ret << std::endl;
                             // std::cerr << "the value of returned value of send: " << ret << std::endl;
                             // std::cerr << "send_size: " << send_size << ", request.Response size: " << request.Response.size() << std::endl;
-                            if (ret > 0) {
+                            if (ret > 0)
+                            {
                                 send_size += ret;
                             }
-                            if (send_size < (int)request.Response.size() && ret > 0) {
+                            if (send_size < (int)request.Response.size() && ret > 0)
+                            {
                                 // std::cerr << "******keep seeendiiiiing*****fd: " << i << std::endl;
-                                continue ;
+                                continue;
                             }
-                            else {
+                            else
+                            {
                                 // std::cerr << "should not be here at alll aaaaaa hhaaaaamiiiiidd" << std::endl;
                                 FD_CLR(i, &rds_read);
                                 FD_CLR(i, &rds_write);
@@ -215,7 +223,8 @@ int main(int ac, char **av)
                         how_many_times = 0;
                         // std::cerr << "************------******************" << std::endl;
                     }
-                    else if (is_available(server.getSocket_client(), i) == -1){
+                    else if (is_available(server.getSocket_client(), i) == -1)
+                    {
                         // std::cerr << "*************************was here************************************" << std::endl;
                         // std::cerr << "close 4 : " << i << std::endl;
                         close(i);
