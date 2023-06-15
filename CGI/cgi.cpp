@@ -6,12 +6,12 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/13 11:30:30 by sriyani           #+#    #+#             */
-/*   Updated: 2023/06/15 19:54:12 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/15 20:55:32 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cgi.hpp"
-#include <signal.h>
+#include <sys/wait.h>
 
 CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_index(serv_index)
 {
@@ -140,7 +140,6 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     ptr[0] = const_cast<char *>(executable.c_str());
     ptr[1] = const_cast<char *>(_script_name.c_str());
     ptr[2] = NULL;
-    // int ala = 0;
     if (pid < 0)
     {
         std::cerr << "Error forking process" << std::endl;
@@ -155,30 +154,20 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         close(fd);
         dup2(out_fd, STDOUT_FILENO);
         close(out_fd);
-
-        // ala = alarm(20);
-
+        alarm(20);
         execve(ptr[0], ptr, _env);
         std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
     }
     else
     {
-        // try
-        // {
-        //     if (ala)
-        //         throw ala;
-        // }
-
-        // catch (std::out_of_range &e)
-        // {
-        //     resp_buffer = "ERROR";
-        //     std::cerr << "Out of range exception: " << e.what() << std::endl;
-        //     exit(1);
-        // }
+       
         int status;
         if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
+        if (WIFSIGNALED(status))
+            {resp_buffer = "error";
+            return 1;}
     }
     size_t rd;
     char bufffer[4096] = " ";
