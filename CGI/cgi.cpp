@@ -166,7 +166,12 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
         if (WIFSIGNALED(status))
-            {resp_buffer = "error";
+            {resp_buffer = "<!DOCTYPE html>"
+                            "<html>"
+                            "<body>"
+                            "<h2>error</h2>"
+                            "</body>"
+                            "</html>";
             return 1;}
     }
     size_t rd;

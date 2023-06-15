@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use CGI;
 
+hhhh
+
 print "$ENV{REDIRECT_STATUS} 200 OK\n";
 print "Server: $ENV{SCRIPT_FILENAME}\n";
 print "Content-type: text/plain\n\n";

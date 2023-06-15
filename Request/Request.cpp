@@ -1477,7 +1477,17 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
-        _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
+        std::cerr << "the body returned from cgi: " << _response_body_as_string << std::endl;
+        if (cgi.getRespBuffer().size() > 13)
+            _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
+        if (_response_body_as_string.empty())
+        {
+            _response_body_as_string = "<!DOCTYPE html>"
+                            "<html>"
+                            "<body>"
+                            "</body>"
+                            "</html>";
+        }
         _http_status = 200;
         return ft_http_status(getHttpStatus());
     }
