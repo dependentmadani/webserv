@@ -169,7 +169,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             {resp_buffer = "<!DOCTYPE html>"
                             "<html>"
                             "<body>"
-                            "<h2>error</h2>"
+                            "<h2>504 - GATEWAY TIMEOUT :)</h2>"
                             "</body>"
                             "</html>";
             return 1;}

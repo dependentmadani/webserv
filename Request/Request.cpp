@@ -330,6 +330,7 @@ int Request::Is_file()
         return request_run_cgi();
         // _response_body_as_string = ;
     }
+    std::cerr << "kan hnaa taniii -*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-" << std::endl;
     _response_body_as_string = read_file(_available_file_path);
     _http_status = 200;
     return ft_http_status(getHttpStatus());
@@ -968,6 +969,7 @@ void Request::ft_http_code()
     http_code[500] = std::string("Internal Server Error");
     http_code[501] = std::string("Not Implemented");
     http_code[503] = std::string("Service Unavailable");
+    http_code[504] = std::string("Gateway Timeout");
 }
 
 int Request::is_available(std::string key, std::string value)
@@ -1137,7 +1139,6 @@ int Request::read_body_request()
     }
     else if (_header.find("Transfer-Encoding") != _header.end())
     {
-        std::cerr << "whaaaats noooooooow a haaamiiiid22" << std::endl;
         post_transfer_encoding();
     }
     std::cerr << "the content size: " << _content_actual_size << std::endl;
@@ -1149,14 +1150,16 @@ int Request::read_body_request()
 int Request::POST_method()
 {
     int state = 0;
+    //check if the directory where to upload to, is available
     if (_parse->serv[_server_index]->loc[_location_index]->uploads.empty()) {
-        _http_status = 404;
+        _http_status = 406;
         return ft_http_status(this->getHttpStatus());
     }
     if (_parse->serv[_server_index]->loc[_location_index]->uploads[0] == '/')
         _directory_to_upload_in = _current_directory + _parse->serv[_server_index]->loc[_location_index]->uploads;
     else
         _directory_to_upload_in = _current_directory + '/' + _parse->serv[_server_index]->loc[_location_index]->uploads;
+    //check the condition of upload
     if (location_support_upload())
     {
         if (read_body_request())
@@ -1284,7 +1287,7 @@ int Request::upload_post_request()
             return ft_http_status(getHttpStatus());
         }
     }
-    std::ofstream out_file("./upload/" + rand_str);
+    std::ofstream out_file(_directory_to_upload_in + rand_str);
 
     if (_body.find("Content-Type") != std::string::npos)
     {
@@ -1394,7 +1397,7 @@ int Request::request_run_cgi()
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
-        std::cerr << "the body returned from cgi: " << _response_body_as_string << std::endl;
+        std::cerr << "the body returned from cgi: |" << _response_body_as_string << "|" << std::endl;
         if (cgi.getRespBuffer().size() > 13)
             _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
         if (_response_body_as_string.empty())

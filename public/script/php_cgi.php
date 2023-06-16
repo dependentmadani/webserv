@@ -1,6 +1,6 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    
+
     // save $_FILES['avatar'] to a inside a folder
     $avatar = $_FILES['avatar'];
     $avatar_name = $avatar['name'];
@@ -11,13 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $avatar_ext = explode('.', $avatar_name);
     $avatar_actual_ext = strtolower(end($avatar_ext));
 
-    $allowed = array('jpg', 'jpeg', 'png', 'mp4');
+    $allowed = array('jpg', 'jpeg', 'png');
 
     if (in_array($avatar_actual_ext, $allowed)) {
         if ($avatar_error === 0) {
-            if ($avatar_size < 1000000000000000000000000000000) {
+            if ($avatar_size < 1000000) {
                 $avatar_name_new = uniqid('', true) . '.' . $avatar_actual_ext;
-                $avatar_destination = 'uploads/' . $avatar_name_new;
+                $avatar_destination = '../uploading/' . $avatar_name_new;
                 move_uploaded_file($avatar_tmp_name, $avatar_destination);
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit(1);
             }
         } else {
-            echo 'Error';
+            echo 'Error a hamid';
             exit(1);
         }
     } else {
@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     setcookie('email', '', time() - 3600);
     setcookie('avatar', '', time() - 3600);
 }
-
 ?>
 <!DOCTYPE html>
 <div>
@@ -61,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <form method="post" enctype="multipart/form-data">
             <input type="text" name="name" placeholder="Name" />
             <input type="text" name="email" placeholder="Email" />
-            <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, video/mp4" />
+            <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />
             <input type="submit" value="Submit" />
         </form>
     <?php endif; ?>
