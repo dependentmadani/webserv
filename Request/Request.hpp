@@ -35,35 +35,34 @@ class Request
 {
 
 private:
-  // std::map<std::string, std::string>  _response_body;
-  Server _server;
-  s_parsing *_parse;
-  int _http_status;
-  int _file_directory_check;
-  int _server_index;
-  int _location_index;
-  int _content_length;
-  int _read_fd;
-  int _chunked_content_value;
-  int _content_actual_size;
-  int _final_file_size;
-  // char                                _buffer_char[BUFFER_SIZE];
-  std::vector<std::string> _file_name_path;
-  std::string _buffer;
-  std::string _current_directory;
-  std::string _requested_file_path;
-  std::string _available_file_path;
-  std::string _directory_path;
-  std::string _first_liner_header;
-  std::string _method;
-  std::string _path;
-  std::map<std::string, std::string> _arguments;
-  std::string _protocol;
-  std::string _body;
-  std::map<std::string, std::string> _header;
-  std::map<std::string, std::string> _response_final;
-  std::string _response_body_as_string;
-  std::map<std::string, std::string> _cookie;
+    Server                              _server;
+    s_parsing                           *_parse;
+    int                                 _http_status;
+    int                                 _file_directory_check;
+    int                                 _server_index;
+    int                                 _location_index;
+    int                                 _content_length;
+    int                                 _read_fd;
+    int                                 _chunked_content_value;
+    int                                 _content_actual_size;
+    int                                 _final_file_size;
+    std::vector<std::string>            _file_name_path;
+    std::string                         _directory_to_upload_in;
+    std::string                         _buffer;
+    std::string                         _current_directory;
+    std::string                         _requested_file_path;
+    std::string                         _available_file_path;
+    std::string                         _directory_path;
+    std::string                         _first_liner_header;
+    std::string                         _method;
+    std::string                         _path;
+    std::map<std::string, std::string>  _arguments;
+    std::string                         _protocol;
+    std::string                         _body;
+    std::map<std::string, std::string>  _header;
+    std::map<std::string, std::string>  _response_final;
+    std::string                         _response_body_as_string;
+    std::map<std::string, std::string>  _cookie;
 
 public:
   Request();

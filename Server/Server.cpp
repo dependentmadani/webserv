@@ -85,11 +85,6 @@ void Server::accept_connections(int position)
         perror("webserv error (accept)");
         exit(1);
     }
-    // int return_fd = fcntl(_socket_to_accept, F_SETFL, O_NONBLOCK);
-    // if (return_fd < 0){
-    //     perror("webserv error2 (fcntl)");
-    //     exit(1);
-    // }
     std::cerr << "fd of accepted socket after is: " << _socket_to_accept << std::endl;
 }
 
@@ -99,7 +94,6 @@ int Server::recv_data(int position)
     file.open("temp_file");
     memset(_buffer, 0, BUFFER_SIZE);
 
-    // while (data > 0) {
     _first_read_size = recv(position, _buffer, BUFFER_SIZE, 0);
     if (_first_read_size < 0)
         return -1;
