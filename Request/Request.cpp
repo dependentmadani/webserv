@@ -330,7 +330,6 @@ int Request::Is_file()
         return request_run_cgi();
         // _response_body_as_string = ;
     }
-    std::cerr << "kan hnaa taniii -*-*-*-*-*-*-*-*--*-*-*-*-*-*-*-" << std::endl;
     _response_body_as_string = read_file(_available_file_path);
     _http_status = 200;
     return ft_http_status(getHttpStatus());
@@ -775,12 +774,12 @@ int Request::ft_http_status(int value)
             }
         }
     }
-    _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2>";
+    _response_body_as_string = "<!DOCTYPE html><html><body>\n<h2><center>";
     std::ostringstream converted;
     converted << this->getHttpStatus();
     _response_body_as_string.append(converted.str());
-    _response_body_as_string.append("</h2>\n<h3>" + http_code[this->getHttpStatus()]);
-    _response_body_as_string.append("</h3></body></html>");
+    _response_body_as_string.append(" - " + http_code[this->getHttpStatus()]);
+    _response_body_as_string.append("</center></h2><hr><h4>webserv</h4></body></html>");
     return this->getHttpStatus();
 }
 
@@ -1099,6 +1098,7 @@ void Request::build_autoindex_page()
     dir = opendir(_directory_path.c_str());
     _response_body_as_string = "<!DOCTYPE html><html><body>";
     // for "." and ".." directories, need to be added
+    _response_body_as_string.append("<h1>Index of " + _path + ":</h1><hr>");
     _response_body_as_string.append("<a href=\"./\">.</a><br>");
     _response_body_as_string.append("<a href=\"../\">..</a><br>");
     // this loop will add or dirctories and files available
