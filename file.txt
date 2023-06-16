@@ -1,1 +1,0 @@
-T /file.png HTTP/1.1
