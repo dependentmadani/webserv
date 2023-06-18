@@ -13,7 +13,7 @@
 #include "Request.hpp"
 #include "../CGI/cgi.hpp"
 
-Request::Request() : _directory_to_upload_in(), _buffer(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
+Request::Request() : _list_files_directories(), _directory_to_upload_in(), _buffer(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
 {
     char buffer[100];
     getcwd(buffer, 100);
@@ -42,6 +42,7 @@ void Request::clear_request_class()
     _chunked_content_value = 0;
     _final_file_size = 0;
     _file_name_path.clear();
+    _list_files_directories.clear();
     _arguments.clear();
     _header.clear();
     _response_final.clear();
@@ -381,9 +382,7 @@ int Request::if_location_has_cgi()
 {
     if (_parse->serv[_server_index]->loc[_location_index]->cgi_pass.empty())
     {
-        _response_body_as_string.append(read_file(_available_file_path));
-        _http_status = 200;
-        return ft_http_status(getHttpStatus());
+        return 0;
     }
     // call the constructor of cgi, than get the data from cgi. All of that as an else condition
     return 1;
@@ -433,12 +432,8 @@ int Request::is_uri_has_backslash_in_end()
 
 int Request::is_dir_has_index_files()
 {
-    int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size() ? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
-    if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
-    {
-        if (!_parse->serv[_server_index]->loc[_location_index]->index.empty())
-            return 1;
-    }
+    if (!_parse->serv[_server_index]->loc[_location_index]->index.empty())
+        return 1;
     return 0;
 }
 
@@ -449,12 +444,16 @@ bool Request::get_auto_index()
 
 int Request::Is_file()
 {
-
     if (if_location_has_cgi())
     {
         std::cerr << "kan hnaa a hmida rass lmida" << std::endl;
         return request_run_cgi();
         // _response_body_as_string = ;
+    }
+    if (access(_available_file_path.c_str(), R_OK) != 0)
+    {
+        _http_status = 403;
+        return ft_http_status(getHttpStatus());
     }
     _response_body_as_string = read_file(_available_file_path);
     _http_status = 200;

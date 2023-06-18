@@ -254,6 +254,11 @@ int Request::request_run_cgi()
     int cgi_return = 1;
     CGI cgi(_location_index, _server_index);
 
+    if (access(_available_file_path.c_str(), R_OK) != 0)
+    {
+        _http_status = 403;
+        return ft_http_status(getHttpStatus());
+    }
     if (is_body_size_good(_server.getBuffer()))
     {
         _http_status = 413;

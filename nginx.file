@@ -1,6 +1,6 @@
 server
 {
-listen  127.0.0.1:1111
+listen  127.0.0.1:1212
 
 server_name			example.com
 

@@ -60,7 +60,7 @@ int Server::initiate_socket()
     int i = bind(_socket_fd, (struct sockaddr *)&_host_addr, sizeof(_host_addr));
     if (i < 0) {
         perror("webserv error (bind) ");
-        return -1;
+        return (-1);
     }
     _socket_client.push_back(_socket_fd);
     std::cout << "Now, we are going to listen, for requests" << std::endl;

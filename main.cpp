@@ -67,6 +67,11 @@ int main(int ac, char **av)
         FD_SET(server.getSocket_fd(), &rds_read);
         std::cerr << "wayeeeeh " << server.getSocket_client()[i] << std::endl;
     }
+    if (server.getSocket_client().empty())
+    {
+        std::cerr << "webserv: No available servers to work with" << std::endl;
+        return 1;
+    }
     int how_many_times = 0;
     int fd_size = server.getSocket_client()[server.getSocket_client().size() - 1];
     struct timeval timeout_val;

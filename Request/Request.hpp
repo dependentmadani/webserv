@@ -47,6 +47,7 @@ private:
     int                                 _content_actual_size;
     int                                 _final_file_size;
     std::vector<std::string>            _file_name_path;
+    std::vector<std::string>            _list_files_directories;
     std::string                         _directory_to_upload_in;
     std::string                         _buffer;
     std::string                         _current_directory;
@@ -84,6 +85,7 @@ public:
   int is_method_allowed_in_location();
   int GET_method();
   int get_request_resource();
+  int get_request_resource_for_delete();
   int get_resource_type();
   int if_location_has_cgi();
   int POST_method();
@@ -98,6 +100,8 @@ public:
   bool get_auto_index();
   int delete_all_folder_content(std::string, int);
   int has_write_access_on_folder();
+
+  void get_all_subdirectories(std::string folder_name);
 
   // void    create_form_for_post();
   void post_transfer_encoding();

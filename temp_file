@@ -1,14 +1,8 @@
-GET /video_tmp.mp4 HTTP/1.1
-Host: localhost:1111
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/114.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
+DELETE /lol/ HTTP/1.1
+Host: example.com
+User-Agent: PostmanRuntime/7.32.2
+Accept: */*
+Postman-Token: fb33490c-250f-4e68-b911-081447c3d150
 Accept-Encoding: gzip, deflate, br
 Connection: keep-alive
-Referer: http://localhost:1111/
-Upgrade-Insecure-Requests: 1
-Sec-Fetch-Dest: document
-Sec-Fetch-Mode: navigate
-Sec-Fetch-Site: same-origin
-Sec-Fetch-User: ?1
 

@@ -88,7 +88,7 @@ int Request::ft_http_status(int value)
     converted << this->getHttpStatus();
     _response_body_as_string.append(converted.str());
     _response_body_as_string.append(" - " + http_code[this->getHttpStatus()]);
-    _response_body_as_string.append("</center></h2><hr><h4>webserv</h4></body></html>");
+    _response_body_as_string.append("</center></h2><hr><h4><center>webserv</center></h4></body></html>");
     return this->getHttpStatus();
 }
 

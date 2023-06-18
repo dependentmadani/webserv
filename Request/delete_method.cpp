@@ -15,7 +15,7 @@
 
 int Request::DELETE_method()
 {
-    if (this->get_request_resource())
+    if (this->get_request_resource_for_delete())
     {
         _http_status = 404;
         return ft_http_status(getHttpStatus());
@@ -31,13 +31,14 @@ int Request::Is_directory_for_DELETE()
 {
     if (is_uri_has_backslash_in_end())
     {
-        if (!if_location_has_cgi())
+        if (if_location_has_cgi())
         {
             if (is_dir_has_index_files())
             {
                 // run cgi on requested file with DELETE REQUEST METHOD
                 // and check if this directory has an index file and cgi
                 // then return code depend on cgi
+                std::cerr << "should be here to run the request run cgi function" << std::endl;
                 _http_status = this->request_run_cgi();
                 return ft_http_status(getHttpStatus());
             }
@@ -75,7 +76,7 @@ int Request::Is_directory_for_DELETE()
     }
     else
     {
-        // redirect the request by adding "/" to the request path.
+        // the request contains a conflit because it does not have a / at the end
         _http_status = 409;
         return ft_http_status(getHttpStatus());
     }
@@ -99,38 +100,29 @@ int Request::Is_file_for_DELETE()
     return 0;
 }
 
+ /////////cheeck this function
 int Request::delete_all_folder_content(std::string folder_file, int type)
 {
-    DIR *dir;
-    struct dirent *ent;
-
-    if ((dir = opendir(folder_file.c_str())) != NULL)
+    if (type == DIRECTORY)
     {
-        /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL)
-        {
-
-            if ((!strcmp(ent->d_name, ".") || strcmp(ent->d_name, "..")) && (strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")))
+        // give all the files and directories available in this directory
+        get_all_subdirectories(folder_file);
+        std::vector<std::string>::iterator beg = _list_files_directories.begin();
+        for (; beg != _list_files_directories.end(); ++beg) {
+            if (access((*beg).c_str(), R_OK) != 0)
             {
-                std::string tmp;
-                if (type == DIRECTORY)
-                    tmp = folder_file + "/" + ent->d_name;
-                else
-                    tmp = folder_file;
-                std::cout << "the file is: " << tmp << std::endl;
-                std::cout << "the file would be: " << ent->d_name << std::endl;
-                if (!std::remove(tmp.c_str()))
-                {
-                    std::cout << "well removed file" << std::endl;
-                }
-                else
-                {
-                    std::cout << "something wrong with file: " << ent->d_name << std::endl;
-                    return 0;
-                }
+                _directory_path = *beg;
+                return 0;
+            }
+            if (!std::remove((*beg).c_str()))
+            {
+                std::cout << "well removed directory" << std::endl;
             }
         }
-        closedir(dir);
+        if (!std::remove(folder_file.c_str()))
+        {
+            std::cout << "well removed directory" << std::endl;
+        }
     }
     else if (type == FILE)
     {
@@ -148,11 +140,40 @@ int Request::delete_all_folder_content(std::string folder_file, int type)
     return 1;
 }
 
+void Request::get_all_subdirectories(std::string folder_name) {
+    DIR *dir;
+    struct dirent *ent;
+    struct stat stat_buff;
+
+
+    while ((dir = opendir(folder_name.c_str())) == NULL) {
+        std::cerr << "whaat makes it return: " << folder_name << std::endl;
+        return ;
+    }
+    while ((ent = readdir(dir)) != NULL)
+    {
+        stat(ent->d_name, &stat_buff);
+        if (std::string(ent->d_name) == "." || std::string(ent->d_name) == "..") {
+            continue;
+        }
+        if (S_ISDIR(stat_buff.st_mode))
+        {
+            get_all_subdirectories(std::string(folder_name + "/" + ent->d_name));
+            _list_files_directories.push_back(folder_name + "/" +std::string(ent->d_name));
+        }
+        else if (S_ISREG(stat_buff.st_mode))
+        {
+            _list_files_directories.push_back(folder_name + "/" + std::string(ent->d_name));
+        }
+    }
+    closedir(dir);
+}
+
 int Request::has_write_access_on_folder()
 {
     int check_access = 0;
 
-    check_access = access(_directory_path.c_str(), W_OK);
+    check_access = access(_directory_path.c_str(), R_OK);
     if (check_access != 0)
         return 0;
     return 1;
