@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/06/15 20:04:38 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/19 17:11:50 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,28 @@ int ft_len(std::string s, char c)
     }
     return (len);
 }
+int check_semi_colonne(std::string str)
+{
+    int count = std::count(str.begin(), str.end(), ';');
+    size_t find = str.find(";");
+    if (count != 1 && str[find] != ';')
+    {
+        std::cout << " Error from semi colonne" << std::endl;
+        exit(1);
+    }
+    return 0;
+}
 
 std::string parsing::trim(const std::string &str)
 {
-    std::size_t first = str.find_first_not_of(" \t\n\r\f\v");
-    std::size_t last = str.find_last_not_of(" \t\n\r\f\v");
+    std::size_t first = 0;
+    std::size_t last = 0;
+    if (str.size())
+    {
+        first = str.find_first_not_of(" \t\n\r\f\v");
+        last = str.find_last_not_of(" \t\n\r\f\v");
+    }
+
     return str.substr(first, last - first + 1);
 }
 
@@ -91,14 +108,21 @@ void parsing::check_listen(t_server *serv, std::string str)
     char *ss;
     std::string s2;
     str = trim(str);
+    check_semi_colonne(str);
     if (!strncmp(str.c_str(), "listen", strlen("listen")))
     {
-
+        if (!isblank(str[strlen("listen")]))
+        {
+            std::cout << "Error from listen" << std::endl;
+            exit(1);
+        }
         str = str.c_str() + strlen("listen");
         if (!str.length())
             print_error();
         str = trim(str);
         ss = const_cast<char *>(str.c_str());
+        size_t ff = str.find(";");
+        str = str.substr(0, ff);
         ptr = strtok(ss, ":");
         while (ptr != NULL)
         {
@@ -115,10 +139,18 @@ void parsing::check_server_name(t_server *serv, std::string str)
 {
     std::string s2;
     str = trim(str);
+    check_semi_colonne(str);
     if (!strncmp(str.c_str(), "server_name", strlen("server_name")))
     {
+        if (!isblank(str[strlen("server_name")]))
+        {
+            std::cout << "Error from server_name" << std::endl;
+            exit(1);
+        }
         str = str.c_str() + strlen("server_name");
         str = trim(str);
+        size_t ff = str.find(";");
+        str = str.substr(0, ff);
         serv->server_name = str;
     }
 }
@@ -126,7 +158,9 @@ void parsing::check_server_name(t_server *serv, std::string str)
 void parsing::check_error_pages(t_server *serv, std::string str)
 {
     str = trim(str);
+    int flag = 0;
     std::vector<std::string> hold_error;
+    check_semi_colonne(str);
     if (!strncmp(str.c_str(), "error_page", strlen("error_page")))
     {
         std::stringstream ss(str);
@@ -147,9 +181,15 @@ void parsing::check_error_pages(t_server *serv, std::string str)
             if (isNumber(hold_error[i].c_str()))
                 serv->error_num.push_back(atoi(hold_error[i].c_str()));
             else if (hold_error[i].compare("error_page"))
+            {
+                size_t ff = hold_error[i].find(";");
+                hold_error[i] = hold_error[i].substr(0, ff);
+                if (ff != std::string::npos)
+                    flag++;
                 serv->error_page.push_back(hold_error[i]);
+            }
         }
-        if (hold_error.size() != 3)
+        if (hold_error.size() != 3 && (!(hold_error.size() == 4 && hold_error[hold_error.size() - 1] == "")))
             print_error();
     }
 }
@@ -158,12 +198,21 @@ void parsing::check_max_client(t_server *serv, std::string str)
 {
     char *ss;
     str = trim(str);
+    check_semi_colonne(str);
     if (!strncmp(str.c_str(), "max_client_body_size", strlen("max_client_body_size")))
     {
+        if (!isblank(str[strlen("max_client_body_size")]))
+        {
+            std::cout << "Error max_client_body_size" << std::endl;
+            exit(1);
+        }
         str = str.c_str() + strlen("max_client_body_size") + 1;
+        str = trim(str);
+        size_t ff = str.find(";");
+        str = str.substr(0, ff);
+        str = trim(str);
         if (!str.length())
             print_error();
-        str = trim(str);
         ss = const_cast<char *>(str.c_str());
         if (isNumber(ss))
             serv->max_client = atol(ss);
@@ -264,7 +313,10 @@ void parsing::check_location(location *loc)
             loc->url_location = trim(loc->url_location);
             size_t found = loc->url_location.find("/");
             if (found == std::string::npos)
+            {
                 std::cout << "Error from location url" << std::endl;
+                exit(1);
+            }
             delete[] ss;
             flag++;
         }
@@ -272,18 +324,32 @@ void parsing::check_location(location *loc)
         {
             j = 0;
             loc->flag_auto++;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("autoindex") - 1)];
             for (size_t i = strlen("autoindex"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
             ptr = trim(ptr);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
+            ptr = trim(ptr);
+            if (!ptr.size())
+            {
+                std::cout << "Error from autoindex" << std::endl;
+                exit(1);
+            }
             delete[] ss;
             flag++;
             if (!strcmp(ptr.c_str(), "on"))
                 loc->auto_index = true;
-            else
+            else if (!strcmp(ptr.c_str(), "off"))
                 loc->auto_index = false;
+            else
+            {
+                std::cout << "Error from autoindex" << std::endl;
+                exit(1);
+            }
         }
         if (!strncmp(ptr.c_str(), "return", strlen("return")))
         {
@@ -302,11 +368,14 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "allow_methods", strlen("allow_methods")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("allow_methods") - 1)];
             for (size_t i = strlen("allow_methods"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
             ptr = trim(ptr);
             fill_methods(loc, ptr);
             for (size_t i = 0; i < loc->methods.size(); i++)
@@ -321,11 +390,20 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "root", strlen("root")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("root") - 1)];
             for (size_t i = strlen("root"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
+            ptr = trim(ptr);
+            if (!ptr.size())
+            {
+                std::cout << "Error from root" << std::endl;
+                exit(1);
+            }
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
             ptr = trim(ptr);
             loc->root_location = ptr;
             delete[] ss;
@@ -334,12 +412,21 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "index", strlen("index")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("index") - 1)];
             for (size_t i = strlen("index"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
             ptr = trim(ptr);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
+            ptr = trim(ptr);
+            if (!ptr.size())
+            {
+                std::cout << "Error from index" << std::endl;
+                exit(1);
+            }
             fill_index(loc, ptr);
             delete[] ss;
             flag++;
@@ -347,35 +434,61 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "cgi_pass", strlen("cgi_pass")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("cgi_pass") - 1)];
             for (size_t i = strlen("cgi_pass"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
             ptr = trim(ptr);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
+            ptr = trim(ptr);
+            if (!ptr.size())
+            {
+                std::cout << "Error from cgi_pass" << std::endl;
+                exit(1);
+            }
             fill_cgi(loc, ptr);
+            if (loc->cgi_pass.size() % 2 != 0)
+            {
+                std::cout << "Error from cgi_pass" << std::endl;
+                exit(1);
+            }
             delete[] ss;
             flag++;
         }
         if (!strncmp(ptr.c_str(), "uploads", strlen("uploads")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("uploads") - 1)];
             for (size_t i = strlen("uploads"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
             ptr = trim(ptr);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
+            ptr = trim(ptr);
+            if (!ptr.size())
+            {
+                std::cout << "Error from uploads" << std::endl;
+                exit(1);
+            }
             loc->uploads = ptr;
             delete[] ss;
             flag++;
         }
         if (isWhitespace(loc->location[i]))
+        {
+            flag++;
             loc->location_flag++;
+        }
     }
     if (flag != loc->location.size())
     {
-        std::cout << "ERROR FROM LOCATION " << std::endl;
+        std::cout << flag << " |ERROR FROM LOCATION |" << loc->location.size() << std::endl;
         exit(0);
     }
     if (loc->root_location.empty() || loc->methods.empty()) // ||  loc->cgi_pass.empty()|| !loc->flag_auto)
@@ -470,7 +583,23 @@ void parsing::check_server(s_parsing *pars, size_t len)
             print_error();
     }
 }
-
+void parsing::check_port(s_parsing *pars)
+{
+    std::vector<int> vec;
+    for (int i = 0; i < pars->num_serv; i++)
+        vec.push_back(pars->serv[i]->ind_port);
+    for (int i = 0; i < pars->num_serv; i++)
+    {
+        for (int j = 0; j < pars->num_serv; j++)
+        {
+            if (vec[i] == vec[j] && i != j)
+            {
+                std::cout << vec[i] << "Error From port " << std::endl;
+                exit(1);
+            }
+        }
+    }
+}
 void parsing::check_key(s_parsing *pars)
 {
     int k = 0;
@@ -507,6 +636,7 @@ void parsing::check_key(s_parsing *pars)
     pars->num_serv = k;
     check_server(pars, k);
     len = k - pars->pars_flag + pars->count_flag;
+    check_port(pars);
     if ((flag + len) != (int)i)
     {
         std::cout << "ERROR FROM PARS " << std::endl;

@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:23 by sriyani           #+#    #+#             */
-/*   Updated: 2023/06/15 18:36:18 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/19 17:12:12 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,12 @@ public:
     void check_max_client(t_server *serv, std::string str);
     void check_location(location *loc);
     std::string trim(const std::string &str);
+    void check_port(s_parsing *pars);
 
 } parsing;
 bool whitespace(unsigned char c);
 bool isWhitespace(unsigned char c);
-
+int check_semi_colonne(std::string str);
 int ft_len(std::string s, char c);
 
 #endif
