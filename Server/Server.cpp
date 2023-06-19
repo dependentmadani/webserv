@@ -100,8 +100,8 @@ int Server::recv_data(int position)
     for (int i = 0; i < _first_read_size; ++i) {
         file << _buffer[i];
     }
+    _buffer_complete.clear();
     _buffer_complete.append(std::string(_buffer));
-    std::cout << "check what: " << position << std::endl;
 
     size_t find_host = _buffer_complete.find("Host:");
     size_t find_next_cr = 0;
@@ -113,10 +113,12 @@ int Server::recv_data(int position)
     int which_serv = -1;
     for (int i = 0; i < _parse->num_serv; ++i) {
         if (_parse->serv[i]->server_name == _request_hostname) {
+            std::cerr << "server name would be: " << _parse->serv[i]->server_name  << ", request_hostname: " << _request_hostname << std::endl;
             which_serv = i;
             break ;
         }
         else if ((_parse->serv[i]->host + ":" + std::to_string(_parse->serv[i]->ind_port)) == _request_hostname) {
+            std::cerr << "server name would be: " << (_parse->serv[i]->host + ":" + std::to_string(_parse->serv[i]->ind_port)) << ", request_hostname: " << _request_hostname  << std::endl;
             which_serv = i;
             break ;
         }

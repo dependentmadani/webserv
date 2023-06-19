@@ -412,6 +412,9 @@ int Request::Is_directory()
             // if this directory has an index file, it should check for cgi in location
             if (this->if_location_has_cgi())
                 return this->request_run_cgi();
+            _response_body_as_string = read_file(_available_file_path);
+            _http_status = 200;
+            return ft_http_status(getHttpStatus());
         }
     }
     else

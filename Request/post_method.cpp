@@ -206,6 +206,7 @@ int Request::If_is_file()
     }
     else
     {
+        std::cerr << "11111 the file is: " << _available_file_path << std::endl;
         _http_status = 403;
         return ft_http_status(getHttpStatus());
     }
@@ -222,6 +223,7 @@ int Request::If_is_directory()
                 request_run_cgi();
             else
             {
+                std::cerr << "222222 the file is: " << _available_file_path << std::endl;
                 _http_status = 403;
                 return ft_http_status(getHttpStatus());
             }
@@ -256,6 +258,7 @@ int Request::request_run_cgi()
 
     if (access(_available_file_path.c_str(), R_OK) != 0)
     {
+        std::cerr << "the file is: " << _available_file_path << std::endl;
         _http_status = 403;
         return ft_http_status(getHttpStatus());
     }
@@ -284,7 +287,7 @@ int Request::request_run_cgi()
     }
 
     _response_body_as_string = cgi.getRespBuffer();
-    _http_status = 203;
+    _http_status = 200;
     return ft_http_status(getHttpStatus());
 }
 

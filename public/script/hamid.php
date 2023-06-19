@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($video_error === 0) {
             if ($video_size < 10000000000000000000000) {
                 $video_name_new = uniqid('', true) . '.' . $video_actual_ext;
-                $video_destination = 'uploads/' . $video_name_new;
+                $video_destination = '../uploading/' . $video_name_new;
                 move_uploaded_file($video_tmp_name, $video_destination);
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
