@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 12:37:13 by sriyani           #+#    #+#             */
-/*   Updated: 2023/06/19 17:11:50 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/06/20 14:31:30 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int check_semi_colonne(std::string str)
 {
     int count = std::count(str.begin(), str.end(), ';');
     size_t find = str.find(";");
-    if (count != 1 && str[find -1] != ';')
+    if (count != 1 && str[find - 1] != ';')
     {
         std::cout << " Error from semi colonne" << std::endl;
         exit(1);
@@ -354,11 +354,15 @@ void parsing::check_location(location *loc)
         if (!strncmp(ptr.c_str(), "return", strlen("return")))
         {
             j = 0;
+            check_semi_colonne(ptr);
             ss = new char[ptr.size() - (strlen("return") - 1)];
             for (size_t i = strlen("return"); i < ptr.size(); i++)
                 ss[j++] = ptr[i];
             ss[j] = '\0';
             ptr = static_cast<std::string>(ss);
+            ptr = trim(ptr);
+            size_t ff = ptr.find(";");
+            ptr = ptr.substr(0, ff);
             ptr = trim(ptr);
             fill_return(loc, ptr);
             delete[] ss;
