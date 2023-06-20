@@ -132,7 +132,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             delete _env[i];
         }
         delete[] _env;
-        return 1;
+        return 2;
     }
     unlink("temp_file");
     pid_t pid = fork();
@@ -166,13 +166,9 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
         if (WIFSIGNALED(status))
-            {resp_buffer = "<!DOCTYPE html>"
-                            "<html>"
-                            "<body>"
-                            "<h2>504 - GATEWAY TIMEOUT :)</h2>"
-                            "</body>"
-                            "</html>";
-            return 1;}
+        {
+            return 1;
+        }
     }
     size_t rd;
     char bufffer[4096] = " ";

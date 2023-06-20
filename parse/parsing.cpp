@@ -32,7 +32,7 @@ int check_semi_colonne(std::string str)
 {
     int count = std::count(str.begin(), str.end(), ';');
     size_t find = str.find(";");
-    if (count != 1 && str[find] != ';')
+    if (count != 1 && str[find -1] != ';')
     {
         std::cout << " Error from semi colonne" << std::endl;
         exit(1);

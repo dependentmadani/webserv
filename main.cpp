@@ -123,6 +123,7 @@ int main(int ac, char **av)
                         request.setServer(server);
                         int val = request.ParseRequest(server.getBuffer());
                         request.set_read_fd(i);
+                        std::cerr << "naaaaaaaaaaadiiiiiii111111" << std::endl;
                         if (val == 1)
                         {
                             if (is_available(server.getSocket_client(), i) == -1)
@@ -137,6 +138,7 @@ int main(int ac, char **av)
                             request.UseMethod();
                         if (request.read_again)
                             continue;
+                        std::cerr << "naaaaaaaaaaadiiiiiii222222" << std::endl;
                         request.build_response();
                         FD_SET(i, &rds_write);
                         send_again = 1;

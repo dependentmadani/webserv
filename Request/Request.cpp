@@ -221,12 +221,12 @@ int Request::is_request_well_formed(char *request_message)
     }
     if (_method == "POST" && _header.count("Transfer-Encoding") && _header.count("Content-Length"))
     {
-        std::cerr << "what the heeeeck" << std::endl;
         _http_status = 400;
         return ft_http_status(getHttpStatus());
     }
     if (url_characters_checker())
     {
+        std::cerr << "it did return url checker error" << std::endl;
         _http_status = 400;
         return ft_http_status(getHttpStatus());
     }
@@ -281,16 +281,23 @@ int Request::get_matched_location_for_request_uri()
 
 int Request::is_location_have_redirection() //TODO: check the utility of this function
 {
-    for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->location.size(); ++i)
+    // for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->location.size(); ++i)
+    // {
+    //     if (_parse->serv[_server_index]->loc[_location_index]->location[i].find("return ") != std::string::npos)
+    //     {
+    //         size_t position_of_return = _parse->serv[_server_index]->loc[_location_index]->location[i].find("return") + 10;
+    //         _http_status = 301;
+    //         _path = _parse->serv[_server_index]->loc[_location_index]->location[i].substr(position_of_return, _parse->serv[_server_index]->loc[_location_index]->location[i].size());
+    //         _path = remove_space(_path);
+    //         return ft_http_status(getHttpStatus());
+    //     }
+    // }
+    if (!_parse->serv[_server_index]->loc[_location_index]->return_url.empty())
     {
-        if (_parse->serv[_server_index]->loc[_location_index]->location[i].find("return ") != std::string::npos)
-        {
-            size_t position_of_return = _parse->serv[_server_index]->loc[_location_index]->location[i].find("return") + 10;
-            _http_status = 301;
-            _path = _parse->serv[_server_index]->loc[_location_index]->location[i].substr(position_of_return, _parse->serv[_server_index]->loc[_location_index]->location[i].size());
-            _path = remove_space(_path);
-            return ft_http_status(getHttpStatus());
-        }
+        _path =_parse->serv[_server_index]->loc[_location_index]->return_url;
+        std::cerr << "wwhaaaaaaaat is theee paaaath: " << _path << std::endl;
+        _http_status = 301;
+        return ft_http_status(getHttpStatus());
     }
     return 0;
 }
@@ -516,9 +523,6 @@ std::string Request::read_file(std::string file)
     }
     if (fd_file > 0)
         close(fd_file);
-    // if ((int)final_output.size() == _final_file_size)
-    //     _final_file_size = 0;
-    // std::cerr << "should check the final size: " << _final_file_size << " and " << final_output.size() << std::endl;
     return final_output;
 }
 
@@ -688,18 +692,19 @@ int Request::is_available(std::string key, std::string value)
         _header[key].pop_back();
 
     if (val && _header[key] != value)
-    {
-        std::cerr << "should be heeere i guess" << std::endl;
         return 1;
-    }
     return 0;
 }
 
 int Request::url_characters_checker()
 {
-    size_t return_value = _path.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%");
-    if (return_value != std::string::npos)
-        return 1;
+    size_t return_value;
+    std::string should_be_in = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%");
+    for (size_t i = 0; i < _path.size(); ++i) {
+        return_value = should_be_in.find(_path[i]);
+        if (return_value == std::string::npos)
+            return 1;
+    }
     return 0;
 }
 

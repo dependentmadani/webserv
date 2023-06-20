@@ -26,7 +26,11 @@ void Request::build_response()
         _response_final["Content_Type"] = mime_type[file_type];
     if (this->getHttpStatus() == 301)
     {
-        _response_final["Location"] = _arguments["Host"] + this->_path + "/";
+        if (this->_path[_path.size() - 1] == '/')
+            _response_final["Location"] = _arguments["Host"] + this->_path;
+        else
+            _response_final["Location"] = _arguments["Host"] + this->_path + "/";
+        std::cerr << "the location will become: " << _response_final["Location"] << std::endl;
     }
     converted.str("");
     converted.clear();
@@ -64,7 +68,7 @@ void Request::build_response()
 int Request::ft_http_status(int value)
 {
     if (value < 300 || value == 301)
-        return 1;
+        return 2;
     if (!_parse->serv[_server_index]->error_num.empty())
     {
         for (size_t i = 0; i < _parse->serv[_server_index]->error_num.size(); ++i)

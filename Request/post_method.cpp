@@ -285,7 +285,11 @@ int Request::request_run_cgi()
         _http_status = 200;
         return ft_http_status(getHttpStatus());
     }
-
+    if (cgi_return == 1 )
+    {
+        _http_status = 504;
+        return ft_http_status(getHttpStatus());
+    }
     _response_body_as_string = cgi.getRespBuffer();
     _http_status = 200;
     return ft_http_status(getHttpStatus());
