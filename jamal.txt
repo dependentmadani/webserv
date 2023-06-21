@@ -1,0 +1,11 @@
+GET /pp/ HTTP/1.1
+Host: localhost:1111
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+Accept: */*
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Accept-Encoding: gzip, deflate, br
+Accept-Language: fr-FR,fr;q=0.9,ar;q=0.8,en-US;q=0.7,en;q=0.6
+

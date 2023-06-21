@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 16:52:14 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/28 11:21:09 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/03/31 16:52:32 by mbadaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
-static int string_count(const char *set, char c)
+static int	string_count(const char *set, char c)
 {
-	int i;
-	int count;
+	int		i;
+	int		count;
 
 	i = 0;
 	count = 0;
@@ -33,29 +33,19 @@ static int string_count(const char *set, char c)
 	return (count);
 }
 
-char **ft_freee(char **arr, int j)
+static char	**ft_freee(char **arr, int j)
 {
 	while (j > 0)
 		free(arr[j--]);
 	free(arr);
 	return (NULL);
 }
-void ft_free(char **arr, int j)
-{
-	int i = 0;
-	while (i < j)
-	{
-		free(arr[i]);
-		i++;
-	}
-	free(arr);
-}
 
-static char **ft_split2_func(char **arr1, const char *str, char c)
+static char	**ft_split2_func(char **arr1, const char *str, char c)
 {
-	size_t i;
-	size_t j;
-	int k;
+	size_t		i;
+	size_t		j;
+	int			k;
 
 	i = 0;
 	j = 0;
@@ -78,9 +68,9 @@ static char **ft_split2_func(char **arr1, const char *str, char c)
 	return (arr1);
 }
 
-char **ft_split(char const *s, char c)
+char	**ft_split(char const *s, char c)
 {
-	char **arr;
+	char	**arr;
 
 	if (!s)
 		return (NULL);

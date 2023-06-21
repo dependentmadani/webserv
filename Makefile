@@ -15,16 +15,11 @@ NAME = webserv
 
 CPP = c++
 
-CPPFLAGS = -std=c++98 -Wall -Werror -Wextra #-fsanitize=address   -g
+CPPFLAGS = -std=c++98 #-fsanitize=address #-Wall -Werror -Wextra  -g
 
 SRC = main.cpp\
 	Server/Server.cpp \
 	Request/Request.cpp \
-	Request/get_method.cpp \
-	Request/delete_method.cpp \
-	Request/post_method.cpp \
-	Request/Response.cpp \
-	Request/method_checkers.cpp \
 	CGI/cgi.cpp\
 	utils/ft_split.cpp \
 	utils/utils_functions.cpp \

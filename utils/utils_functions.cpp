@@ -6,7 +6,7 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 16:54:35 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/05/28 11:11:43 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/17 13:26:05 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,35 +71,4 @@ std::string randomstring(int length)
 	}
 
 	return str;
-}
-
-std::string readFileToString(const std::string &filename)
-{
-	std::ifstream file(filename);
-	std::string content((std::istreambuf_iterator<char>(file)),
-						(std::istreambuf_iterator<char>()));
-	return content;
-}
-std::string trim(const std::string &str)
-{
-	std::regex pattern("^\\s+|\\s+$");
-
-	return std::regex_replace(str, pattern, "");
-}
-
-void deleteCharArray(char **arr, size_t size)
-{
-	for (size_t i = 0; i < size; ++i)
-	{
-		delete[] arr[i];
-		delete[] arr;
-	}
-}
-
-void free_doublep(char **str)
-{
-	int j = 0;
-	while (str[j] != NULL)
-		j++;
-	ft_free(str, j);
 }

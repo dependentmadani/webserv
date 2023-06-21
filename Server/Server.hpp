@@ -35,7 +35,7 @@ class Server {
         Server(int port);
         ~Server();
         
-        int     initiate_socket();
+        int     initiate_socket(int num_serv);
         void    accept_connections(int position);
         int     recv_data(int position);
 
@@ -46,12 +46,10 @@ class Server {
         int                 getSocket_fd() const;
         int                 getSocket_to_accept() const;
         int                 getFirstReadSize() const;
-        int                 get_num_serv() const;
         void                setPort(int);
         void                setParse(s_parsing* );
 
     private:
-        int                 _num_serv;
         int                 _first_read_size;
         int                 _socket_fd;
         int                 _socket_to_accept;
@@ -60,8 +58,8 @@ class Server {
         std::vector<int>    _socket_client;
         char                _buffer[BUFFER_SIZE + 1];
         std::string         _buffer_complete;
-        std::string         _request_hostname;
         bool                _connexion_status;
+        fd_set              _readfds;
         s_parsing           *_parse;
 };
 

@@ -1,7 +1,9 @@
+#!/usr/bin/php-cgi
+
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    // save $_FILES['avatar'] to a inside a folder
+    
+    // save $_FILES['avatar'] $to a inside a folder
     $avatar = $_FILES['avatar'];
     $avatar_name = $avatar['name'];
     $avatar_tmp_name = $avatar['tmp_name'];
@@ -15,9 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (in_array($avatar_actual_ext, $allowed)) {
         if ($avatar_error === 0) {
-            if ($avatar_size < 1000000) {
+            if ($avatar_size < 1000000000) {
                 $avatar_name_new = uniqid('', true) . '.' . $avatar_actual_ext;
-                $avatar_destination = '../uploading/' . $avatar_name_new;
+                $avatar_destination = 'uploads/' . $avatar_name_new;
                 move_uploaded_file($avatar_tmp_name, $avatar_destination);
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
@@ -30,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit(1);
             }
         } else {
-            echo 'Error a hamid';
+            echo 'Error';
             exit(1);
         }
     } else {
@@ -45,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     setcookie('email', '', time() - 3600);
     setcookie('avatar', '', time() - 3600);
 }
+
 ?>
 <!DOCTYPE html>
 <div>
@@ -57,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <center><a href="?logout">Logout</a></center>
         </p>
     <?php else: ?>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" />
             <input type="text" name="name" placeholder="Name" />
             <input type="text" name="email" placeholder="Email" />
             <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />

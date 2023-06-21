@@ -24,6 +24,3 @@ print("<p>Name: {0}</p>".format(name))
 print("<p>Age: {0}</p>".format(age))
 print("</body>")
 print("</html>")
-
-while 1:
-    a = 1
