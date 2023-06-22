@@ -279,8 +279,23 @@ void fill_return(location *loc, std::string str)
                 if (atoi(token.c_str()))
                     loc->num_return = atoi(token.c_str());
                 else
-                    loc->return_url = token;
+                    loc->retrun_urlll.push_back(token);
             }
+        }
+    }
+}
+void check_isdouble(std::vector<std::string> str)
+{
+    for(size_t i=0; i < str.size();i++)
+    {
+        for(size_t j=0; j < str.size(); j++)
+        {
+            if(j!=i && str[i] == str[j])
+            {
+                 std::cout << "Error from methodes" << std::endl;
+                    exit(1);
+            }
+ 
         }
     }
 }
@@ -361,6 +376,12 @@ void parsing::check_location(location *loc)
             ptr = ptr.substr(0, ff);
             ptr = trim(ptr);
             fill_return(loc, ptr);
+            if(!loc->num_return ||  loc->retrun_urlll.size() != 1)
+            {
+                std::cout << "Error from return " << std::endl;
+                        exit(1);
+            }
+            loc->return_url = loc->retrun_urlll[0];
             delete[] ss;
             flag++;
         }
@@ -378,11 +399,16 @@ void parsing::check_location(location *loc)
             ptr = ptr.substr(0, ff);
             ptr = trim(ptr);
             fill_methods(loc, ptr);
+            check_isdouble(loc->methods);
             for (size_t i = 0; i < loc->methods.size(); i++)
             {
                 if (loc->methods.size() > 3 || (strcmp(loc->methods[i].c_str(), "POST") &&
                                                 strcmp(loc->methods[i].c_str(), "GET") && strcmp(loc->methods[i].c_str(), "DELETE")))
-                    std::cout << "Error from methodes" << std::endl;
+                    {
+                        std::cout << "Error from methodes" << std::endl;
+                        exit(1);
+                    }
+                        
             }
             delete[] ss;
             flag++;

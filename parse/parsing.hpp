@@ -29,6 +29,8 @@ typedef struct s_location
     std::vector<std::string> cgi_pass;
     std::string uploads;
     std::string return_url;
+    std::vector<std::string> retrun_urlll;
+    int  num_url;
     int num_return;
     bool auto_index;
     int flag_auto;

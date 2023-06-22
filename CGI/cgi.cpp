@@ -110,11 +110,6 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     std::string substring = "\r\n\r\n";
     size_t position = fileContent.find(substring);
     std::string head = fileContent.substr(0, position);
-    for (size_t i = position + 4; i < fileContent.size(); i++)
-    {
-        out_file.put(fileContent[i]);
-    }
-    out_file.close();
     fill_cgi(req.getHeader(), head, serv);
     if (!executable.size())
     {
@@ -134,6 +129,11 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         delete[] _env;
         return 2;
     }
+    for (size_t i = position + 4; i < fileContent.size(); i++)
+    {
+        out_file.put(fileContent[i]);
+    }
+    out_file.close();
     unlink("temp_file");
     pid_t pid = fork();
     char **ptr = new char *[3];
@@ -166,9 +166,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
         if (WIFSIGNALED(status))
-        {
             return 1;
-        }
     }
     size_t rd;
     char bufffer[4096] = " ";

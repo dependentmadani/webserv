@@ -115,7 +115,6 @@ int Request::upload_post_request()
     std::string str = "Content-Disposition";
     std::string line;
     std::string ext;
-    // char c;
     std::string rand_str = randomstring(3);
     size_t find = _body.find("Content-Disposition");
     if (find != std::string::npos)
@@ -153,8 +152,7 @@ int Request::upload_post_request()
             return ft_http_status(getHttpStatus());
         }
     }
-    std::ofstream out_file(_directory_to_upload_in + rand_str);
-
+    std::ofstream out_file(_directory_to_upload_in +  "/" + rand_str);
     if (_body.find("Content-Type") != std::string::npos)
     {
         std::string fileContent = readFileToString("temp_file");

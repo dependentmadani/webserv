@@ -1,5 +1,3 @@
-#!/usr/bin/php-cgi
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,7 +11,7 @@
     </form>
     <?php
     if (isset($_POST['submit'])) {
-        $targetDir = "uploads/";
+        $targetDir = "../uploading";
         $targetFile = $targetDir . basename($_FILES["fileToUpload"]["name"]);
         $uploadOk = 1;
         $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));

@@ -1,9 +1,9 @@
-print('Content-Type: text/html', end='\r\n\r\n')
+print("Content-type:text/html\r\n\r\n")
 print()
+
 import sys
 import os
 
-print("Hi")
 # print(os.environ)
 
 a = '''
