@@ -15,7 +15,7 @@ NAME = webserv
 
 CPP = c++
 
-CPPFLAGS = -std=c++98 -Wall -Werror -Wextra #-fsanitize=address   -g
+CPPFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 SRC = main.cpp\
 	Server/Server.cpp \
@@ -35,6 +35,7 @@ HEADERS = Server/Server.hpp \
 	CGI/cgi.hpp \
 	utils/utils.hpp \
 	parse/parsing.hpp \
+	Client/client.hpp
 
 OBJ = $(SRC:.cpp=.o)
 

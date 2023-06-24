@@ -5,7 +5,7 @@
 </head>
 <body>
     <h2>Upload a File</h2>
-    <form action="upload.php" method="post" enctype="multipart/form-data">
+    <form action="test.php" method="post" enctype="multipart/form-data">
         <input type="file" name="fileToUpload" id="fileToUpload">
         <input type="submit" value="Upload File" name="submit">
     </form>
@@ -29,7 +29,7 @@
         }
 
         // Allow only certain file formats (in this example, only JPEG and PNG files are allowed)
-        if ($imageFileType != "jpg" && $imageFileType != "png") {
+        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
             echo "Sorry, only JPG and PNG files are allowed.";
             $uploadOk = 0;
         }

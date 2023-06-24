@@ -29,15 +29,41 @@
 
 # define BUFFER_SIZE 180000
 
+class Request;
+
+static struct Client *clients = 0;
+
+struct Client {
+	private:
+		int					_number_of_request;
+		std::vector<int>	_fd;
+
+	public:
+		Client(): _number_of_request(0), _fd() {socket = 0;};
+		~Client() {};
+		void	set_fd(int val) {this->_fd.push_back(val);};
+		std::vector<int>	get_fd() const {return _fd;}
+		int					get_number_request() const {return _number_of_request;}
+
+		Request *request;
+		int		socket;
+		socklen_t	address_length;
+		struct sockaddr_storage address;
+		int		received;
+		struct Client *next;
+};
+
 class Server {
     public:
         Server();
         Server(int port);
         ~Server();
         
-        int     initiate_socket();
-        void    accept_connections(int position);
-        int     recv_data(int position);
+        int                 initiate_socket(int pos);
+        void                accept_connections(int position);
+        int                 recv_data(int position);
+        struct Client       *get_client(struct Client **client, int sock);
+        void                drop_client(struct Client **cl, struct Client *client);
 
         int                 getServerFd() const;
         std::string         getBufferString() const;
@@ -56,6 +82,7 @@ class Server {
         int                 _socket_fd;
         int                 _socket_to_accept;
         struct sockaddr_in  _host_addr;
+        struct addrinfo     _hints;
         int                 _port;
         std::vector<int>    _socket_client;
         char                _buffer[BUFFER_SIZE + 1];
@@ -64,5 +91,7 @@ class Server {
         bool                _connexion_status;
         s_parsing           *_parse;
 };
+
+#include "../Request/Request.hpp"
 
 #endif

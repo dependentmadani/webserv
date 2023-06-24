@@ -6,15 +6,14 @@
 /*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 12:16:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/06/20 20:51:19 by sriyani          ###   ########.fr       */
+/*   Updated: 2023/05/28 11:24:06 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../CGI/cgi.hpp"
-#include <stdlib.h>
 
-Request::Request() : _list_files_directories(), _directory_to_upload_in(), _buffer(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
+Request::Request() : _cgi_helper(-1, -1), _list_files_directories(), _directory_to_upload_in(), _buffer(), _requested_file_path(), _directory_path(), _method(), _path(), _arguments(), _protocol(), _body(), _header(), http_code(), allowed_methods()
 {
     char buffer[100];
     getcwd(buffer, 100);
@@ -25,8 +24,14 @@ Request::Request() : _list_files_directories(), _directory_to_upload_in(), _buff
     _content_length = 0;
     _read_fd = 0;
     _final_file_size = 0;
+    _size_of_read = 0;
+    _fd_file = 0;
     _chunked_content_value = 0;
+    finished = true;
     read_again = false;
+    send_again = 0;
+    send_size = 0;
+    _check_cgi = 0;
 }
 
 Request::~Request()
@@ -42,6 +47,10 @@ void Request::clear_request_class()
     _read_fd = 0;
     _chunked_content_value = 0;
     _final_file_size = 0;
+    _size_of_read = 0;
+    if (_fd_file > 0)
+        close(_fd_file);
+    _fd_file = 0;
     _file_name_path.clear();
     _list_files_directories.clear();
     _arguments.clear();
@@ -77,14 +86,11 @@ int Request::ParseRequest(char *request_message)
     this->clear_request_class();
     if (this->FirstLinerRequest(splited_request[0]) == 1)
     {
-        std::cerr << "first_liner_request" << std::endl;
         free_doublep(splited_request);
         return 1;
     }
     free_doublep(splited_request);
-    if (this->HeaderRequest(request_message))
-    {
-        std::cerr << "header request" << std::endl;
+    if (this->HeaderRequest(request_message)){
         return 1;
     }
     if (this->get_location_index() == -1)
@@ -154,7 +160,6 @@ int Request::HeaderRequest(char *request_message)
         else
             break;
     }
-    std::cerr << "the transfer encoding: " << _header["Content-Type"] << "|" << std::endl;
     std::string tmp(request_message);
     size_t position_empty_line = tmp.find("\r\n\r\n");
     if (position_empty_line != std::string::npos && position_empty_line != tmp.size())
@@ -200,9 +205,14 @@ int Request::check_method_protocol()
         _http_status = 200;
         return 0;
     }
-    if (_method == "OPTIONS" || _method == "HEAD" || _method == "PUT" || _method == "TRACE" || _method == "CONNECT")
+    else if (_method == "OPTIONS" || _method == "HEAD" || _method == "PUT" || _method == "TRACE" || _method == "CONNECT")
     {
         _http_status = 501;
+        return ft_http_status(this->getHttpStatus());
+    }
+    else
+    {
+        _http_status = 405;
         return ft_http_status(this->getHttpStatus());
     }
     if (_protocol != "HTTP/1.1")
@@ -228,7 +238,6 @@ int Request::is_request_well_formed(char *request_message)
     }
     if (url_characters_checker())
     {
-        std::cerr << "it did return url checker error" << std::endl;
         _http_status = 400;
         return ft_http_status(getHttpStatus());
     }
@@ -242,19 +251,18 @@ int Request::is_request_well_formed(char *request_message)
         _http_status = 413;
         return ft_http_status(getHttpStatus());
     }
-    std::cout << "all good for now :) !" << std::endl;
     return 0;
 }
 
 int Request::get_matched_location_for_request_uri()
 {
+    // check if path is valid, for security reason
     int path_counter = 0;
     size_t pos = 0;
     std::string url = getPath();
 
     url.erase(0, 1);
     std::string tmp;
-
     while ((pos = url.find("/")) != std::string::npos)
     {
         tmp = url.substr(0, pos);
@@ -272,6 +280,7 @@ int Request::get_matched_location_for_request_uri()
     int size_for_path = _parse->serv[_server_index]->loc[_location_index]->url_location.size() > getPath().size() ? getPath().size() : _parse->serv[_server_index]->loc[_location_index]->url_location.size();
     if (this->getPath().substr(0, size_for_path) == _parse->serv[_server_index]->loc[_location_index]->url_location)
         check_availability = true;
+
     if (!check_availability)
     {
         _http_status = 404;
@@ -280,7 +289,7 @@ int Request::get_matched_location_for_request_uri()
     return 0;
 }
 
-int Request::is_location_have_redirection() // TODO: check the utility of this function
+int Request::is_location_have_redirection() //TODO: check the utility of this function
 {
     // for (size_t i = 0; i < _parse->serv[_server_index]->loc[_location_index]->location.size(); ++i)
     // {
@@ -295,8 +304,7 @@ int Request::is_location_have_redirection() // TODO: check the utility of this f
     // }
     if (!_parse->serv[_server_index]->loc[_location_index]->return_url.empty())
     {
-        _path = _parse->serv[_server_index]->loc[_location_index]->return_url;
-        std::cerr << "wwhaaaaaaaat is theee paaaath: " << _path << std::endl;
+        _path =_parse->serv[_server_index]->loc[_location_index]->return_url;
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
@@ -312,6 +320,7 @@ int Request::is_method_allowed_in_location()
     }
     return 1;
 }
+
 
 void Request::reform_requestPath_locationPath()
 {
@@ -345,10 +354,8 @@ void Request::reform_requestPath_locationPath()
         complete_path.resize(complete_path.size() - 1);
     }
     stat(complete_path.c_str(), &stat_buff);
-    std::cerr << "the compleeete path: " << complete_path << std::endl;
     if (S_ISDIR(stat_buff.st_mode))
     {
-        std::cout << "complete path: " << complete_path << std::endl;
         _directory_path = complete_path;
         _file_directory_check = DIRECTORY;
         if (!_parse->serv[_server_index]->loc[i]->index.empty())
@@ -375,10 +382,9 @@ void Request::reform_requestPath_locationPath()
 
 int Request::UseMethod()
 {
-    std::cerr << "the method used: " << _method << std::endl;
     if (_method == "GET")
         return this->GET_method();
-    else if (_method == "POST")
+    else if (_method == "POST") 
         return this->POST_method();
     else if (_method == "DELETE")
         return this->DELETE_method();
@@ -397,9 +403,9 @@ int Request::if_location_has_cgi()
 
 int Request::Is_directory()
 {
-    if (is_uri_has_backslash_in_end())
+    if ( is_uri_has_backslash_in_end() )
     {
-        if (!is_dir_has_index_files())
+        if ( !is_dir_has_index_files() )
         {
             if (!get_auto_index())
             {
@@ -419,14 +425,14 @@ int Request::Is_directory()
             // if this directory has an index file, it should check for cgi in location
             if (this->if_location_has_cgi())
                 return this->request_run_cgi();
-            _response_body_as_string = read_file(_available_file_path);
+            read_file(_available_file_path);
             _http_status = 200;
             return ft_http_status(getHttpStatus());
         }
     }
     else
     {
-        // resend a request with uri joined with backslash in end
+        //resend a request with uri joined with backslash in end
         _http_status = 301;
         return ft_http_status(getHttpStatus());
     }
@@ -454,18 +460,16 @@ bool Request::get_auto_index()
 
 int Request::Is_file()
 {
-    if (if_location_has_cgi())
-    {
-        std::cerr << "kan hnaa a hmida rass lmida" << std::endl;
-        return request_run_cgi();
-        // _response_body_as_string = ;
-    }
     if (access(_available_file_path.c_str(), R_OK) != 0)
     {
         _http_status = 403;
         return ft_http_status(getHttpStatus());
     }
-    _response_body_as_string = read_file(_available_file_path);
+    if (if_location_has_cgi())
+    {
+        return request_run_cgi();
+    }
+    read_file(_available_file_path);
     _http_status = 200;
     return ft_http_status(getHttpStatus());
 }
@@ -501,28 +505,37 @@ int Request::check_for_arguments_in_path(std::string path)
 
 std::string Request::read_file(std::string file)
 {
-    int fd_file = open(file.c_str(), O_RDONLY);
-    int size_of_read = 1;
+    if (!_fd_file)
+        _fd_file = open(file.c_str(), O_RDONLY);
     char buffer_tmp[BUFFER_SIZE];
     std::string final_output;
 
     _final_file_size = 0;
-    if (fd_file != -1)
+    if (_fd_file != -1)
     {
-        while (size_of_read > 0)
-        {
-            memset(buffer_tmp, 0, BUFFER_SIZE);
-            size_of_read = read(fd_file, buffer_tmp, BUFFER_SIZE);
-            for (int i = 0; i < size_of_read; ++i)
-            {
+        memset(buffer_tmp, 0, BUFFER_SIZE);
+        int read_read = read(_fd_file, buffer_tmp, BUFFER_SIZE);
+        if (read_read > 0) {
+            _size_of_read = read_read;
+            _content_length = _size_of_read;
+            for (int i = 0; i < read_read; ++i)
                 final_output += buffer_tmp[i];
+            _response_body_as_string = final_output;
+            if (!finished) {
+                Response = _response_body_as_string;
             }
-            _final_file_size += size_of_read;
-            std::cerr << "the size that it reads: " << size_of_read << std::endl;
+            finished = false;
+        }
+        if (read_read <= 0) {
+            _size_of_read = 0;
+            finished = true;
         }
     }
-    if (fd_file > 0)
-        close(fd_file);
+    if (_fd_file > 0 && finished)
+    {
+        close(_fd_file);
+        _fd_file = 0;
+    }
     return final_output;
 }
 
@@ -855,4 +868,36 @@ int Request::string_to_decimal(std::string str)
     converted >> number;
 
     return number;
+}
+
+void    Request::set_cgi_ext(std::string ext) {
+    this->_cgi_ext = ext;
+}
+
+std::string Request::get_cgi_ext() const {
+    return this->_cgi_ext;
+}
+
+int Request::get_cgi_child_process() const {
+    return _cgi_child_process;
+}
+
+void    Request::set_cgi_child_process(int cgi_process) {
+    this->_cgi_child_process = cgi_process;
+}
+
+void    Request::set_cgi_helper(int val) {
+    this->_check_cgi = val;
+}
+
+void    Request::set_response_as_body(std::string content) {
+    this->_response_body_as_string = content;
+}
+
+void  Request::set_content_type(std::string content) {
+    _response_final["Content-Type"] = mime_type[content];
+}
+
+void    Request::set_content_length(int size_content) {
+    _content_length = size_content;
 }
