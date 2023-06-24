@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   post_method.c                                      :+:      :+:    :+:   */
+/*   post_method.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbadaoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: sriyani <sriyani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 11:40:44 by mbadaoui          #+#    #+#             */
-/*   Updated: 2023/06/17 11:41:54 by mbadaoui         ###   ########.fr       */
+/*   Updated: 2023/06/20 17:05:36 by sriyani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ int Request::POST_method()
     {
         if (read_body_request())
         {
+            std::cerr << "all seem to be nice" << std::endl;
             return 1;
         }
         upload_post_request();
@@ -114,7 +115,6 @@ int Request::upload_post_request()
     std::string str = "Content-Disposition";
     std::string line;
     std::string ext;
-    // char c;
     std::string rand_str = randomstring(3);
     size_t find = _body.find("Content-Disposition");
     if (find != std::string::npos)
@@ -152,8 +152,7 @@ int Request::upload_post_request()
             return ft_http_status(getHttpStatus());
         }
     }
-    std::ofstream out_file(_directory_to_upload_in + "/" + rand_str);
-
+    std::ofstream out_file(_directory_to_upload_in +  "/" + rand_str);
     if (_body.find("Content-Type") != std::string::npos)
     {
         std::string fileContent = readFileToString("temp_file");
@@ -205,6 +204,7 @@ int Request::If_is_file()
     }
     else
     {
+        std::cerr << "11111 the file is: " << _available_file_path << std::endl;
         _http_status = 403;
         return ft_http_status(getHttpStatus());
     }
@@ -221,6 +221,7 @@ int Request::If_is_directory()
                 request_run_cgi();
             else
             {
+                std::cerr << "222222 the file is: " << _available_file_path << std::endl;
                 _http_status = 403;
                 return ft_http_status(getHttpStatus());
             }
@@ -253,30 +254,9 @@ int Request::request_run_cgi()
     int cgi_return = 1;
     CGI cgi(_location_index, _server_index);
 
-    if (!finished) {
-        char bufffer[BUFFER_SIZE] = " ";
-        memset(bufffer, 0, BUFFER_SIZE);
-        int rd = read(_fd_file, bufffer, sizeof(bufffer));
-        if (rd > 0)
-            Response = "";
-            for (int i = 0; i < rd; ++i)
-                Response += bufffer[i];
-            _content_length = rd;
-        if (rd <= 0) {
-            finished = true;
-        }
-        if (_fd_file > 0 && finished) {
-            close(_fd_file);
-            _fd_file = 0;
-            unlink("file.txt");
-            unlink("out_result.txt");
-        }
-        _http_status = 200;
-        return ft_http_status(getHttpStatus());
-    }
-
     if (access(_available_file_path.c_str(), R_OK) != 0)
     {
+        std::cerr << "the file is: " << _available_file_path << std::endl;
         _http_status = 403;
         return ft_http_status(getHttpStatus());
     }
@@ -286,18 +266,10 @@ int Request::request_run_cgi()
         return ft_http_status(getHttpStatus());
     }
     cgi_return = cgi.handle_cgi_request(*this, get_server_buffer().c_str(), _parse->serv[_server_index]);
-    if (!this->_check_cgi && cgi.get_checker())
-    {
-        this->_cgi_helper = cgi;
-        this->_check_cgi = 1;
-        return 1;
-    }
-    else if (this->_check_cgi && !_cgi_helper.get_checker()){
-        this->_check_cgi = 0;
-    }
     if (!cgi_return)
     {
         _response_body_as_string = cgi.getRespBuffer();
+        std::cerr << "the body returned from cgi: |" << _response_body_as_string << "|" << std::endl;
         if (cgi.getRespBuffer().size() > 13)
             _response_final["Content-Type"] = cgi.getContentType().substr(13, cgi.getContentType().size());
         if (_response_body_as_string.empty())
@@ -316,10 +288,6 @@ int Request::request_run_cgi()
         _http_status = 508;
         return ft_http_status(getHttpStatus());
     }
-    if (cgi_return == 3) {
-        finished = false;
-        _fd_file = cgi.get_fd_val();
-    }
     _response_body_as_string = cgi.getRespBuffer();
     _http_status = 200;
     return ft_http_status(getHttpStatus());
@@ -335,6 +303,7 @@ int Request::read_body_request()
         memset(buffer_chr, 0, BUFFER_SIZE);
         int content_length_read = recv(_read_fd, buffer_chr, BUFFER_SIZE, 0);
         in_file.write(buffer_chr, content_length_read);
+        std::cout << content_length_read << std::endl;
         _content_actual_size -= content_length_read;
         if (_content_actual_size > 0)
             read_again = true;
@@ -345,10 +314,8 @@ int Request::read_body_request()
     {
         post_transfer_encoding();
     }
+    std::cerr << "the content size: " << _content_actual_size << std::endl;
     in_file.close();
+    std::cerr << "the status of read_again: " << read_again << std::endl;
     return read_again;
-}
-
-int Request::get_cgi_helper() const {
-    return _check_cgi;
 }

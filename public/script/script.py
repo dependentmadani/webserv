@@ -11,7 +11,7 @@ age = form.getvalue('age')
 
 # Set the content type of the response
 
-print("Content-Type:text/html\r\n\r\n")
+print("Content-type:text/html\r\n\r\n")
 
 # Generate the HTML response
 print("<html>")
@@ -24,6 +24,3 @@ print("<p>Name: {0}</p>".format(name))
 print("<p>Age: {0}</p>".format(age))
 print("</body>")
 print("</html>")
-
-while 1:
-    a = 1

@@ -46,12 +46,6 @@ private:
     int                                 _chunked_content_value;
     int                                 _content_actual_size;
     int                                 _final_file_size;
-    int                                 _size_of_read;
-    int                                 _fd_file;
-    int                                 _check_cgi;
-    int                                 _cgi_child_process;
-    CGI                                 _cgi_helper;
-    std::string                         _cgi_ext;
     std::vector<std::string>            _file_name_path;
     std::vector<std::string>            _list_files_directories;
     std::string                         _directory_to_upload_in;
@@ -146,10 +140,7 @@ public:
   std::map<int, std::string> http_code;
   std::map<std::string, std::string> mime_type;
   std::vector<std::string> allowed_methods;
-  bool  finished;
-  bool  read_again;
-  int   send_size;
-  int   send_again;
+  bool read_again;
   std::string Response;
 
   std::string getMethod() const;
@@ -161,20 +152,11 @@ public:
   std::string get_server_buffer() const;
   int getFile_size() const;
   int getHttpStatus() const;
-  int get_cgi_helper() const;
-  void  set_cgi_helper(int val);
   void setParse(s_parsing *);
   void setServer_index(int index);
   void set_read_fd(int);
   void setServer(Server);
-  void set_cgi_ext(std::string ext);
-  int   get_cgi_child_process() const;
-  void  set_cgi_child_process(int);
-  std::string get_cgi_ext() const;
   std::string const &getBody() const;
-  void  set_response_as_body(std::string);
-  void  set_content_type(std::string);
-  void  set_content_length(int size_content);
 };
 
 #endif

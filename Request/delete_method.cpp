@@ -38,13 +38,8 @@ int Request::Is_directory_for_DELETE()
                 // run cgi on requested file with DELETE REQUEST METHOD
                 // and check if this directory has an index file and cgi
                 // then return code depend on cgi
-                if (!this->delete_all_folder_content(_directory_path + "/" + _parse->serv[_server_index]->loc[_location_index]->index[0], FILE))
-                {
-                    _http_status = 404;
-                    return ft_http_status(getHttpStatus());
-                }
-                //// TODO: neeed to bee check
-                _http_status = 204;
+                std::cerr << "should be here to run the request run cgi function" << std::endl;
+                _http_status = this->request_run_cgi();
                 return ft_http_status(getHttpStatus());
             }
             else
@@ -59,11 +54,13 @@ int Request::Is_directory_for_DELETE()
             // delete all folder content
             if (this->delete_all_folder_content(_directory_path, DIRECTORY))
             {
+                // std::cout << "well, all is good" << std::endl;
                 _http_status = 204;
                 return ft_http_status(getHttpStatus());
             }
             else
             {
+                // std::cout << "those things are not good" << std::endl;
                 if (this->has_write_access_on_folder())
                 {
                     _http_status = 500;
@@ -90,12 +87,14 @@ int Request::Is_file_for_DELETE()
 {
     if (this->if_location_has_cgi())
     {
+        // std::cout << "shouldnt be here aaaa hamid :)" << std::endl;
         // nothing to do here for the moment. waiting for cgi to be done.
         // return code depend on cgi
         return this->request_run_cgi();
     }
     else
     {
+        std::cout << "was here to delete" << std::endl;
         return this->delete_all_folder_content(_file_name_path[0], FILE);
     }
     return 0;
@@ -127,17 +126,14 @@ int Request::delete_all_folder_content(std::string folder_file, int type)
     }
     else if (type == FILE)
     {
-        if (access(folder_file.c_str(), R_OK) != 0)
-        {
-            _directory_path = folder_file;
-            return 0;
-        }
+        std::cout << "I believe it reached here: " << folder_file << std::endl;
         if (!std::remove(folder_file.c_str()))
         {
             std::cout << "well removed the file" << std::endl;
         }
         else
         {
+            std::cout << "something wrong in file" << std::endl;
             return 0;
         }
     }
@@ -151,6 +147,7 @@ void Request::get_all_subdirectories(std::string folder_name) {
 
 
     while ((dir = opendir(folder_name.c_str())) == NULL) {
+        std::cerr << "whaat makes it return: " << folder_name << std::endl;
         return ;
     }
     while ((ent = readdir(dir)) != NULL)

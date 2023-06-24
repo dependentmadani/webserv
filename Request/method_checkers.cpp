@@ -23,6 +23,7 @@ int Request::get_request_resource()
         {
             _available_file_path = *b;
             _content_length = stat_buff.st_size;
+            std::cout << "the file is available " << *(b) << std::endl;
             return 0;
         }
     }
@@ -41,6 +42,7 @@ int Request::get_request_resource_for_delete()
             {
                 _available_file_path = *b;
                 _content_length = stat_buff.st_size;
+                std::cout << "the file is available " << *(b) << std::endl;
                 return 0;
             }
         }
@@ -51,6 +53,7 @@ int Request::get_request_resource_for_delete()
         {
             _available_file_path = _directory_path;
             _content_length = stat_buff.st_size;
+            std::cout << "the directory is available " << _available_file_path << std::endl;
             return 0;
         }
     }

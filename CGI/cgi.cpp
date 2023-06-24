@@ -15,8 +15,6 @@
 
 CGI::CGI(int loc_index, int serv_index) : _location_index(loc_index), _server_index(serv_index)
 {
-    _fd_val = 0;
-    _checker = 0;
 }
 
 CGI::~CGI()
@@ -112,41 +110,31 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     std::string substring = "\r\n\r\n";
     size_t position = fileContent.find(substring);
     std::string head = fileContent.substr(0, position);
-    for (size_t i = position + 4; i < fileContent.size(); i++)
-    {
-        out_file.put(fileContent[i]);
-    }
-    out_file.close();
     fill_cgi(req.getHeader(), head, serv);
     if (!executable.size())
     {
+        std::ifstream file(_script_name.c_str());
+        std::string content;
+        if (file.is_open())
+        {
+            content.assign((std::istreambuf_iterator<char>(file)),
+                           (std::istreambuf_iterator<char>()));
+            file.close();
+        }
+        resp_buffer = content;
         for (size_t i = 0; i < _envcgi.size(); i++)
         {
             delete _env[i];
         }
         delete[] _env;
-        size_t rd;
-        char bufffer[4096] = " ";
-        _fd_val = open(_script_name.c_str(), O_RDONLY);
-        if((rd = read(_fd_val, bufffer, sizeof(buffer))) > 0)
-        {
-            for (size_t i = 0; i < rd; ++i)
-                resp_buffer += bufffer[i];
-        }
-        if (rd <= 0) {
-            _checker = 0;
-            close(_fd_val);
-            unlink("file.txt");
-            unlink("temp_file");
-            unlink("out_result.txt");
-        }
-        else{
-            return 3;
-        }
         return 2;
     }
+    for (size_t i = position + 4; i < fileContent.size(); i++)
+    {
+        out_file.put(fileContent[i]);
+    }
+    out_file.close();
     unlink("temp_file");
-    _checker = 1;
     pid_t pid = fork();
     char **ptr = new char *[3];
     ptr[0] = const_cast<char *>(executable.c_str());
@@ -165,29 +153,20 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
         dup2(fd, STDIN_FILENO);
         close(fd);
         dup2(out_fd, STDOUT_FILENO);
+        close(out_fd);
+        alarm(40);
         execve(ptr[0], ptr, _env);
+        std::cerr << "Error executing CGI script" << std::endl;
         exit(1);
     }
     else
     {
+
         int status;
-        int check = waitpid(pid, &status, WNOHANG);
-        if ( check == -1) {
+        if (waitpid(pid, &status, 0) == -1)
             perror("wait() error");
-        }
-        if (check == 0)
-        {
-            _checker = pid;
-            req.set_cgi_child_process(pid);
-            req.set_cgi_ext(_ext);
-            for (size_t i = 0; i < _envcgi.size(); i++)
-                delete _env[i];
-            delete[] _env;
-            delete[] ptr;
+        if (WIFSIGNALED(status))
             return 1;
-        }
-        if (check == pid)
-            _checker = 0;
     }
     size_t rd;
     char bufffer[4096] = " ";
@@ -205,7 +184,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
     else
         found = resp_buffer.find("\r\n\r\n");
     hold_ContentType = resp_buffer.substr(0, found);
-    size_t fnd = hold_ContentType.find("Content-Type:");
+    size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         resp_buffer = resp_buffer.substr(found + 1);
     for (size_t i = 0; i < _envcgi.size(); i++)
@@ -225,18 +204,6 @@ std::string const &CGI::getRespBuffer() const
 std::string const &CGI::getContentType() const
 {
     return hold_ContentType;
-}
-
-int CGI::get_fd_val() const {
-    return _fd_val;
-}
-
-int CGI::get_checker() const {
-    return _checker;
-}
-
-int CGI::get_server_index() const {
-    return _server_index;
 }
 
 void CGI::check_cgi(std::vector<std::string> str)

@@ -34,8 +34,6 @@ private:
       char *_pwd;
       int _location_index;
       int _server_index;
-      int _fd_val;
-      int _checker;
       std::vector<std::string> hold;
       std::vector<std::string> _envcgi;
       char **_env;
@@ -57,9 +55,6 @@ public:
       void check_cgi(std::vector<std::string> str);
       std::string const &getContentType() const;
       void fill_env(std::string buffer);
-      int  get_fd_val() const;
-      int  get_checker() const;
-      int  get_server_index() const;
 };
 
 #include "../Request/Request.hpp"
