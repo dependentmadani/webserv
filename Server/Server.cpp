@@ -13,7 +13,7 @@
 #include "Server.hpp"
 #include <iostream>
 
-Server::Server() : _first_read_size(), _host_addr(), _hints(), _socket_client(), _buffer_complete(), _request_hostname()
+Server::Server() : _first_read_size(), _host_addr(), _bind_address(), _hints(), _socket_client(), _buffer_complete(), _request_hostname()
 {
     _num_serv = 0;
     _socket_fd = 0;
@@ -22,7 +22,7 @@ Server::Server() : _first_read_size(), _host_addr(), _hints(), _socket_client(),
     _connexion_status = false;
 }
 
-Server::Server(int port) : _first_read_size(), _host_addr(), _hints(), _socket_client(), _buffer_complete(), _request_hostname()
+Server::Server(int port) : _first_read_size(), _host_addr(), _bind_address(), _hints(), _socket_client(), _buffer_complete(), _request_hostname()
 {
     _num_serv = 0;
     _socket_fd = 0;
@@ -43,10 +43,9 @@ int Server::initiate_socket(int pos)
     _hints.ai_socktype = SOCK_STREAM;
     _hints.ai_flags = AI_PASSIVE;
 
-    struct addrinfo* bind_address;
-    getaddrinfo(_parse->serv[pos]->host.c_str(), std::to_string(_port).c_str(), &_hints, &bind_address);
+    getaddrinfo(_parse->serv[pos]->host.c_str(), std::to_string(_port).c_str(), &_hints, &_bind_address);
 
-    _socket_fd = socket(bind_address->ai_family, bind_address->ai_socktype, bind_address->ai_protocol);
+    _socket_fd = socket(_bind_address->ai_family, _bind_address->ai_socktype, _bind_address->ai_protocol);
     if (_socket_fd < 0)
     {
         perror("webserv error (socket) ");
@@ -61,11 +60,13 @@ int Server::initiate_socket(int pos)
     if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0) {
         std::cerr << "Failed to set socket option" << std::endl;
     }
-    int i = bind(_socket_fd, bind_address->ai_addr, bind_address->ai_addrlen);
+    int i = bind(_socket_fd, _bind_address->ai_addr, _bind_address->ai_addrlen);
     if (i < 0) {
+        freeaddrinfo(_bind_address);
         perror("webserv error (bind) ");
         return (-1);
     }
+    freeaddrinfo(_bind_address);
     _socket_client.push_back(_socket_fd);
     std::cout << "Now, we are going to listen, for requests" << std::endl;
     if (listen(_socket_fd, SOMAXCONN) < 0)

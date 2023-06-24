@@ -137,6 +137,7 @@ int CGI::handle_cgi_request(Request &req, char const *buffer, t_server *serv)
             _checker = 0;
             close(_fd_val);
             unlink("file.txt");
+            unlink("temp_file");
             unlink("out_result.txt");
         }
         else{

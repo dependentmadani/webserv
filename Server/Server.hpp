@@ -82,6 +82,7 @@ class Server {
         int                 _socket_fd;
         int                 _socket_to_accept;
         struct sockaddr_in  _host_addr;
+        struct addrinfo*    _bind_address;
         struct addrinfo     _hints;
         int                 _port;
         std::vector<int>    _socket_client;
