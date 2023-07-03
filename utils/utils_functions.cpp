@@ -80,11 +80,18 @@ std::string readFileToString(const std::string &filename)
 						(std::istreambuf_iterator<char>()));
 	return content;
 }
+
 std::string trim(const std::string &str)
 {
-	std::regex pattern("^\\s+|\\s+$");
+    std::size_t first = 0;
+    std::size_t last = 0;
+    if (str.size())
+    {
+        first = str.find_first_not_of(" \t\n\r\f\v");
+        last = str.find_last_not_of(" \t\n\r\f\v");
+    }
 
-	return std::regex_replace(str, pattern, "");
+    return str.substr(first, last - first + 1);
 }
 
 void deleteCharArray(char **arr, size_t size)
