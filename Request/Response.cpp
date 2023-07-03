@@ -23,23 +23,21 @@ void Request::build_response()
     int position_extension = _available_file_path.find_last_of(".");
     file_type = _available_file_path.substr(position_extension + 1, _available_file_path.size());
     if (!file_type.empty() && _response_final.find("Content-Type") == _response_final.end())
-        _response_final["Content_Type"] = mime_type[file_type];
+        _response_final["Content-Type"] = mime_type[file_type];
     if (this->getHttpStatus() == 301)
     {
         if (this->_path[_path.size() - 1] == '/')
             _response_final["Location"] = _arguments["Host"] + this->_path;
         else
             _response_final["Location"] = _arguments["Host"] + this->_path + "/";
-        std::cerr << "the location will become: " << _response_final["Location"] << std::endl;
     }
     converted.str("");
     converted.clear();
     converted << _content_length;
     _response_final["Connection"] = "closed";
     if (_content_length)
-        _response_final["Content_Length"] = converted.str();
+        _response_final["Content-Length"] = converted.str();
 
-    // std::cout << "the string: " << _response["content_length"] << ", and: " << _response["return_code"] << std::endl;
 
     /*
     The response http should include:
@@ -51,7 +49,7 @@ void Request::build_response()
     -The content-length describes the length of the response
     -The content-type describes the media type of the resource returned.
     */
-    //    Response.append("Date: Thu 20 Apr 2023 01:22:10 GMT\r\n");
+    // Example:   Date: Thu 20 Apr 2023 01:22:10 GMT
     this->build_date();
     Response.append("Server: webserv/1.0\r\n");
     std::map<std::string, std::string>::iterator b = _response_final.begin();
@@ -60,6 +58,8 @@ void Request::build_response()
         std::string add_line = b->first + ": " + b->second + "\r\n";
         Response.append(add_line);
     }
+    if (!_cgi_content_header.empty())
+        Response += _cgi_content_header;
     Response.append("\r\n");
     Response.append(_response_body_as_string);
 }
@@ -67,6 +67,7 @@ void Request::build_response()
 // this function will be able to use response, where it will build a http message
 int Request::ft_http_status(int value)
 {
+    _http_status = value;
     if (value < 300 || value == 301)
         return 2;
     if (!_parse->serv[_server_index]->error_num.empty())
