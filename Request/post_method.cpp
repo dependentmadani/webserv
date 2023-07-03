@@ -152,7 +152,7 @@ int Request::upload_post_request()
         }
     }
     std::ofstream out_file(_directory_to_upload_in + "/" + rand_str);
-
+    std::cerr << "\033[1;31rand_str file name: " << rand_str << "\033[1;0m"<< std::endl;
     if (_body.find("Content-Type") != std::string::npos)
     {
         std::string fileContent = readFileToString("temp_file");

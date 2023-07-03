@@ -37,7 +37,8 @@ void Request::build_response()
     _response_final["Connection"] = "closed";
     if (_content_length)
         _response_final["Content-Length"] = converted.str();
-
+    converted.str("");
+    converted.clear();
 
     /*
     The response http should include:
@@ -94,6 +95,8 @@ int Request::ft_http_status(int value)
     _response_body_as_string.append(converted.str());
     _response_body_as_string.append(" - " + http_code[this->getHttpStatus()]);
     _response_body_as_string.append("</center></h2><hr><h4><center>webserv</center></h4></body></html>");
+    converted.str("");
+    converted.clear();
     return this->getHttpStatus();
 }
 
@@ -107,6 +110,8 @@ void Request::add_zero(int timer)
 
 void Request::build_date()
 {
+    std::ostringstream converted;
+
     time_t now = time(0);
     std::string days_of_week[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     std::string months[13] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -114,14 +119,29 @@ void Request::build_date()
     tm *time = localtime(&now);
     Response.append("Date: ").append(days_of_week[time->tm_wday]).append(", ");
     this->add_zero(time->tm_mday);
-    Response.append(std::to_string(time->tm_mday)).append(" ");
-    Response.append(months[time->tm_mon]).append(" ").append(std::to_string(time->tm_year + 1900)).append(" ");
+    converted << time->tm_mday;
+    Response.append(converted.str()).append(" ");
+    converted.str("");
+    converted.clear();
+    converted << (time->tm_year + 1900);
+    Response.append(months[time->tm_mon]).append(" ").append(converted.str()).append(" ");
+    converted.str("");
+    converted.clear();
     this->add_zero(time->tm_hour);
-    Response.append(std::to_string(time->tm_hour)).append(":");
+    converted << time->tm_hour;
+    Response.append(converted.str()).append(":");
+    converted.str("");
+    converted.clear();
+    converted << time->tm_min;
     this->add_zero(time->tm_min);
-    Response.append(std::to_string(time->tm_min)).append(":");
+    Response.append(converted.str()).append(":");
+    converted.str("");
+    converted.clear();
+    converted << time->tm_sec;
     this->add_zero(time->tm_sec);
-    Response.append(std::to_string(time->tm_sec)).append(" GMT").append("\r\n");
+    Response.append(converted.str()).append(" GMT").append("\r\n");
+    converted.str("");
+    converted.clear();
 }
 
 void Request::build_autoindex_page()

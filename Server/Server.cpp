@@ -37,13 +37,17 @@ Server::~Server()
 
 int Server::initiate_socket(int pos)
 {
+    std::ostringstream converted;
     memset(&_hints, 0, sizeof(_hints));
 
     _hints.ai_family = AF_INET;
     _hints.ai_socktype = SOCK_STREAM;
     _hints.ai_flags = AI_PASSIVE;
 
-    getaddrinfo(_parse->serv[pos]->host.c_str(), std::to_string(_port).c_str(), &_hints, &_bind_address);
+    converted << _port;
+    getaddrinfo(_parse->serv[pos]->host.c_str(), converted.str().c_str(), &_hints, &_bind_address);
+    converted.str("");
+    converted.clear();
 
     _socket_fd = socket(_bind_address->ai_family, _bind_address->ai_socktype, _bind_address->ai_protocol);
     if (_socket_fd < 0)
@@ -138,6 +142,7 @@ void Server::accept_connections(int position)
 int Server::recv_data(int position)
 {
     std::ofstream file;
+    std::ostringstream converted;
     file.open("temp_file");
     memset(_buffer, 0, BUFFER_SIZE);
 
@@ -159,10 +164,15 @@ int Server::recv_data(int position)
     }
     int which_serv = -1;
     for (int i = 0; i < _parse->num_serv; ++i) {
-        if ((_parse->serv[i]->host + ":" + std::to_string(_parse->serv[i]->ind_port)) == _request_hostname) {
+        converted << _parse->serv[i]->ind_port;
+        if ((_parse->serv[i]->host + ":" + converted.str()) == _request_hostname) {
             which_serv = i;
+            converted.str("");
+            converted.clear();
             break ;
         }
+        converted.str("");
+        converted.clear();
     }
     if (which_serv == -1) {
         for (int i = 0; i < _parse->num_serv; ++i) {

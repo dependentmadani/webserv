@@ -58,6 +58,12 @@ std::string    cgi_helper_function(Request &req) {
     size_t fnd = hold_ContentType.find("Content-type:");
     if (fnd != std::string::npos)
         response = response.substr(found + 1);
+    if (req.get_cgi_ext() == ".pl")
+        req.set_content_length(response.size());
+
+    else {
+        req.set_content_length(response.size() - 1);
+    }
     if (response.empty()) {
         response = "<!DOCTYPE html>"
                             "<html>"
@@ -254,7 +260,6 @@ int main(int ac, char **av)
                                 client->request->set_cgi_helper(0);
                                 client->request->ft_http_status(200);
                                 client->request->set_response_as_body(hada);
-                                client->request->set_content_length(hada.size());
                                 client->request->set_content_type("html");
                                 client->request->build_response();
                                 client->request->send_again = 1;
