@@ -34,8 +34,7 @@ HEADERS = Server/Server.hpp \
 	Request/Request.hpp \
 	CGI/cgi.hpp \
 	utils/utils.hpp \
-	parse/parsing.hpp \
-	Client/client.hpp
+	parse/parsing.hpp
 
 OBJ = $(SRC:.cpp=.o)
 

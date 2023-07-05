@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <regex>
 
 void *ft_calloc(int count, int size);
 char **ft_freee(char **arr, int j);
