@@ -25,7 +25,7 @@ The program "webserv" takes a configuration file as an argument, or it uses a de
 If the mandatory part is perfect, you may implement additional features like supporting cookies and session management or handling multiple CGI (Common Gateway Interface).
 
 ## RUN the project
-Make sure to have `make` command in your system. Run the command `make`, then `./webserv file.config`.
+Make sure to have `make` command in your system. Run the command `make`, then `./webserv file.conf`.
 
 Have fun! 🚀
 
