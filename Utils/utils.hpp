@@ -18,16 +18,16 @@
 #include <iostream>
 #include <fstream>
 
-void *ft_calloc(int count, int size);
-char **ft_freee(char **arr, int j);
-char **ft_split(char const *ss, char c);
-char *str_cut(const char *s, int begin, int fin);
-size_t ft_strlen(const char *s);
-void *ft_memset(void *b, int c, int len);
+void        *ft_calloc(int count, int size);
+char        **ft_freee(char **arr, int j);
+char        **ft_split(char const *ss, char c);
+char        *str_cut(const char *s, int begin, int fin);
+size_t      ft_strlen(const char *s);
+void        *ft_memset(void *b, int c, int len);
 std::string randomstring(int length);
 std::string readFileToString(const std::string &filename);
 std::string trim(const std::string &str);
-void deleteCharArray(char **arr, size_t size);
-void free_doublep(char **str);
-void ft_free(char **arr, int j);
+void        deleteCharArray(char **arr, size_t size);
+void        free_doublep(char **str);
+void        ft_free(char **arr, int j);
 #endif

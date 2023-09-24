@@ -41,16 +41,16 @@ struct Client {
 	public:
 		Client(): _number_of_request(0), _fd() {socket = 0;};
 		~Client() {};
-		void	set_fd(int val) {this->_fd.push_back(val);};
-		std::vector<int>	get_fd() const {return _fd;}
-		int					get_number_request() const {return _number_of_request;}
+		void	                    set_fd(int val) {this->_fd.push_back(val);};
+		std::vector<int>	        get_fd() const {return _fd;}
+		int					        get_number_request() const {return _number_of_request;}
 
-		Request *request;
-		int		socket;
-		socklen_t	address_length;
-		struct sockaddr_storage address;
-		int		received;
-		struct Client *next;
+		Request                     *request;
+		int		                    socket;
+		socklen_t	                address_length;
+		struct  sockaddr_storage    address;
+		int		                    received;
+		struct Client               *next;
 };
 
 class Server {

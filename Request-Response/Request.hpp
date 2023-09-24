@@ -112,40 +112,40 @@ public:
 
   void post_transfer_encoding();
 
-  int Is_file();
+  int   Is_file();
 
   // get which location
-  int get_location_index();
+  int   get_location_index();
   // function to check in the header
-  int is_available(std::string, std::string);
+  int   is_available(std::string, std::string);
   // function to check url for a character not allowed
-  int url_characters_checker();
-  void print_parse_vector();
+  int   url_characters_checker();
+  void  print_parse_vector();
   std::string remove_space(std::string tmp);
   // get the file_name_path value
-  void reform_requestPath_locationPath();
+  void  reform_requestPath_locationPath();
   std::string read_file(std::string);
-  void build_date();
-  void add_zero(int timer);
-  int check_for_arguments_in_path(std::string path);
-  int read_body_request();
+  void  build_date();
+  void  add_zero(int timer);
+  int   check_for_arguments_in_path(std::string path);
+  int   read_body_request();
 
   /*Response functions*/
-  void build_response();
+  void  build_response();
 
   /* POST */
-  int upload_post_request();
-  bool location_support_upload();
-  int If_is_directory();
-  bool is_location_has_cgi();
-  int request_run_cgi();
-  int If_is_file();
-  int string_to_decimal(std::string);
+  int   upload_post_request();
+  bool  location_support_upload();
+  int   If_is_directory();
+  bool  is_location_has_cgi();
+  int   request_run_cgi();
+  int   If_is_file();
+  int   string_to_decimal(std::string);
   unsigned long hex_to_dec(std::string hex);
 
-  std::map<int, std::string> http_code;
-  std::map<std::string, std::string> mime_type;
-  std::vector<std::string> allowed_methods;
+  std::map<int, std::string>          http_code;
+  std::map<std::string, std::string>  mime_type;
+  std::vector<std::string>            allowed_methods;
   bool  finished;
   bool  read_again;
   int   send_size;
@@ -159,15 +159,15 @@ public:
   std::string getResponse();
   std::string getAvailableFilePath() const;
   std::string get_server_buffer() const;
-  int getFile_size() const;
-  int getHttpStatus() const;
-  int get_cgi_helper() const;
+  int   getFile_size() const;
+  int   getHttpStatus() const;
+  int   get_cgi_helper() const;
   void  set_cgi_helper(int val);
-  void setParse(s_parsing *);
-  void setServer_index(int index);
-  void set_read_fd(int);
-  void setServer(Server);
-  void set_cgi_ext(std::string ext);
+  void  setParse(s_parsing *);
+  void  setServer_index(int index);
+  void  set_read_fd(int);
+  void  setServer(Server);
+  void  set_cgi_ext(std::string ext);
   int   get_cgi_child_process() const;
   void  set_cgi_child_process(int);
   std::string get_cgi_ext() const;

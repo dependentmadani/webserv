@@ -85,7 +85,6 @@ int is_available(std::vector<int> tmp, int value)
     return -1;
 }
 
-// TODO: fix the blocked file descriptor in the case where it needs to complete sending of response
 int main(int ac, char **av)
 {
     std::ifstream file;
