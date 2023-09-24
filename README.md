@@ -27,6 +27,6 @@ If the mandatory part is perfect, you may implement additional features like sup
 ## RUN the project
 Make sure to have `make` command in your system. Run the command `make`, then `./webserv file.config`.
 
-Happy fun! 🚀
+Have fun! 🚀
 
 (Note: This is a simplified version of the subject for the README, focusing on the key points. Be sure to refer to the full subject document for detailed instructions.)
